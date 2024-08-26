@@ -221,7 +221,6 @@ def pretrain(neox_args):
             valid_data_iterator,
             test_data_iterator,
         ) = build_train_valid_test_data_iterators(neox_args=neox_args,data_path=train_data_path)
-        print(neox_args.do_train)
 
         iteration = train(neox_args=neox_args,timers=timers,model=model,optimizer=optimizer,lr_scheduler=lr_scheduler,train_data_iterator=train_data_iterator,valid_data_iterator=valid_data_iterator,buffer=buffer)
 
@@ -248,7 +247,7 @@ def pretrain(neox_args):
                 optimizer=optimizer,
                 lr_scheduler=lr_scheduler,
             )
-            buffer.save_buffer(f"buffer/buffer_dataset_{i+1}.pth")
+            # buffer.save_buffer(f"buffer/buffer_dataset_{i+1}.pth")
 
     # Final test evaluation after training on all datasets.
     if neox_args.do_test:
@@ -1023,14 +1022,13 @@ def train_step_pipe(neox_args, timers, model, data_iterator,replay_buffer=None):
         timers(t).reset()
     return loss_dict
 
-
 def train(
     neox_args,
     timers,
     model,
     optimizer,
     lr_scheduler,
-    train_data_iterators,  # Pass a list of iterators, one for each task
+    train_data_iterator,
     valid_data_iterator,
     buffer,
 ):
@@ -1041,10 +1039,6 @@ def train(
 
     # Tracking loss.
     total_loss_dict = {}
-
-    # plasticity and forgetting metrics
-    plasticity = {}
-    forgetting = {}
 
     # Iterations.
     iteration = neox_args.iteration
@@ -1076,117 +1070,92 @@ def train(
             with_stack=True,
         )
         prof.start()
-
-    if isinstance(train_data_iterators, torch.utils.data.DataLoader):
-        train_data_iterators = [train_data_iterators]
-
-    num_tasks = len(train_data_iterators)
-    previous_task_metrics = [{} for _ in range(num_tasks)]
-
-    # Use the eval tasks for calculating plasticity and forgetting
-    eval_tasks = neox_args.eval_tasks
-
     while iteration < neox_args.train_iters:
-        # Loop through all tasks sequentially within each epoch
-        for task_id, train_data_iterator in enumerate(train_data_iterators):
-            if neox_args.profile:
-                prof.step()
-            if neox_args.profile and iteration == neox_args.profile_step_start:
-                torch.cuda.cudart().cudaProfilerStart()
+        if neox_args.profile:
+            prof.step()
+        if neox_args.profile and iteration == neox_args.profile_step_start:
+            torch.cuda.cudart().cudaProfilerStart()
+        loss_dict, skipped_iter = train_step(
+            neox_args=neox_args,
+            timers=timers,
+            data_iterator=train_data_iterator,
+            model=model,
+            optimizer=optimizer,
+            replay_buffer=buffer,
+            lr_scheduler=lr_scheduler,
+        )
+        if neox_args.profile and iteration == neox_args.profile_step_stop:
+            torch.cuda.cudart().cudaProfilerStop()
+            prof.stop()
+        iteration += 1
+        neox_args.iteration = iteration
+        if neox_args.precision == "fp16":
+            overflow_monitor.check(skipped_iter)  # check for repeated overflow
+        if neox_args.log_gradient_noise_scale:  # log noise scale if applicable
+            noise_scale_logger.update()
 
-            loss_dict, skipped_iter = train_step(
+        # get learning rate (if present) - if doing soft prompt tuning + pipe parallel, you
+        # may have no tunable parameters on a specific rank
+        if optimizer.param_groups:
+            lr = optimizer.param_groups[0].get("lr", 0)
+        else:
+            lr = 0
+
+        # Logging.
+        report_memory_flag = training_log(
+            neox_args=neox_args,
+            timers=timers,
+            loss_dict=loss_dict,
+            total_loss_dict=total_loss_dict,
+            learning_rate=lr,
+            iteration=iteration,
+            loss_scale=optimizer.cur_scale if neox_args.precision == "fp16" else None,
+            report_memory_flag=report_memory_flag,
+            skipped_iter=skipped_iter,
+            model=model,
+            optimizer=optimizer,
+            noise_scale_logger=noise_scale_logger,
+        )
+
+        # Checkpointing
+        if neox_args.save and iteration in neox_args.save_iters:
+            save_checkpoint(
                 neox_args=neox_args,
-                timers=timers,
-                data_iterator=train_data_iterator,
+                iteration=iteration,
                 model=model,
                 optimizer=optimizer,
                 lr_scheduler=lr_scheduler,
-                replay_buffer=buffer,
             )
-            if neox_args.profile and iteration == neox_args.profile_step_stop:
-                torch.cuda.cudart().cudaProfilerStop()
-                prof.stop()
-            iteration += 1
-            neox_args.iteration = iteration
-            if neox_args.precision == "fp16":
-                overflow_monitor.check(skipped_iter)  # check for repeated overflow
-            if neox_args.log_gradient_noise_scale:  # log noise scale if applicable
-                noise_scale_logger.update()
-
-            # Calculate and log plasticity and forgetting
-            if eval_tasks:
-                current_task_metrics = calculate_metrics(neox_args, model, eval_tasks, iteration, timers, task_id=task_id)
-
-                for task_i in range(task_id + 1):
-                    for metric_name, metric_value in current_task_metrics.items():
-                        prev_value = previous_task_metrics[task_i].get(metric_name, metric_value)
-                        plasticity.setdefault(metric_name, []).append(max(0, metric_value - prev_value))
-                        forgetting.setdefault(metric_name, []).append(max(0, prev_value - metric_value))
-
-                previous_task_metrics[task_id] = current_task_metrics.copy()
-
-            # get learning rate (if present) - if doing soft prompt tuning + pipe parallel, you
-            # may have no tunable parameters on a specific rank
-            lr = optimizer.param_groups[0].get("lr", 0) if optimizer.param_groups else 0
-
-            # Logging.
-            report_memory_flag = training_log(
+        # Evaluation
+        if (
+            neox_args.eval_interval
+            and iteration % neox_args.eval_interval == 0
+            and neox_args.do_valid
+        ):
+            prefix = "iteration {}".format(iteration)
+            evaluate_and_print_results(
                 neox_args=neox_args,
-                timers=timers,
-                loss_dict=loss_dict,
-                total_loss_dict=total_loss_dict,
-                learning_rate=lr,
-                iteration=iteration,
-                loss_scale=optimizer.cur_scale if neox_args.precision == "fp16" else None,
-                report_memory_flag=report_memory_flag,
-                skipped_iter=skipped_iter,
+                prefix=prefix,
+                forward_step_func=forward_step,
+                data_iterator=valid_data_iterator,
                 model=model,
-                optimizer=optimizer,
-                noise_scale_logger=noise_scale_logger,
-                plasticity=plasticity,
-                forgetting=forgetting,
+                iteration=iteration,
+                verbose=False,
+                timers=timers,
             )
 
-            # Checkpointing
-            if neox_args.save and iteration in neox_args.save_iters:
-                save_checkpoint(
-                    neox_args=neox_args,
-                    iteration=iteration,
-                    model=model,
-                    optimizer=optimizer,
-                    lr_scheduler=lr_scheduler,
+        if neox_args.exit_interval and iteration % neox_args.exit_interval == 0:
+            torch.distributed.barrier()
+            time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            rank = torch.distributed.get_rank()
+            print_rank_0(
+                "rank: {} | time: {} | exiting the program at iteration {}".format(
+                    rank, time_str, iteration
                 )
-            # Evaluation
-            if (
-                neox_args.eval_interval
-                and iteration % neox_args.eval_interval == 0
-                and neox_args.do_valid
-            ):
-                prefix = "iteration {}".format(iteration)
-                evaluate_and_print_results(
-                    neox_args=neox_args,
-                    prefix=prefix,
-                    forward_step_func=forward_step,
-                    data_iterator=valid_data_iterator,
-                    model=model,
-                    iteration=iteration,
-                    verbose=False,
-                    timers=timers,
-                )
-
-            if neox_args.exit_interval and iteration % neox_args.exit_interval == 0:
-                torch.distributed.barrier()
-                time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                rank = torch.distributed.get_rank()
-                print_rank_0(
-                    "rank: {} | time: {} | exiting the program at iteration {}".format(
-                        rank, time_str, iteration
-                    )
-                )
-                sys.exit()
+            )
+            sys.exit()
 
     return iteration
-
 
 def evaluate(
     neox_args, forward_step_fn, data_iterator, model, verbose=False, timers=None
