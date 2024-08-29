@@ -37,8 +37,11 @@
         "eps": 1.0e-8,
       }
     },
-   "min_lr": 3.0e-5,
-   "warmup": 0.01,
+  "min_lr": 3.0e-5,
+  "lr-decay-style": "cosine-inf",
+  "num_repeats": 3,
+  "warmup": 0.01,
+
 
    # for all zero_optimization options, see https://www.deepspeed.ai/docs/config-json/#zero-optimizations-for-fp16-training
    "zero_optimization": {
@@ -78,11 +81,9 @@
    },
 
    # misc. training settings
-   "train_iters": 3000,
+   "train_iters": 1000,
    "lr_decay_iters": 21000,
    "distributed_backend": "nccl",
-   "lr_decay_style": "cosine",
-   "warmup": 0.01,
    "checkpoint_factor": 10000,
    "eval_interval": 10000,
    "eval_iters": 0,

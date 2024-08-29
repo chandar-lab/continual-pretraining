@@ -93,6 +93,10 @@ class Buffer:
         self.num_seen_examples = 0
         del self.texts, self.task_labels 
 
+
+
+
+
 def reservoir(num_seen_examples: int, buffer_size: int) -> int:
     """Reservoir sampling strategy for adding data to the buffer."""
     if num_seen_examples < buffer_size:
@@ -116,45 +120,41 @@ def get_data_by_index(self, indexes):
     sampled_task_labels = self.task_labels[indexes]
     return sampled_texts, sampled_task_labels
 
+
 @torch.no_grad()
-def fill_buffer(buffer: Buffer, dataset, t_idx: int, net = None):
+def fill_buffer(buffer: Buffer, dataset, t_idx: int, samples_per_task=None):
     """
     Populate the buffer with data from the current task.
-    
-    Note: The `net` and `use_herding` parameters are kept for potential future use with model-based herding strategies in NLP. 
 
     Args:
         buffer (Buffer): The buffer instance.
         dataset (Dataset): Your NLP dataset. Assume it has a `__getitem__` returning (text, task_label).
         t_idx (int): Index of the current task.
-        net (optional): Not used currently. Placeholder for future model integration.
+        samples_per_task (int, optional): Number of samples to store per task. If not provided, it will be calculated dynamically.
     """
-
-    n_seen_classes = dataset.N_CLASSES_PER_TASK * (t_idx + 1) if isinstance(dataset.N_CLASSES_PER_TASK, int) else \
-        sum(dataset.N_CLASSES_PER_TASK[:t_idx + 1])
-    n_past_classes = dataset.N_CLASSES_PER_TASK * t_idx if isinstance(dataset.N_CLASSES_PER_TASK, int) else \
-        sum(dataset.N_CLASSES_PER_TASK[:t_idx])
-    samples_per_class = buffer.buffer_size // n_seen_classes
-
+    
+    # If samples_per_task is not provided, calculate dynamically
+    if samples_per_task is None:
+        samples_per_task = buffer.buffer_size // (t_idx + 1)
+    
     if t_idx > 0:
         # Subsample from previous tasks
         all_texts, all_labels = buffer.get_all_data()
         buffer.empty()
 
-        for _y in torch.unique(all_labels):
-            idx = (all_labels == _y).nonzero().squeeze() 
-            _texts = [all_texts[i] for i in idx][:samples_per_class]
-            _labels = all_labels[idx][:samples_per_class]
-            buffer.add_data(_texts, _labels) 
+        unique_labels = set(all_labels)  # Use a set for unique string labels
+        for label in unique_labels:
+            idx = [i for i, lbl in enumerate(all_labels) if lbl == label]
+            selected_texts = [all_texts[i] for i in idx][:samples_per_task]
+            selected_labels = [all_labels[i] for i in idx][:samples_per_task]
+            buffer.add_data(selected_texts, selected_labels)
 
     # Add data from the current task 
     for i in range(len(dataset)):
-        text, task_label = dataset[i] 
-        if (task_label >= n_past_classes) and (task_label < n_seen_classes): 
-            buffer.add_data([text], torch.tensor([task_label]))
+        text, task_label = dataset[i]
+        buffer.add_data([text], [task_label])  # No need for .item() since labels are strings
 
-    assert len(buffer.texts) <= buffer.buffer_size
-    assert buffer.num_seen_examples <= buffer.buffer_size
+
 
     
     def save_buffer(self, filepath: str) -> None:
