@@ -89,6 +89,150 @@ def build_the_dataset(
     return dataset
 
 
+
+
+def get_valid_test_split_(splits, size):
+    """Get dataset splits for test ."""
+
+    splits = [0.5 , 0.5]
+    splits_sum = sum(splits)
+    splits_index = [0]
+    for index, split in enumerate(splits):
+        splits_index.append(splits_index[index] + int(round(split * float(size))))
+    diff = splits_index[-1] - size
+    for index in range(1, len(splits_index)):
+        splits_index[index] -= diff
+    return splits_index
+
+
+def build_valid_test_dataset(
+    data_prefix,
+    use_shared_fs,
+    data_impl,
+    splits_test_valid,
+    train_valid_test_num_samples,
+    seq_length,
+    seed,
+    skip_warmup,
+):
+    """Build test dataset."""
+
+    # Indexed dataset.
+    indexed_dataset = make_indexed_dataset(data_prefix, data_impl, skip_warmup)
+
+    total_num_of_documents = indexed_dataset.sizes.shape[0]
+    splits_test_valid=[0.5, 0.5]
+    splits = get_valid_test_split_(splits_test_valid, total_num_of_documents)
+
+    def build_dataset(index, name):
+        dataset = None
+        if splits[index + 1] > splits[index]:
+            documents = np.arange(
+                start=splits[index], stop=splits[index + 1], step=1, dtype=np.int32
+            )
+
+            dataset = GPT2Dataset(
+                name,
+                data_prefix,
+                documents,
+                indexed_dataset,
+                train_valid_test_num_samples[index],
+                seq_length,
+                seed,
+                use_shared_fs=use_shared_fs,
+            )
+        return dataset
+    
+
+
+    test_dataset = build_dataset(0, "test")
+    valid_dataset = build_dataset(1, "valid")
+
+    return test_dataset,valid_dataset
+
+
+
+
+def build_valid_test_data_iterators(neox_args):
+    """XXX"""
+
+    (valid_dataloader, test_dataloader) = (None, None)
+
+    print_rank_0("> building train, validation, and test datasets ...")
+
+    # Ensure only the first/last pipeline stages have data loaders
+    if neox_args.is_pipe_parallel:
+        is_first_stage = mpu.get_pipe_parallel_rank() == 0
+        is_last_stage = (
+            mpu.get_pipe_parallel_rank() == mpu.get_pipe_parallel_world_size() - 1
+        )
+        pipe_load = is_first_stage or is_last_stage
+    else:
+        pipe_load = True
+
+    # Data loader only on rank 0 of each model parallel group.
+    if mpu.get_model_parallel_rank() == 0 and pipe_load:
+        # Number of train/valid/test samples.
+        train_iters = neox_args.train_iters
+        eval_iters = (train_iters // neox_args.eval_interval + 1) * neox_args.eval_iters
+        test_iters = neox_args.eval_iters
+        train_val_test_num_samples = [
+            train_iters * neox_args.train_batch_size,
+            eval_iters * neox_args.train_batch_size,
+            test_iters * neox_args.train_batch_size,
+        ]
+
+        test_ds, valid_ds  = build_valid_test_dataset(
+                data_prefix=neox_args.test_data_paths[0],
+                use_shared_fs=neox_args.use_shared_fs,
+                data_impl=neox_args.data_impl,
+                splits_test_valid=[0.5,0.5],
+                train_valid_test_num_samples=train_val_test_num_samples,
+                seq_length=neox_args.seq_length,
+                seed=neox_args.seed,
+                skip_warmup=(not neox_args.mmap_warmup),
+            )
+
+        # Build dataloders.
+        valid_dataloader = make_data_loader(valid_ds, neox_args=neox_args)
+        test_dataloader = make_data_loader(test_ds, neox_args=neox_args)
+
+        # Flags to know if we need to do training/validation/testing.
+        do_valid = valid_dataloader is not None and neox_args.eval_iters > 0
+        do_test = test_dataloader is not None and neox_args.eval_iters > 0
+
+
+    if valid_dataloader is not None:
+        start_iter_val = (
+            (neox_args.iteration * neox_args.gradient_accumulation_steps)
+            // neox_args.eval_interval
+        ) * neox_args.eval_iters
+        valid_dataloader.batch_sampler.start_iter = start_iter_val % len(
+            valid_dataloader
+        )
+        print_rank_0(
+            "setting validation data start iteration to {}".format(
+                valid_dataloader.batch_sampler.start_iter
+            )
+        )
+
+    if valid_dataloader is not None:
+        valid_data_iterator = iter(valid_dataloader)
+    else:
+        valid_data_iterator = None
+
+    if test_dataloader is not None:
+        test_data_iterator = iter(test_dataloader)
+    else:
+        test_data_iterator = None
+
+    return valid_data_iterator, test_data_iterator
+
+
+
+
+
+
 def build_train_valid_test_datasets(
     data_prefix,
     use_shared_fs,
@@ -322,89 +466,6 @@ def build_train_valid_test_data_iterators(neox_args,data_path=None):
             eval_iters * neox_args.train_batch_size,
             test_iters * neox_args.train_batch_size,
         ]
-
-        # if neox_args.train_data_paths:
-        #     # when individual train / valid / test data paths are provided
-        #     # normalize weight values and get num samples for each dataset
-        #     train_weights, train_num_samples = get_normalized_weights_and_num_samples(
-        #         neox_args.train_data_weights, train_val_test_num_samples[0]
-        #     )
-        #     valid_weights, valid_num_samples = get_normalized_weights_and_num_samples(
-        #         neox_args.valid_data_weights, train_val_test_num_samples[1]
-        #     )
-        #     test_weights, test_num_samples = get_normalized_weights_and_num_samples(
-        #         neox_args.test_data_weights, train_val_test_num_samples[2]
-        #     )
-
-        #     # build individual datasets
-        #     train_datasets, valid_datasets, test_datasets = build_weighted_datasets(
-        #         neox_args,
-        #         train_num_samples,
-        #         valid_num_samples,
-        #         test_num_samples,
-        #         train_weights,
-        #         valid_weights,
-        #         test_weights,
-        #         build_index_mappings=not neox_args.weight_by_num_documents,
-        #     )
-
-        #     if neox_args.weight_by_num_documents:
-
-        #         # gets the number of documents in each datapath
-        #         get_num_docs_list = lambda datasets: [
-        #             dataset.indexed_dataset.sizes.shape[0] for dataset in datasets
-        #         ]
-        #         train_num_docs, valid_num_docs, test_num_docs = (
-        #             get_num_docs_list(train_datasets),
-        #             get_num_docs_list(valid_datasets),
-        #             get_num_docs_list(test_datasets),
-        #         )
-
-        #         # builds weights according to alpha + the number of docs
-        #         fn = partial(
-        #             weights_by_num_docs, alpha=neox_args.weighted_sampler_alpha
-        #         )
-        #         train_weights, valid_weights, test_weights = (
-        #             fn(train_num_docs),
-        #             fn(valid_num_docs),
-        #             fn(test_num_docs),
-        #         )
-        #         (
-        #             train_weights,
-        #             train_num_samples,
-        #         ) = get_normalized_weights_and_num_samples(
-        #             train_weights, train_val_test_num_samples[0]
-        #         )
-        #         (
-        #             valid_weights,
-        #             valid_num_samples,
-        #         ) = get_normalized_weights_and_num_samples(
-        #             valid_weights, train_val_test_num_samples[1]
-        #         )
-        #         test_weights, test_num_samples = get_normalized_weights_and_num_samples(
-        #             test_weights, train_val_test_num_samples[2]
-        #         )
-
-        #         # rebuild datasets weighted according to new weights
-        #         train_datasets, valid_datasets, test_datasets = build_weighted_datasets(
-        #             neox_args,
-        #             train_num_samples,
-        #             valid_num_samples,
-        #             test_num_samples,
-        #             train_weights,
-        #             valid_weights,
-        #             test_weights,
-        #         )
-
-        #     if train_datasets:
-        #         train_ds = BlendableDataset(train_datasets, train_weights)
-        #     if valid_datasets:
-        #         valid_ds = BlendableDataset(valid_datasets, valid_weights)
-        #     if test_datasets:
-        #         test_ds = BlendableDataset(test_datasets, test_weights)
-        # else:
-            # when just data_path is provided
-            # split dataset into train, valid and test from data_path
         train_ds, valid_ds, test_ds = build_train_valid_test_datasets(
                 data_prefix=data_path,
                 use_shared_fs=neox_args.use_shared_fs,

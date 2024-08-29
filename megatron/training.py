@@ -45,7 +45,7 @@ from megatron.model import (
     get_params_for_weight_decay_optimization,
 )
 from megatron.checkpointing import load_checkpoint, save_checkpoint
-from megatron.data.data_utils import build_train_valid_test_data_iterators
+from megatron.data.data_utils import build_train_valid_test_data_iterators, build_valid_test_data_iterators
 from megatron.initialize import initialize_megatron
 from megatron.learning_rates import AnnealingLR
 from megatron.logging import tb_wandb_log, training_log
@@ -209,22 +209,32 @@ def pretrain(neox_args):
             lr_scheduler=lr_scheduler,
         )
 
-    # Sequential training on each dataset in train_data_paths.
+    _ , valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
+    neox_args=neox_args, data_path=neox_args.valid_data_paths[0])
     for i, train_data_path in enumerate(neox_args.train_data_paths):
         print_rank_0(f"Starting pretraining on dataset {i+1}/{len(neox_args.train_data_paths)}: {train_data_path}")
 
         # Update the neox_args for the current dataset.
-        neox_args.data_path = train_data_path
-        
-        (
-            train_data_iterator,
-            valid_data_iterator,
-            test_data_iterator,
-        ) = build_train_valid_test_data_iterators(neox_args=neox_args,data_path=train_data_path)
+        # neox_args.data_path = train_data_path
 
-        iteration = train(neox_args=neox_args,timers=timers,model=model,optimizer=optimizer,lr_scheduler=lr_scheduler,train_data_iterator=train_data_iterator,valid_data_iterator=valid_data_iterator,buffer=buffer)
+        # Rebuild the training data iterator for the current dataset.
+        train_data_iterator = build_train_valid_test_data_iterators(
+            neox_args=neox_args, data_path=train_data_path
+        )[0]
 
-        # Validation after training on the current dataset.
+
+        iteration = train(
+            neox_args=neox_args,
+            timers=timers,
+            model=model,
+            optimizer=optimizer,
+            lr_scheduler=lr_scheduler,
+            train_data_iterator=train_data_iterator,
+            valid_data_iterator=valid_data_iterator,
+            buffer=buffer
+        )
+
+        # Validation after training on the current dataset using the combined validation dataset.
         if neox_args.do_valid:
             prefix = f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data"
             evaluate_and_print_results(
@@ -249,7 +259,7 @@ def pretrain(neox_args):
             )
             # buffer.save_buffer(f"buffer/buffer_dataset_{i+1}.pth")
 
-    # Final test evaluation after training on all datasets.
+    # Final test evaluation after training on all datasets using the combined test dataset.
     if neox_args.do_test:
         prefix = "The end of pretraining on all datasets for test data"
         evaluate_and_print_results(
@@ -263,7 +273,6 @@ def pretrain(neox_args):
             timers=timers,
             chart_name="test",
         )
-
 
 
 def _get_batch(neox_args, tokenizer, keys, data, datatype):
@@ -473,8 +482,8 @@ def forward_step(
         neox_args=neox_args, data_iterator=data_iterator
     )
 
-    from continual_utils.replay_buffer import Buffer
-    buffer= Buffer(5000,tokens, labels)
+    # from continual_utils.replay_buffer import Buffer
+    # buffer= Buffer(5000,tokens, labels)
 
     if timers is not None:
         timers("batch generator").stop()
@@ -991,6 +1000,7 @@ def train_step_pipe(neox_args, timers, model, data_iterator,replay_buffer=None):
 
     assert neox_args.deepspeed
     inputs = next(data_iterator)
+    # print(inputs)
     if replay_buffer is not None:
         replay_buffer.add_data(inputs['text'],inputs['label'])
         if not replay_buffer.is_empty():
@@ -1041,7 +1051,7 @@ def train(
     total_loss_dict = {}
 
     # Iterations.
-    iteration = neox_args.iteration
+    iteration = 0
 
     timers("interval time").start()
     report_memory_flag = True

@@ -78,8 +78,8 @@
    },
 
    # misc. training settings
-   "train_iters": 3200,
-   "lr_decay_iters": 3200,
+   "train_iters": 3000,
+   "lr_decay_iters": 21000,
    "distributed_backend": "nccl",
    "lr_decay_style": "cosine",
    "warmup": 0.01,
@@ -95,8 +95,9 @@
 
 
   "train_data_paths": ["data/slim_pajama/tokenized_train_0-100B/ArXiv/ArXiv","data/slim_pajama/tokenized_train_0-100B/Book/Book","data/slim_pajama/tokenized_train_0-100B/C4/C4","data/slim_pajama/tokenized_train_0-100B/CommonCrawl/CommonCrawl","data/slim_pajama/tokenized_train_0-100B/Github/Github","data/slim_pajama/tokenized_train_0-100B/StackExchange/StackExchange","data/slim_pajama/tokenized_train_0-100B/Wikipedia/Wikipedia"],
-  "test_data_paths": ["data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "data/slim_pajama/test/Book/tokenized_book_text_document","data/slim_pajama/test/C4/tokenized_c4_text_document","data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","data/slim_pajama/test/Github/tokenized_github_text_document","data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
-  "valid_data_paths": ["data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "data/slim_pajama/test/Book/tokenized_book_text_document","data/slim_pajama/test/C4/tokenized_c4_text_document","data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","data/slim_pajama/test/Github/tokenized_github_text_document","data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
+  "test_data_paths": ["data/slim_pajama/test/all/sp_test"],
+  "valid_data_paths": ["data/slim_pajama/test/all/sp_test"],
+  # "valid_data_paths": ["data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "data/slim_pajama/test/Book/tokenized_book_text_document","data/slim_pajama/test/C4/tokenized_c4_text_document","data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","data/slim_pajama/test/Github/tokenized_github_text_document","data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
   "split" : "20,75,5",
   # "label_data_paths": ["data/slim_pajama/tokenized_train_0-100B/ArXiv/ArXiv","data/slim_pajama/tokenized_train_0-100B/Book/Book"],
   "tensorboard_dir": "test_tensorboard",
