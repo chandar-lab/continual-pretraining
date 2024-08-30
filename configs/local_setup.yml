@@ -41,6 +41,7 @@
   "lr-decay-style": "cosine-inf",
   "num_repeats": 3,
   "warmup": 0.01,
+  "minimizer": "sam",
 
 
    # for all zero_optimization options, see https://www.deepspeed.ai/docs/config-json/#zero-optimizations-for-fp16-training
@@ -81,7 +82,7 @@
    },
 
    # misc. training settings
-   "train_iters": 1000,
+   "train_iters": 100,
    "lr_decay_iters": 21000,
    "distributed_backend": "nccl",
    "checkpoint_factor": 10000,

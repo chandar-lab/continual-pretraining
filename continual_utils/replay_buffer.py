@@ -5,6 +5,11 @@ import numpy as np
 import torch
 
 
+import torch
+import numpy as np
+import os
+from typing import List, Tuple
+
 class Buffer:
     """
     Memory buffer for rehearsal methods in continual learning.
@@ -47,7 +52,7 @@ class Buffer:
 
         Args:
             texts (List[str]): List of text strings.
-            task labels: List of corresponding task labels
+            task_labels (List[str]): List of corresponding task labels
         """
         if not hasattr(self, 'texts'):
             self.init_tensors()
@@ -76,8 +81,7 @@ class Buffer:
 
         choice = np.random.choice(num_avail_samples, size=size, replace=False)
         sampled_texts = [self.texts[i] for i in choice]
-        # sampled_task_labels = self.task_labels[choice]
-        sampled_task_labels=[self.task_labels[i] for i in choice]
+        sampled_task_labels = [self.task_labels[i] for i in choice]
 
         if not return_index:
             return sampled_texts, sampled_task_labels 
@@ -91,10 +95,36 @@ class Buffer:
     def empty(self) -> None:
         """Empty the buffer."""
         self.num_seen_examples = 0
-        del self.texts, self.task_labels 
+        del self.texts, self.task_labels
 
+    def save_buffer(self, filepath: str) -> None:
+        """
+        Save the buffer to a file.
 
+        Args:
+            filepath (str): The path to the file where the buffer will be saved.
+        """
+        buffer_data = {
+            'num_seen_examples': self.num_seen_examples,
+            'texts': self.texts,
+            'task_labels': self.task_labels
+        }
+        torch.save(buffer_data, filepath)
 
+    def load_buffer(self, filepath: str) -> None:
+        """
+        Load the buffer from a file.
+
+        Args:
+            filepath (str): The path to the file from which the buffer will be loaded.
+        """
+        if os.path.isfile(filepath):
+            buffer_data = torch.load(filepath, map_location=self.device)
+            self.num_seen_examples = buffer_data['num_seen_examples']
+            self.texts = buffer_data['texts']
+            self.task_labels = buffer_data['task_labels']
+        else:
+            raise FileNotFoundError(f"No such file: '{filepath}'")
 
 
 def reservoir(num_seen_examples: int, buffer_size: int) -> int:
@@ -121,56 +151,4 @@ def get_data_by_index(self, indexes):
     return sampled_texts, sampled_task_labels
 
 
-@torch.no_grad()
-def fill_buffer(buffer: Buffer, dataset, t_idx: int, samples_per_task=None):
-    """
-    Populate the buffer with data from the current task.
-
-    Args:
-        buffer (Buffer): The buffer instance.
-        dataset (Dataset): Your NLP dataset. Assume it has a `__getitem__` returning (text, task_label).
-        t_idx (int): Index of the current task.
-        samples_per_task (int, optional): Number of samples to store per task. If not provided, it will be calculated dynamically.
-    """
     
-    # If samples_per_task is not provided, calculate dynamically
-    if samples_per_task is None:
-        samples_per_task = buffer.buffer_size // (t_idx + 1)
-    
-    if t_idx > 0:
-        # Subsample from previous tasks
-        all_texts, all_labels = buffer.get_all_data()
-        buffer.empty()
-
-        unique_labels = set(all_labels)  # Use a set for unique string labels
-        for label in unique_labels:
-            idx = [i for i, lbl in enumerate(all_labels) if lbl == label]
-            selected_texts = [all_texts[i] for i in idx][:samples_per_task]
-            selected_labels = [all_labels[i] for i in idx][:samples_per_task]
-            buffer.add_data(selected_texts, selected_labels)
-
-    # Add data from the current task 
-    for i in range(len(dataset)):
-        text, task_label = dataset[i]
-        buffer.add_data([text], [task_label])  # No need for .item() since labels are strings
-
-
-
-    
-    def save_buffer(self, filepath: str) -> None:
-        """
-        Save the buffer to a file.
-
-        Args:
-            filepath (str): Path to the file where the buffer will be saved.
-        """
-        # Create a dictionary with the buffer contents
-        buffer_data = {
-            'texts': self.texts,
-            'task_labels': self.task_labels,
-            'num_seen_examples': self.num_seen_examples,
-            'buffer_size': self.buffer_size
-        }
-        
-        # Save the dictionary using torch's save function
-        torch.save(buffer_data, filepath)

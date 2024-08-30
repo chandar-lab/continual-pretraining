@@ -30,7 +30,7 @@ import torch
 import deepspeed
 from deepspeed.runtime.data_pipeline.curriculum_scheduler import CurriculumScheduler
 import numpy as np
-
+from continual_utils.asam import ASAM,SAM
 from megatron.utils import (
     Timers,
     init_wandb,
@@ -812,7 +812,14 @@ def setup_model_and_optimizer(neox_args, use_cache=False, iteration=None):
     """Setup model and optimizer."""
     model = get_model(neox_args=neox_args, use_cache=use_cache)
     optimizer, param_groups = get_optimizer(model=model, neox_args=neox_args)
-    lr_scheduler = get_learning_rate_scheduler(optimizer=optimizer, neox_args=neox_args)
+    if neox_args.minimizer:
+        if neox_args.minimizer== "SAM":
+            minimizer = SAM(optimizer,model)
+        else:
+            minimizer = ASAM(optimizer,model)
+        lr_scheduler = get_learning_rate_scheduler(optimizer=minimizer.optimizer, neox_args=neox_args)
+    else:
+        lr_scheduler = get_learning_rate_scheduler(optimizer=optimizer, neox_args=neox_args)
 
     if neox_args.deepspeed:
         print_rank_0("DeepSpeed is enabled.")
@@ -903,21 +910,13 @@ def backward_step(neox_args, timers, optimizer, model, loss):
         raise ValueError("Must be using deepspeed to run neox")
 
 
-def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer, lr_scheduler):
-    """Single training step."""
+def train_step(neox_args, timers, data_iterator, model, optimizer, replay_buffer, lr_scheduler, sam=None):
+    """Single training step with optional SAM/ASAM integration."""
 
-    # Pipeline parallelism schedules forward/backward/step
     if neox_args.is_pipe_parallel:
         reduced_loss = train_step_pipe(
-            neox_args=neox_args, timers=timers, model=model, data_iterator=data_iterator,replay_buffer=replay_buffer
+            neox_args=neox_args, timers=timers, model=model, data_iterator=data_iterator, replay_buffer=replay_buffer
         )
-        if (
-            neox_args.memory_profiling
-            and neox_args.iteration >= neox_args.profile_step_start
-            and neox_args.iteration <= neox_args.profile_step_stop
-            and torch.distributed.get_rank() == 0
-        ):
-            save_snapshot(neox_args)
     else:
         losses = []
         for _ in range(neox_args.gradient_accumulation_steps):
@@ -932,57 +931,62 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
             )
             timers("forward").stop()
             losses.append(loss)
+            
             # Calculate gradients, reduce across processes, and clip.
-            if (
-                neox_args.profile
-                and neox_args.iteration >= neox_args.profile_step_start
-                and neox_args.iteration <= neox_args.profile_step_stop
-            ):
+            if neox_args.profile and neox_args.iteration >= neox_args.profile_step_start and neox_args.iteration <= neox_args.profile_step_stop:
                 torch.cuda.nvtx.range_push(f"Backward pass")
+            
             timers("backward").start()
-            backward_step(
-                neox_args=neox_args,
-                timers=timers,
-                optimizer=optimizer,
-                model=model,
-                loss=loss,
-            )
-            timers("backward").stop()
-            if (
-                neox_args.profile
-                and neox_args.iteration >= neox_args.profile_step_start
-                and neox_args.iteration <= neox_args.profile_step_stop
-            ):
-                torch.cuda.nvtx.range_pop()
-            # Update parameters.
-            if (
-                neox_args.profile
-                and neox_args.iteration >= neox_args.profile_step_start
-                and neox_args.iteration <= neox_args.profile_step_stop
-            ):
-                torch.cuda.nvtx.range_push(f"Optimizer step")
-            timers("optimizer").start()
-            if neox_args.deepspeed:
-                model.step()
+            
+            if sam:
+                # SAM/ASAM ascent step
+                loss.backward()
+                sam.ascent_step()
+
+                # Forward again to get the sharpness-aware loss
+                loss = forward_step(
+                    neox_args=neox_args,
+                    timers=timers,
+                    data_iterator=data_iterator,
+                    model=model,
+                    is_train=True,
+                )
+                # Compute new gradients for the descent step
+                loss.backward()
+                sam.descent_step()
             else:
-                raise ValueError("Must be using deepspeed to run neox")
+                # Standard backward step
+                backward_step(
+                    neox_args=neox_args,
+                    timers=timers,
+                    optimizer=optimizer,
+                    model=model,
+                    loss=loss,
+                )
+                if neox_args.deepspeed:
+                    model.step()
+                else:
+                    raise ValueError("Must be using deepspeed to run neox")
+
+            timers("backward").stop()
+
+            timers("optimizer").start()
+            if sam is None:
+                if neox_args.deepspeed:
+                    model.step()
+                else:
+                    raise ValueError("Must be using deepspeed to run neox")
             timers("optimizer").stop()
-            if (
-                neox_args.profile
-                and neox_args.iteration >= neox_args.profile_step_start
-                and neox_args.iteration <= neox_args.profile_step_stop
-            ):
+
+            if neox_args.profile and neox_args.iteration >= neox_args.profile_step_start and neox_args.iteration <= neox_args.profile_step_stop:
                 torch.cuda.nvtx.range_pop()
-            if (
-                neox_args.profile
-                and neox_args.iteration >= neox_args.profile_step_start
-                and neox_args.iteration <= neox_args.profile_step_stop
-                and torch.distributed.get_rank() == 0
-            ):
+                
+            if neox_args.profile and neox_args.iteration >= neox_args.profile_step_start and neox_args.iteration <= neox_args.profile_step_stop and torch.distributed.get_rank() == 0:
                 save_snapshot(neox_args)
+        
         reduced_loss = {
             "lm_loss": reduce_losses(losses).mean()
-        }  # reduces losses across machines for logging
+        }
 
     if neox_args.precision == "fp16" and model.optimizer.overflow:
         skipped_iter = 1
@@ -991,6 +995,7 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
 
     collect_loss_for_unit_test(reduced_loss["lm_loss"])
     return reduced_loss, skipped_iter
+
 
 
 
@@ -1043,7 +1048,11 @@ def train(
     buffer,
 ):
     """Train the model function."""
-
+    if neox_args.minimizer is not None:
+        if neox_args.minimizer == "sam":
+            sam=SAM(optimizer,model,rho=0.5)
+        else:
+            sam=ASAM(optimizer,model,rho=0.5)
     # Turn on training mode which enables dropout.
     model.train()
 
@@ -1093,6 +1102,7 @@ def train(
             optimizer=optimizer,
             replay_buffer=buffer,
             lr_scheduler=lr_scheduler,
+            sam=sam,
         )
         if neox_args.profile and iteration == neox_args.profile_step_stop:
             torch.cuda.cudart().cudaProfilerStop()
