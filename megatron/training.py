@@ -203,6 +203,7 @@ def pretrain(neox_args):
             model=model,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
+            buffer=buffer,
         )
 
     if task_id is None:
@@ -1134,7 +1135,6 @@ def train(
 
         # Checkpointing
         if iteration in [10,20,30,40,50,60,70,80,90,100] or iteration == neox_args.train_iters:
-            print('Saving buffer')
             buffer.save('/lustre/orion/bif151/scratch/istabrak/gpt-neox/data/saved_buffer_continual')
             save_checkpoint(
                 neox_args=neox_args,

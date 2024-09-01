@@ -111,6 +111,6 @@
   "finetune": true,
   "save": "checkpoints/tested",
   "log_dir": "logs",
-  # "load": "checkpoints/tested",
+  "load": "checkpoints/tested",
 
 }

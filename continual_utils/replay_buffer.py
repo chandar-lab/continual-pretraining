@@ -110,6 +110,22 @@ class Buffer:
                 torch.save(getattr(self, attr_str), os.path.join(directory, f'{attr_str}.pt'))
 
 
+    def load(self, directory: str):
+        """Load the buffer from disk.
+
+        Args:
+            directory (str): Directory from which to load the buffer data.
+        """
+        metadata = torch.load(os.path.join(directory, 'metadata.pt'))
+        self.buffer_size = metadata['buffer_size']
+        self.num_seen_examples = metadata.get('num_seen_examples', 0)  # Handle cases where it might not be saved
+
+        for attr_str in self.attributes:
+            path = os.path.join(directory, f'{attr_str}.pt')
+            if os.path.exists(path):
+                setattr(self, attr_str, torch.load(path))
+
+
 
 
 def reservoir(num_seen_examples: int, buffer_size: int) -> int:

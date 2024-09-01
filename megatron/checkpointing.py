@@ -389,7 +389,7 @@ def save_checkpoint(neox_args, iteration, model, optimizer, lr_scheduler,task_id
     torch.distributed.barrier()
 
 def load_checkpoint(
-    neox_args, model, optimizer, lr_scheduler, inference=False, iteration=None):
+    neox_args, model, optimizer, lr_scheduler, inference=False, iteration=None,buffer=None):
     """Load a model checkpoint and return the iteration and task_id."""
     if neox_args.deepspeed:
         load_optim_and_scheduler = (
@@ -462,4 +462,6 @@ def load_checkpoint(
         print_rank_0(" > could not find arguments in the checkpoint for validation...")
 
     # Return the correctly loaded iteration and task_id
+    if buffer is not None:
+        buffer.load("/lustre/orion/bif151/scratch/istabrak/gpt-neox/data/saved_buffer_continual")
     return iteration, task_id
