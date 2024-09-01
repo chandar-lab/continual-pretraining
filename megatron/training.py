@@ -1000,7 +1000,7 @@ def train_step_pipe(neox_args, timers, model, data_iterator,replay_buffer=None):
 
     assert neox_args.deepspeed
     inputs = next(data_iterator)
-    # print(inputs)
+    print(inputs)
     if replay_buffer is not None:
         replay_buffer.add_data(inputs['text'],inputs['label'])
         if not replay_buffer.is_empty():
