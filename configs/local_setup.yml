@@ -38,8 +38,8 @@
       }
     },
   "min_lr": 3.0e-5,
-  "lr-decay-style": "cosine-inf",
-  "num_repeats": 3,
+  "lr-decay-style": "cosine",
+  # "num_repeats": 3,
   "warmup": 0.01,
 
 
@@ -81,7 +81,8 @@
    },
 
    # misc. training settings
-   "train_iters": 1000,
+   "train_iters": 100,
+   "save_iters": [10,20,30,40,50,60,70,80,90,100],
    "lr_decay_iters": 21000,
    "distributed_backend": "nccl",
    "checkpoint_factor": 10000,
@@ -108,7 +109,8 @@
   "use_wandb": False,
   "num_workers": 1,
   "finetune": true,
-  "save": "checkpoints/ssm_pretrain/final",
+  "save": "checkpoints/tested",
   "log_dir": "logs",
+  # "load": "checkpoints/tested",
 
 }
