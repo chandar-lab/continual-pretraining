@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH -A bif151
-#SBATCH -t 2:00:00
-#SBATCH -N 1
-#SBATCH --gpus=2
+#SBATCH -t 6:00:00
+#SBATCH -N 100
 #SBATCH --mail-user=istabrak.abbes@mila.quebec
 #SBATCH --mail-type=ALL
 #SBATCH --mail-type=BEGIN

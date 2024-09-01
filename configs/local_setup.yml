@@ -1,25 +1,27 @@
 { 
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
+   # model settings
+   "num_layers": 12,
+   "hidden_size": 768,
+   "num_attention_heads": 12,
+   "seq_length": 2048,
+   "max_position_embeddings": 2048,
+   "norm": "layernorm",
+   "pos_emb": "rotary",
+   "no_weight_tying": true,
+   "gpt_j_residual": false,
+   "output_layer_parallelism": "column",
 
-  # model settings
-  "num_layers": 10,
-  "hidden_size": 640,
-  "num_attention_heads": 10,
-  "seq_length": 2048,
-  "max_position_embeddings": 2048,
-  "pos_emb": "rotary",
-  "rotary_pct": 0.25,
-  "no_weight_tying": true,
-  "gpt_j_residual": true,
-  "output_layer_parallelism": "column",
+   # these should provide some speedup but takes a while to build, set to true if desired
+   "scaled_upper_triang_masked_softmax_fusion": false,
+   "bias_gelu_fusion": false,
+   "rope_fusion": false,
+   "layernorm_fusion": false,
 
-
-  "attention-config": [[["global"], 10]],
-  "init_method": "small_init",
-  "output_layer_init_method": "wang_init",
-
-  "activation": "silu",
+   # init methods
+   "init_method": "small_init",
+   "output_layer_init_method": "wang_init",
 
 
    # these should provide some speedup but takes a while to build, set to true if desired
@@ -81,9 +83,9 @@
    },
 
    # misc. training settings
-   "train_iters": 100,
-   "save_iters": [10,20,30,40,50,60,70,80,90,100],
-   "lr_decay_iters": 21000,
+   "train_iters": 6500,
+   "save_iters": [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500],
+   "lr_decay_iters": 210000,
    "distributed_backend": "nccl",
    "checkpoint_factor": 10000,
    "eval_interval": 10000,
@@ -100,7 +102,7 @@
   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
   "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
   # "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Book/tokenized_book_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/C4/tokenized_c4_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Github/tokenized_github_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
-  "split" : "20,75,5",
+  "split" : "50,30,20",
   # "label_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/ArXiv/ArXiv","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Book/Book"],
   "tensorboard_dir": "test_tensorboard",
   "tokenizer_type": "HFTokenizer",
@@ -109,8 +111,8 @@
   "use_wandb": False,
   "num_workers": 1,
   "finetune": true,
-  "save": "checkpoints/tested",
+  "save": "checkpoints/pythia_125M_4500",
   "log_dir": "logs",
-  "load": "checkpoints/tested",
+  "load": "checkpoints/pythia_125M_4500",
 
 }

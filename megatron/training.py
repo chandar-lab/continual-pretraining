@@ -194,8 +194,8 @@ def pretrain(neox_args):
         neox_args=neox_args, use_cache=False, iteration=neox_args.iteration
     )
     task_id=None
-    iteration = neox_args.train_iters
-    buffer = Buffer(10000, neox_args.tokenizer)
+    iteration = 0
+    buffer = Buffer(int(1e7), neox_args.tokenizer)
     timers("model and optimizer").stop()
     if neox_args.load is not None:
         iteration, task_id = load_checkpoint(
@@ -235,8 +235,11 @@ def pretrain(neox_args):
             train_data_iterator=train_data_iterator,
             valid_data_iterator=valid_data_iterator,
             buffer=buffer,
-            task_id=i
+            task_id=i,
+            iteration=iteration,
         )
+        
+        iteration=0
 
         # Validation after training on the current dataset using the combined validation dataset.
         if neox_args.do_valid:
@@ -1045,7 +1048,8 @@ def train(
     train_data_iterator,
     valid_data_iterator,
     buffer,
-    task_id
+    task_id,
+    iteration=0,
 ):
     """Train the model function."""
 
@@ -1056,7 +1060,7 @@ def train(
     total_loss_dict = {}
 
     # Iterations.
-    iteration = 0
+    iteration = iteration
 
     timers("interval time").start()
     report_memory_flag = True
@@ -1134,7 +1138,7 @@ def train(
         )
 
         # Checkpointing
-        if iteration in [10,20,30,40,50,60,70,80,90,100] or iteration == neox_args.train_iters:
+        if iteration in [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500] or iteration == neox_args.train_iters:
             buffer.save('/lustre/orion/bif151/scratch/istabrak/gpt-neox/data/saved_buffer_continual')
             save_checkpoint(
                 neox_args=neox_args,
