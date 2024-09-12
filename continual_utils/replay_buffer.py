@@ -1,143 +1,79 @@
-from typing import List, Tuple
-import numpy as np
 import torch
+import numpy as np
 import os
 
 class Buffer:
-    """
-    Memory buffer for rehearsal methods in continual learning.
-    Specifically designed to store text data and their corresponding labels.
-    """
-
-    def __init__(self, buffer_size, device="cpu"):
-        """
-        Initialize the buffer.
-
-        Args:
-            buffer_size (int): Maximum capacity of the buffer.
-            device (str, optional): Device to store the buffer tensors. Defaults to "cpu".
-        """
+    def __init__(self, buffer_size, device="cpu", cache_size=1000):
         self.buffer_size = buffer_size
         self.device = device
         self.num_seen_examples = 0
-        self.attributes = ['texts', 'task_labels']  # Attributes stored in the buffer
+        self.texts = [None] * self.buffer_size
+        self.cache_size = cache_size
+        self.cache = []
+        self.cache_index = 0
 
     def to(self, device):
-        """Move the buffer tensors to the specified device."""
         self.device = device
-        for attr_str in self.attributes:
-            if hasattr(self, attr_str):
-                setattr(self, attr_str, getattr(self, attr_str).to(device))
         return self
 
     def __len__(self):
-        """Return the current number of elements in the buffer."""
         return min(self.num_seen_examples, self.buffer_size)
 
-    def init_tensors(self) -> None:
-        """Initialize the tensors for storing text and task_label data."""
-        self.texts = [None] * self.buffer_size  # List to hold text strings
-        self.task_labels = [None] * self.buffer_size  # List to hold task labels
-
-    def add_data(self, texts: List[str], task_labels: List[str]):
-        """
-        Add data to the buffer using reservoir sampling.
-
-        Args:
-            texts (List[str]): List of text strings.
-            task labels: List of corresponding task labels
-        """
-        if not hasattr(self, 'texts'):
-            self.init_tensors()
-
-        for text, task_label in zip(texts, task_labels):
+    def add_data(self, texts: list):
+        for text in texts:
             index = reservoir(self.num_seen_examples, self.buffer_size)
             self.num_seen_examples += 1
             if index >= 0:
                 self.texts[index] = text 
-                self.task_labels[index] = task_label
 
-    def get_data(self, size: int, return_index=False) -> Tuple:
-        """
-        Sample a batch of data from the buffer.
+    def get_data(self, size: int, return_index=False):
+        if not self.cache:
+            self._refill_cache()
 
-        Args:
-            size (int): Batch size.
-            return_index (bool, optional): Whether to return the indices of the sampled data. Defaults to False.
-
-        Returns:
-            Tuple: A tuple containing the sampled texts and task_labels. If return_index is True, the indices are included as the first element.
-        """
-        num_avail_samples = min(self.num_seen_examples, self.buffer_size)
-        if size > num_avail_samples:
-            size = num_avail_samples
-
-        choice = np.random.choice(num_avail_samples, size=size, replace=False)
-        sampled_texts = [self.texts[i] for i in choice]
-        # sampled_task_labels = self.task_labels[choice]
-        sampled_task_labels=[self.task_labels[i] for i in choice]
+        num_avail_samples = min(len(self.cache), size)
+        sampled_texts = self.cache[:num_avail_samples]
+        self.cache = self.cache[num_avail_samples:]
 
         if not return_index:
-            return sampled_texts, sampled_task_labels 
+            return sampled_texts
         else:
-            return torch.tensor(choice).to(self.device), sampled_texts, sampled_task_labels
+            return torch.arange(num_avail_samples).to(self.device), sampled_texts
+
+    def _refill_cache(self):
+        num_avail_samples = min(self.num_seen_examples, self.buffer_size)
+        choice = np.random.choice(num_avail_samples, size=self.cache_size, replace=False)
+        self.cache = [self.texts[i] for i in choice if self.texts[i] is not None]
 
     def is_empty(self) -> bool:
-        """Check if the buffer is empty."""
         return self.num_seen_examples == 0
 
     def empty(self) -> None:
-        """Empty the buffer."""
         self.num_seen_examples = 0
-        del self.texts, self.task_labels 
+        self.texts = [None] * self.buffer_size
+        self.cache = []
 
+    def save(self, filepath: str) -> None:
+        buffer_data = {
+            'texts': self.texts,
+            'num_seen_examples': self.num_seen_examples,
+            'buffer_size': self.buffer_size
+        }
+        torch.save(buffer_data, filepath)
 
-    def save(self, directory: str):
-        """Save the buffer to disk.
-
-        Args:
-            directory (str): Directory to save the buffer data.
-        """
-        os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
-
-        # Save metadata
-        torch.save({'buffer_size': self.buffer_size
-        }, os.path.join(directory, 'metadata.pt'))
-
-        # Save data attributes
-        for attr_str in self.attributes:
-            if hasattr(self, attr_str):
-                torch.save(getattr(self, attr_str), os.path.join(directory, f'{attr_str}.pt'))
-
-
-    def load(self, directory: str):
-        """Load the buffer from disk.
-
-        Args:
-            directory (str): Directory from which to load the buffer data.
-        """
-        metadata = torch.load(os.path.join(directory, 'metadata.pt'))
-        self.buffer_size = metadata['buffer_size']
-        self.num_seen_examples = metadata.get('num_seen_examples', 0)  # Handle cases where it might not be saved
-
-        for attr_str in self.attributes:
-            path = os.path.join(directory, f'{attr_str}.pt')
-            if os.path.exists(path):
-                setattr(self, attr_str, torch.load(path))
-
-
-
+    @classmethod
+    def load(cls, filepath: str, device="cpu", cache_size=1000):
+        buffer_data = torch.load(filepath, map_location=device)
+        buffer = cls(buffer_data['buffer_size'], device, cache_size)
+        buffer.texts = buffer_data['texts']
+        buffer.num_seen_examples = buffer_data['num_seen_examples']
+        buffer._refill_cache()
+        return buffer
 
 def reservoir(num_seen_examples: int, buffer_size: int) -> int:
-    """Reservoir sampling strategy for adding data to the buffer."""
     if num_seen_examples < buffer_size:
         return num_seen_examples
-
     rand = np.random.randint(0, num_seen_examples + 1)
-    if rand < buffer_size:
-        return rand
-    else:
-        return -1
+    return rand if rand < buffer_size else -1
 
 def get_all_data(self):
     """Return all the data stored in the buffer."""

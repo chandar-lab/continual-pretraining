@@ -929,7 +929,13 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
     else:
         losses = []
         for _ in range(neox_args.gradient_accumulation_steps):
-            # Forward model for one step.
+            timers("batch generator").start()
+            current_batch = next(data_iterator)
+            buffer_batch = buffer.get_data(neox_args.batch_size // 2)  # Get half the batch from buffer
+            combined_batch = {
+                'text': torch.cat([current_batch['text'], buffer_batch['text']], dim=0),
+            }
+            timers("batch generator").stop()
             timers("forward").start()
             loss = forward_step(
                 neox_args=neox_args,
@@ -938,6 +944,8 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
                 model=model,
                 is_train=True,
             )
+            # Forward model for one step.
+
             timers("forward").stop()
             losses.append(loss)
             # Calculate gradients, reduce across processes, and clip.
@@ -988,6 +996,8 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
                 and torch.distributed.get_rank() == 0
             ):
                 save_snapshot(neox_args)
+        buffer.add_data(current_batch['text'])
+
         reduced_loss = {
             "lm_loss": reduce_losses(losses).mean()
         }  # reduces losses across machines for logging
@@ -1138,8 +1148,7 @@ def train(
         )
 
         # Checkpointing
-        if iteration in [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500] or iteration == neox_args.train_iters:
-            buffer.save('/lustre/orion/bif151/scratch/istabrak/gpt-neox/data/saved_buffer_continual')
+        if neox_args.save_interval and iteration % neox_args.save_interval == 0:
             save_checkpoint(
                 neox_args=neox_args,
                 iteration=iteration,
@@ -1148,6 +1157,8 @@ def train(
                 lr_scheduler=lr_scheduler,
                 task_id=task_id,
             )
+            # Save the buffer
+            buffer.save(f'{neox_args.save}/buffer_task_{task_id}_iter_{iteration}.pt')
         # Evaluation
         if (
             neox_args.eval_interval

@@ -1,45 +1,35 @@
-{ 
+{
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
-   # model settings
-   "num_layers": 12,
-   "hidden_size": 768,
-   "num_attention_heads": 12,
-   "seq_length": 2048,
-   "max_position_embeddings": 2048,
-   "norm": "layernorm",
-   "pos_emb": "rotary",
-   "no_weight_tying": true,
-   "gpt_j_residual": false,
-   "output_layer_parallelism": "column",
 
-   # these should provide some speedup but takes a while to build, set to true if desired
-   "scaled_upper_triang_masked_softmax_fusion": false,
-   "bias_gelu_fusion": false,
-   "rope_fusion": false,
-   "layernorm_fusion": false,
+  "num_layers": 24,
+  "hidden_size": 1024,
+  "num_attention_heads": 16,
+  "seq_length": 2048,
+  "max_position_embeddings": 2048,
+  "pos_emb": "rotary",
+  "rotary_pct": 0.25,
+  "no_weight_tying": true,
+  "gpt_j_residual": true,
+  "output_layer_parallelism": "column",
 
-   # init methods
-   "init_method": "small_init",
-   "output_layer_init_method": "wang_init",
+  "attention_config": [[["global"], 24]],
 
+  "scaled_upper_triang_masked_softmax_fusion": False,
+  "bias_gelu_fusion": False,
 
-   # these should provide some speedup but takes a while to build, set to true if desired
-   "scaled_upper_triang_masked_softmax_fusion": false,
-   "bias_gelu_fusion": false,
-   "rope_fusion": false,
-   "layernorm_fusion": false,
+  "init_method": "small_init",
+  "output_layer_init_method": "wang_init",
 
-   # optimizer settings
-   "optimizer": {
-      "type": "Adam",
-      "params": {
-        "lr": 3.0e-4,
-        "betas": [0.9, 0.95],
-        "eps": 1.0e-8,
-      }
-    },
-  "min_lr": 3.0e-5,
+  "optimizer": {
+    "type": "Adam",
+    "params": {
+      "lr": 0.0003,
+      "betas": [0.9, 0.95],
+      "eps": 1.0e-8
+    }
+  },
+  "min_lr": 0.00003,
   "lr-decay-style": "cosine",
   # "num_repeats": 3,
   "warmup": 0.01,
@@ -47,7 +37,7 @@
 
    # for all zero_optimization options, see https://www.deepspeed.ai/docs/config-json/#zero-optimizations-for-fp16-training
    "zero_optimization": {
-    "stage": 0,
+    "stage": 1,
     "allgather_partitions": True,
     "allgather_bucket_size": 500000000,
     "overlap_comm": True,
@@ -83,26 +73,43 @@
    },
 
    # misc. training settings
-   "train_iters": 6500,
-   "save_iters": [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500],
-   "lr_decay_iters": 210000,
+  #  "train_iters": 6500,
+  #  "save_iters": [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500],
+  #  "lr_decay_iters": 210000,
    "distributed_backend": "nccl",
    "checkpoint_factor": 10000,
    "eval_interval": 10000,
-   "eval_iters": 0,
+   "eval_iters": 100,
 
    # logging
    "log_interval": 100,
    "steps_per_print": 10,
    "keep_last_n_checkpoints": 4,
    "wall_clock_breakdown": true,
-
-
-  "train_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/ArXiv/ArXiv","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Book/Book","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/C4/C4","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/CommonCrawl/CommonCrawl","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Github/Github","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/StackExchange/StackExchange","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Wikipedia/Wikipedia"],
+  # or for weighted datasets:
+  "train-data-paths": [
+    '/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/ArXiv/ArXiv',
+    '/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Book/Book',
+    '/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/C4/C4',
+    '/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Wikipedia/Wikipedia',
+    '/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Github/Github',
+    '/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/StackExchange/StackExchange',
+    '/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/CommonCrawl/CommonCrawl',],
+  "train-data-weights": [
+    4.428184641, 
+    4.203131326, 
+    26.688499472, 
+    3.997293125, 
+    5.224141056, 
+    3.371078725, 
+    52.087671651
+  ],
+  "train-iters": 132366,
+  "lr-decay-iters": 132366,
   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
   "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
   # "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Book/tokenized_book_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/C4/tokenized_c4_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Github/tokenized_github_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
-  "split" : "50,30,20",
+  "split" : "70,20,10",
   # "label_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/ArXiv/ArXiv","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Book/Book"],
   "tensorboard_dir": "test_tensorboard",
   "tokenizer_type": "HFTokenizer",
@@ -111,8 +118,7 @@
   "use_wandb": False,
   "num_workers": 1,
   "finetune": true,
-  "save": "checkpoints/pythia_125M_4500",
+  "save": "checkpoints/pythia_410M_130k",
   "log_dir": "logs",
-  "load": "checkpoints/pythia_125M_4500",
 
 }
