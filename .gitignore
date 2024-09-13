@@ -155,3 +155,8 @@ src/
 # test data files
 tests/data/*.bin
 tests/data/*.idx
+hostfiles/
+test_tensorboard/events.out.tfevents.1726011915.login10.1778947.0
+test_tensorboard/events.out.tfevents.1726012177.login10.1781274.0
+test_tensorboard/events.out.tfevents.1726013099.login10.1792766.0
+core

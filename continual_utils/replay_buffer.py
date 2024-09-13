@@ -1,9 +1,7 @@
-
-
 from typing import List, Tuple
 import numpy as np
 import torch
-
+import os
 
 class Buffer:
     """
@@ -94,6 +92,39 @@ class Buffer:
         del self.texts, self.task_labels 
 
 
+    def save(self, directory: str):
+        """Save the buffer to disk.
+
+        Args:
+            directory (str): Directory to save the buffer data.
+        """
+        os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
+
+        # Save metadata
+        torch.save({'buffer_size': self.buffer_size
+        }, os.path.join(directory, 'metadata.pt'))
+
+        # Save data attributes
+        for attr_str in self.attributes:
+            if hasattr(self, attr_str):
+                torch.save(getattr(self, attr_str), os.path.join(directory, f'{attr_str}.pt'))
+
+
+    def load(self, directory: str):
+        """Load the buffer from disk.
+
+        Args:
+            directory (str): Directory from which to load the buffer data.
+        """
+        metadata = torch.load(os.path.join(directory, 'metadata.pt'))
+        self.buffer_size = metadata['buffer_size']
+        self.num_seen_examples = metadata.get('num_seen_examples', 0)  # Handle cases where it might not be saved
+
+        for attr_str in self.attributes:
+            path = os.path.join(directory, f'{attr_str}.pt')
+            if os.path.exists(path):
+                setattr(self, attr_str, torch.load(path))
+
 
 
 
@@ -119,58 +150,3 @@ def get_data_by_index(self, indexes):
     sampled_texts = [self.texts[i] for i in indexes]
     sampled_task_labels = self.task_labels[indexes]
     return sampled_texts, sampled_task_labels
-
-
-@torch.no_grad()
-def fill_buffer(buffer: Buffer, dataset, t_idx: int, samples_per_task=None):
-    """
-    Populate the buffer with data from the current task.
-
-    Args:
-        buffer (Buffer): The buffer instance.
-        dataset (Dataset): Your NLP dataset. Assume it has a `__getitem__` returning (text, task_label).
-        t_idx (int): Index of the current task.
-        samples_per_task (int, optional): Number of samples to store per task. If not provided, it will be calculated dynamically.
-    """
-    
-    # If samples_per_task is not provided, calculate dynamically
-    if samples_per_task is None:
-        samples_per_task = buffer.buffer_size // (t_idx + 1)
-    
-    if t_idx > 0:
-        # Subsample from previous tasks
-        all_texts, all_labels = buffer.get_all_data()
-        buffer.empty()
-
-        unique_labels = set(all_labels)  # Use a set for unique string labels
-        for label in unique_labels:
-            idx = [i for i, lbl in enumerate(all_labels) if lbl == label]
-            selected_texts = [all_texts[i] for i in idx][:samples_per_task]
-            selected_labels = [all_labels[i] for i in idx][:samples_per_task]
-            buffer.add_data(selected_texts, selected_labels)
-
-    # Add data from the current task 
-    for i in range(len(dataset)):
-        text, task_label = dataset[i]
-        buffer.add_data([text], [task_label])  # No need for .item() since labels are strings
-
-
-
-    
-    def save_buffer(self, filepath: str) -> None:
-        """
-        Save the buffer to a file.
-
-        Args:
-            filepath (str): Path to the file where the buffer will be saved.
-        """
-        # Create a dictionary with the buffer contents
-        buffer_data = {
-            'texts': self.texts,
-            'task_labels': self.task_labels,
-            'num_seen_examples': self.num_seen_examples,
-            'buffer_size': self.buffer_size
-        }
-        
-        # Save the dictionary using torch's save function
-        torch.save(buffer_data, filepath)

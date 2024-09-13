@@ -151,8 +151,11 @@ def get_checkpoint_name(checkpoints_path, iteration, release=False, mp_rank=None
     )
 
 
-def get_checkpoint_tag(iteration: int) -> str:
-    return f"global_step{iteration}"
+def get_checkpoint_tag_after_task(iteration: int, task_id: int = None) -> str:
+        return f"after_task{task_id}"
+
+def get_checkpoint_tag(iteration: int, task_id: int = None) -> str:
+        return f"global_step{iteration}_task{task_id}"
 
 
 def delete_old_checkpoints(save_dir, n_to_keep):
@@ -178,10 +181,11 @@ def delete_old_checkpoints(save_dir, n_to_keep):
                     pass
 
 
-def save_ds_checkpoint(iteration, model, neox_args):
+def save_ds_checkpoint(iteration, model, neox_args, task_id=None):
     """Save a model checkpoint."""
     sd = {
         "iteration": iteration,
+        "task_id": task_id,
         "args": {
             "num_layers": neox_args.num_layers,
             "hidden_size": neox_args.hidden_size,
@@ -205,8 +209,11 @@ def save_ds_checkpoint(iteration, model, neox_args):
         logits = do_forward_pass(neox_args=neox_args, model=model)
         sd["checkpoint_validation_logits"] = logits
 
-    # checkpoint folder name
-    tag = get_checkpoint_tag(iteration)
+
+    if iteration == neox_args.train_iters:
+        tag = get_checkpoint_tag_after_task(iteration, task_id)
+    else:    
+        tag = get_checkpoint_tag(iteration, task_id)
 
     # save checkpoint
     model.save_checkpoint(neox_args.save, tag=tag, client_state=sd)
@@ -312,9 +319,9 @@ def _upload(
     )
 
 
-def upload_checkpoint(iteration, neox_args):
+def upload_checkpoint(iteration, neox_args, task_id):
     local_checkpoint_path = os.path.join(
-        os.path.abspath(neox_args.save), get_checkpoint_tag(iteration)
+        os.path.abspath(neox_args.save), get_checkpoint_tag(iteration, task_id)
     )
     local_checkpoint_list = sorted(
         filter(
@@ -325,7 +332,7 @@ def upload_checkpoint(iteration, neox_args):
     remote_checkpoint_path = os.path.join(
         neox_args.s3_path,
         os.path.basename(neox_args.save),
-        get_checkpoint_tag(iteration),
+        get_checkpoint_tag(iteration, task_id),
     )
     remote_checkpoint_list = [
         os.path.join(
@@ -351,13 +358,22 @@ def upload_checkpoint(iteration, neox_args):
     )
 
 
-def save_checkpoint(neox_args, iteration, model, optimizer, lr_scheduler):
-    """Save a model checkpoint."""
 
-    if neox_args.deepspeed:
-        save_ds_checkpoint(iteration, model, neox_args)
-    else:
-        raise ValueError("Must be using deepspeed to use neox")
+def save_checkpoint_after_task(neox_args, iteration, model, optimizer, lr_scheduler, task_id):
+    """Save a model checkpoint after completing a task."""
+    save_ds_checkpoint(iteration, model, neox_args, task_id=task_id)
+
+    torch.distributed.barrier()
+    upload_to_s3 = torch.distributed.get_rank() == 0 and neox_args.s3_path is not None
+    if upload_to_s3:
+        upload_checkpoint(iteration, neox_args)
+
+    # Wait so everyone is done (not necessary)
+    torch.distributed.barrier()
+
+def save_checkpoint(neox_args, iteration, model, optimizer, lr_scheduler,task_id):
+    """Save a model checkpoint."""
+    save_ds_checkpoint(iteration, model, neox_args, task_id=task_id)
 
     torch.distributed.barrier()
     upload_to_s3 = torch.distributed.get_rank() == 0 and neox_args.s3_path is not None
@@ -372,21 +388,43 @@ def save_checkpoint(neox_args, iteration, model, optimizer, lr_scheduler):
     # Wait so everyone is done (not necessary)
     torch.distributed.barrier()
 
-
 def load_checkpoint(
-    neox_args, model, optimizer, lr_scheduler, inference=False, iteration=None
-):
-    """Load a model checkpoint and return the iteration."""
+    neox_args, model, optimizer, lr_scheduler, inference=False, iteration=None,buffer=None):
+    """Load a model checkpoint and return the iteration and task_id."""
     if neox_args.deepspeed:
         load_optim_and_scheduler = (
             not neox_args.no_load_optim
-        )  # TODO: These should be configured by separate args
+        )
         if neox_args.finetune:
             load_optim_and_scheduler = False
+        
+        # Determine the tag and extract iteration and task_id
         if iteration is not None:
             tag = get_checkpoint_tag(iteration)
         else:
-            tag = None
+            # If iteration is None, attempt to load the latest available checkpoint
+            available_checkpoints = sorted(
+                [
+                    i.name
+                    for i in Path(neox_args.load).glob("global_step*")
+                ]
+            )
+            if not available_checkpoints:
+                raise ValueError("No available checkpoints to load.")
+            
+            # Extract the latest iteration and task_id from the latest checkpoint
+            latest_checkpoint = available_checkpoints[-1]
+            match = re.match(r"global_step(\d+)_task(\d+)", latest_checkpoint)
+            if match:
+                iteration = int(match.group(1))
+                task_id = int(match.group(2))
+                tag = latest_checkpoint
+            else:
+                raise ValueError(f"Unable to extract iteration and task_id from checkpoint tag {latest_checkpoint}")
+
+        # Debugging: Print the tag and attempt to load the checkpoint
+        print(f"Attempting to load checkpoint with tag {tag}")
+
         checkpoint_name, state_dict = model.load_checkpoint(
             neox_args.load,
             load_optimizer_states=load_optim_and_scheduler,
@@ -396,87 +434,34 @@ def load_checkpoint(
         )
 
         if checkpoint_name is None:
-            # if an iteration is specified, we want to raise an error here rather than
-            # continuing silently, since we are trying to load a specific checkpoint
-            if iteration is not None:
-                available_checkpoints = sorted(
-                    [
-                        int(i.name.replace("global_step", ""))
-                        for i in Path(neox_args.load).glob("global_step*")
-                    ]
-                )
-                raise ValueError(
-                    f"Unable to load checkpoint for iteration {iteration}. \nAvailable iterations: {pformat(available_checkpoints)}"
-                )
-            if mpu.get_data_parallel_rank() == 0:
-                print("Unable to load checkpoint.")
+            available_checkpoints = sorted(
+                [
+                    i.name
+                    for i in Path(neox_args.load).glob("global_step*")
+                ]
+            )
+            raise ValueError(f"Unable to load checkpoint for iteration {iteration}. \nAvailable iterations: {available_checkpoints}")
 
-            return 0  # iteration 0, if not checkpoint loaded
     else:
         raise ValueError("Must be using deepspeed to use neox")
 
-    # Set iteration.
+    # Correctly set the iteration and task_id from the loaded checkpoint
     if neox_args.finetune:
         iteration = 0
+        task_id = 0
     else:
-        if "iteration" in state_dict:
-            iteration = state_dict["iteration"]
-        else:
-            iteration = state_dict.get(
-                "total_iters"
-            )  # total_iters backward compatible with older checkpoints
-        if iteration is None:
-            raise ValueError(
-                f"Unable to load iteration from checkpoint {checkpoint_name} with keys {state_dict.keys()}, exiting"
-            )
+        iteration = state_dict.get("iteration", iteration)
+        task_id = state_dict.get("task_id", task_id)
 
-    # Check arguments.
+    # Validate checkpoint arguments
     if "args" in state_dict:
         checkpoint_args = state_dict["args"]
         check_checkpoint_args(neox_args=neox_args, checkpoint_args=checkpoint_args)
-        print_rank_0(
-            " > validated currently set args with arguments in the checkpoint ..."
-        )
+        print_rank_0(" > validated currently set args with arguments in the checkpoint ...")
     else:
         print_rank_0(" > could not find arguments in the checkpoint for validation...")
 
-    # Check loaded checkpoint with forward pass
-    if neox_args.checkpoint_validation_with_forward_pass:
-        if "checkpoint_validation_logits" in state_dict:
-            check_forward_pass(
-                neox_args=neox_args,
-                model=model,
-                checkpoint_logits=state_dict["checkpoint_validation_logits"],
-                inference=inference,
-            )
-            print_rank_0(" > validated loaded checkpoint with forward pass ...")
-        else:
-            if mpu.get_data_parallel_rank() == 0:
-                print(
-                    " > WARNING: checkpoint_validation_with_forward_pass is configured but no checkpoint validation data available in checkpoint {}".format(
-                        checkpoint_name
-                    )
-                )
-
-    # rng states.
-    if not neox_args.finetune and not neox_args.no_load_rng:
-        try:
-            random.setstate(state_dict["random_rng_state"])
-            np.random.set_state(state_dict["np_rng_state"])
-            torch.set_rng_state(state_dict["torch_rng_state"])
-            torch.cuda.set_rng_state(state_dict["cuda_rng_state"])
-            mpu.get_cuda_rng_tracker().set_states(state_dict["rng_tracker_states"])
-        except KeyError:
-            print_rank_0(
-                "Unable to load optimizer from checkpoint {}. "
-                "Specify --no-load-rng or --finetune to prevent "
-                "attempting to load the optimizer state, "
-                "exiting ...".format(checkpoint_name)
-            )
-            sys.exit()
-
-    torch.distributed.barrier()
-    if mpu.get_data_parallel_rank() == 0:
-        print("  successfully loaded {}".format(checkpoint_name))
-
-    return iteration
+    # Return the correctly loaded iteration and task_id
+    if buffer is not None:
+        buffer.load("/lustre/orion/bif151/scratch/istabrak/gpt-neox/data/saved_buffer_continual")
+    return iteration, task_id

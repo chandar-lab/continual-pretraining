@@ -438,7 +438,7 @@ def weights_by_num_docs(l: list, alpha=0.3):
     return weights
 
 
-def build_train_valid_test_data_iterators(neox_args,data_path=None):
+def build_train_valid_test_data_iterators(neox_args,data_path=None,iteration=0):
     """XXX"""
 
     (train_dataloader, valid_dataloader, test_dataloader) = (None, None, None)
@@ -509,7 +509,7 @@ def build_train_valid_test_data_iterators(neox_args,data_path=None):
     # Shift the start iterations.
     if train_dataloader is not None:
         train_dataloader.batch_sampler.start_iter = (
-            neox_args.iteration * neox_args.gradient_accumulation_steps
+            iteration * neox_args.gradient_accumulation_steps
         ) % len(train_dataloader)
         print_rank_0(
             "setting training data start iteration to {}".format(
@@ -518,7 +518,7 @@ def build_train_valid_test_data_iterators(neox_args,data_path=None):
         )
     if valid_dataloader is not None:
         start_iter_val = (
-            (neox_args.iteration * neox_args.gradient_accumulation_steps)
+            (iteration * neox_args.gradient_accumulation_steps)
             // neox_args.eval_interval
         ) * neox_args.eval_iters
         valid_dataloader.batch_sampler.start_iter = start_iter_val % len(

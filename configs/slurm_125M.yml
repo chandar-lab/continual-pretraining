@@ -1,28 +1,34 @@
 {
    "pipe_parallel_size": 1,
    "model_parallel_size": 1,
-   "num_layers": 12,
-   "hidden_size": 768,
-   "num_attention_heads": 12,
-   "seq_length": 2048,
-   "max_position_embeddings": 2048,
-   "norm": "layernorm",
-   "pos_emb": "rotary",
-   "no_weight_tying": true,
+
+  "num_layers": 24,
+  "hidden_size": 1024,
+  "num_attention_heads": 16,
+  "seq_length": 2048,
+  "max_position_embeddings": 2048,
+  "pos_emb": "rotary",
+  "rotary_pct": 0.25,
+  "no_weight_tying": true,
+  "gpt_j_residual": true,
+  "output_layer_parallelism": "column",
+
+  "attention_config": [[["flash"], 24]],
+
    "scaled_upper_triang_masked_softmax_fusion": true,
-   "bias_gelu_fusion": true,
+   "bias_gelu_fusion": false,
    "rope_fusion": false,
    "layernorm_fusion": false,
    "optimizer": {
      "type": "Adam",
      "params": {
-       "lr": 0.0006,
+       "lr": 0.000004,
        "betas": [0.9, 0.999],
        "eps": 1.0e-8
      }
    },
    "zero_optimization": {
-    "stage": 0,
+    "stage": 1,
     "allgather_partitions": true,
     "allgather_bucket_size": 500000000,
     "overlap_comm": true,
@@ -30,9 +36,9 @@
     "reduce_bucket_size": 500000000,
     "contiguous_gradients": true
   },
-   "train_micro_batch_size_per_gpu": 4,
+   "train_micro_batch_size_per_gpu": 16,
+   "gradient_accumulation_steps": 4,
    "data_impl": "mmap",
-   "split": "949,50,1",
    "checkpoint_activations": true,
    "checkpoint_num_layers": 1,
    "partition_activations": true,
@@ -48,8 +54,8 @@
      "hysteresis": 2,
      "min_loss_scale": 1
    },
-   "train_iters": 320000,
-   "lr_decay_iters": 320000,
+   "train_iters": 15000,
+   "lr_decay_iters": 15000,
    "distributed_backend": "nccl",
    "lr_decay_style": "cosine",
    "warmup": 0.01,
@@ -61,6 +67,17 @@
    "keep_last_n_checkpoints": 4,
    "wall_clock_breakdown": true,
    "launcher": "slurm",
-   "deepspeed_slurm": true,
-   "comment": "neox"
+   "deepspeed_slurm": true,  
+   "train_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/ArXiv/ArXiv","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Book/Book","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/C4/C4","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/CommonCrawl/CommonCrawl","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Github/Github","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/StackExchange/StackExchange","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Wikipedia/Wikipedia"],
+   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
+   "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
+   # "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Book/tokenized_book_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/C4/tokenized_c4_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Github/tokenized_github_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
+   "split" : "70,10,20",
+   "tokenizer_type": "HFTokenizer",
+   "vocab_file": "20B_checkpoints/20B_tokenizer.json",
+
+   "save": "checkpoints/pythia_1B_15k",
+   "log_dir": "logs",
+   # "load": "checkpoints/pythia_125M_4500",
+
 }
