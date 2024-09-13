@@ -184,7 +184,7 @@ def pretrain(neox_args):
     timers = Timers(
         use_wandb=neox_args.use_wandb, tensorboard_writer=neox_args.tensorboard_writer
     )
-
+    print_rank_0("creating model ...")
     # Initialize and get arguments, timers, and Tensorboard writer.
     initialize_megatron(neox_args=neox_args)
 
@@ -195,7 +195,7 @@ def pretrain(neox_args):
     )
     task_id=None
     iteration = 0
-    buffer = Buffer(int(1e7), neox_args.tokenizer)
+    # buffer = Buffer(int(1e9), neox_args.tokenizer)
     timers("model and optimizer").stop()
     if neox_args.load is not None:
         iteration, task_id = load_checkpoint(
@@ -203,16 +203,14 @@ def pretrain(neox_args):
             model=model,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
-            buffer=buffer,
+            buffer=None,
         )
 
     if task_id is None:
-        task_id = 0  # Start from the first task if not resuming
-    
-    
+        task_id = 0  # Start from the first task if not resuming    
 
     _ , valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
-    neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=iteration)
+    neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0)
     for i in range(task_id, len(neox_args.train_data_paths)):
         train_data_path = neox_args.train_data_paths[i]
         print_rank_0(f"Starting pretraining on dataset {i+1}/{len(neox_args.train_data_paths)}: {train_data_path}")
@@ -234,7 +232,7 @@ def pretrain(neox_args):
             lr_scheduler=lr_scheduler,
             train_data_iterator=train_data_iterator,
             valid_data_iterator=valid_data_iterator,
-            buffer=buffer,
+            buffer=None,
             task_id=i,
             iteration=iteration,
         )
@@ -1020,6 +1018,7 @@ def train_step_pipe(neox_args, timers, model, data_iterator,replay_buffer=None):
             
             # Create a dictionary with the combined inputs
             combined_dict = {'text': combined_inputs}
+            
             # labels = torch.cat((labels, buf_labels))
             loss = model.train_batch(data_iter=iter([combined_dict]))
 
@@ -1138,8 +1137,8 @@ def train(
         )
 
         # Checkpointing
-        if iteration in [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500] or iteration == neox_args.train_iters:
-            buffer.save('/lustre/orion/bif151/scratch/istabrak/gpt-neox/data/saved_buffer_continual')
+        if iteration in neox_args.save_iters or iteration in [1, 1000 , 2000, 3000, 4000 , 5000 , 6000,7000 , 8000 , 9000 , 10000,11000, 12000, 13000, 14000,15000] or iteration == neox_args.train_iters:
+            # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
             save_checkpoint(
                 neox_args=neox_args,
                 iteration=iteration,
