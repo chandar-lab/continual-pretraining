@@ -9,6 +9,8 @@
   "max_position_embeddings": 2048,
   "pos_emb": "rotary",
   "rotary_pct": 0.25,
+  "mlp_type": "llama",
+  "activation": "silu",
   "no_weight_tying": true,
   "gpt_j_residual": true,
   "output_layer_parallelism": "column",

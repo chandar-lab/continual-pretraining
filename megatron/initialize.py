@@ -122,6 +122,11 @@ def _initialize_distributed(neox_args):
     """Initialize torch.distributed and mpu."""
 
     device_count = torch.cuda.device_count()
+
+    # if device_count == 4:
+    #     device_count = 8
+
+        
     if torch.distributed.is_initialized():
 
         if neox_args.rank == 0:
@@ -141,6 +146,8 @@ def _initialize_distributed(neox_args):
         if device_count > 0:
             device = neox_args.rank % device_count
             if neox_args.local_rank is not None:
+                print("neox_args.rank:",neox_args.rank,"neox_args.local_rank:", neox_args.local_rank, "device:", device, "device_count",device_count)
+
                 assert (
                     neox_args.local_rank == device
                 ), "expected local-rank to be the same as rank % device-count."

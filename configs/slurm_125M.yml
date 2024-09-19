@@ -1,38 +1,98 @@
 {
-   "pipe_parallel_size": 1,
-   "model_parallel_size": 1,
-   "num_layers": 12,
-   "hidden_size": 768,
-   "num_attention_heads": 12,
-   "seq_length": 2048,
-   "max_position_embeddings": 2048,
-   "norm": "layernorm",
-   "pos_emb": "rotary",
-   "no_weight_tying": true,
-   "scaled_upper_triang_masked_softmax_fusion": true,
-   "bias_gelu_fusion": true,
-   "rope_fusion": false,
-   "layernorm_fusion": false,
-   "optimizer": {
-     "type": "Adam",
-     "params": {
-       "lr": 0.0006,
-       "betas": [0.9, 0.999],
-       "eps": 1.0e-8
-     }
-   },
-   "zero_optimization": {
-    "stage": 0,
+  "pipe_parallel_size": 3,
+  "model_parallel_size": 8,
+
+  ##########
+  #1.4B
+  ##########
+  # "num_layers": 24,
+  # "hidden_size": 2048,
+  # "intermediate_size": 5632,
+  # "num_attention_heads": 16,
+  # "attention_config": [[["flash"], 24]],
+  ##########
+  #7B
+  # pp1 mp2 mbs1 == 49TFLOPs w/61% mem 1 node
+  # pp1 mp2 mbs4 == 69TFLOPs w/64% mem 1 node
+  # PP1 mp1 fits 1 node
+  ##########
+  # "num_layers": 32,
+  # "hidden_size": 4096,
+  # "num_attention_heads": 32,
+  # "intermediate_size": 11264,
+  # "attention_config": [[["flash"], 32]],
+  ##########
+  # #13B
+  # pp1 mp1 mbs1 == OOM 1 node
+  # pp1 mp2 mbs1 == 46TFLOPs 99%Vram 1 node
+  # pp1 mp2 mbs2 == 58.4TFLOPs 99%Vram 1 node
+  # pp1 mp2 mbs4 == 66.9TFLOPs 99%Vram 1 node
+  ##########
+  # "num_layers": 40,
+  # "hidden_size": 5120,
+  # "num_attention_heads": 40,
+  # "intermediate_size": 14264,
+  # "attention_config": [[["flash"], 40]],
+
+  ##########
+  # # 34B
+  #40B actually
+  # pp1 mp4 mbs1 == OOM 1 node
+  # pp1 mp8 mbs1 == OOM 1 node
+  # pp4 mp8 mbs1 == 13 TFLOPs 4 nodes
+  # pp3 mp8 mbs1 == 17 TFLOPs 3 nodes
+  # pp3 mp8 mbs8 == 17 TFLOPs 3 nodes (1575.1)
+  ##########
+  "num_layers": 48,
+  "hidden_size": 8192,
+  "num_attention_heads": 64,
+  "intermediate_size": 22528,
+  "attention_config": [[["flash"], 48]],
+
+
+
+  "train_micro_batch_size_per_gpu": 8,
+  "data_impl": "mmap",
+  "split": "949,50,1",
+  "num_workers": 2,
+
+  "seq_length": 2048,
+  "max_position_embeddings": 2048,
+  "pos_emb": "rotary",
+  "rotary_pct": 1,
+  "no_weight_tying": true,
+  "gpt_j_residual": false,
+  "output_layer_parallelism": "column",
+  "mlp_type": "llama",
+  "rms_norm_epsilon": 1.0e-5,
+
+  "scaled_upper_triang_masked_softmax_fusion": true,
+  "bias_gelu_fusion": false,
+
+  "init_method": "small_init",
+  "output_layer_init_method": "wang_init",
+
+  "optimizer": {
+    "type": "Adam",
+    "params": {
+      "lr": 0.0003,
+      "betas": [0.9, 0.95],
+      "eps": 1.0e-8
+    }
+  },
+  "min_lr": 0.00003,
+
+  "zero_optimization": {
+    "stage": 1,
     "allgather_partitions": true,
     "allgather_bucket_size": 500000000,
     "overlap_comm": true,
     "reduce_scatter": true,
     "reduce_bucket_size": 500000000,
-    "contiguous_gradients": true
+    "contiguous_gradients": true,
+    "cpu_offload": false
   },
-   "train_micro_batch_size_per_gpu": 4,
-   "data_impl": "mmap",
-   "split": "949,50,1",
+
    "checkpoint_activations": true,
    "checkpoint_num_layers": 1,
    "partition_activations": true,
@@ -56,7 +116,7 @@
    "checkpoint_factor": 10000,
    "eval_interval": 1000,
    "eval_iters": 10,
-   "log_interval": 100,
+   "log_interval": 10,
    "steps_per_print": 10,
    "keep_last_n_checkpoints": 4,
    "wall_clock_breakdown": true,
