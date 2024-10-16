@@ -33,7 +33,7 @@ def make_data_loader(dataset, neox_args):
     # Data parallel arguments.
     world_size = mpu.get_data_parallel_world_size()
     rank = mpu.get_data_parallel_rank()
-    global_batch_size = neox_args.batch_size * world_size
+    global_batch_size = neox_args.batch_size* world_size
     num_workers = neox_args.num_workers
 
     # Use a simple sampler with distributed batch sampler.
@@ -153,7 +153,7 @@ def build_valid_test_dataset(
 
 
 
-def build_valid_test_data_iterators(neox_args):
+def build_valid_test_data_iterators(neox_args, task_id):
     """XXX"""
 
     (valid_dataloader, test_dataloader) = (None, None)
@@ -174,8 +174,8 @@ def build_valid_test_data_iterators(neox_args):
     if mpu.get_model_parallel_rank() == 0 and pipe_load:
         # Number of train/valid/test samples.
         train_iters = neox_args.train_iters
-        eval_iters = (train_iters // neox_args.eval_interval + 1) * neox_args.eval_iters
-        test_iters = neox_args.eval_iters
+        eval_iters = (train_iters // neox_args.eval_interval + 1) * neox_args.eval_iters[task_id]
+        test_iters = neox_args.eval_iters[task_id]
         train_val_test_num_samples = [
             train_iters * neox_args.train_batch_size,
             eval_iters * neox_args.train_batch_size,
@@ -198,15 +198,15 @@ def build_valid_test_data_iterators(neox_args):
         test_dataloader = make_data_loader(test_ds, neox_args=neox_args)
 
         # Flags to know if we need to do training/validation/testing.
-        do_valid = valid_dataloader is not None and neox_args.eval_iters > 0
-        do_test = test_dataloader is not None and neox_args.eval_iters > 0
+        do_valid = valid_dataloader is not None and neox_args.eval_iters[task_id] > 0
+        do_test = test_dataloader is not None and neox_args.eval_iters[task_id] > 0
 
 
     if valid_dataloader is not None:
         start_iter_val = (
             (neox_args.iteration * neox_args.gradient_accumulation_steps)
             // neox_args.eval_interval
-        ) * neox_args.eval_iters
+        ) * neox_args.eval_iters[task_id]
         valid_dataloader.batch_sampler.start_iter = start_iter_val % len(
             valid_dataloader
         )
@@ -438,7 +438,7 @@ def weights_by_num_docs(l: list, alpha=0.3):
     return weights
 
 
-def build_train_valid_test_data_iterators(neox_args,data_path=None,iteration=0):
+def build_train_valid_test_data_iterators(neox_args,data_path=None,iteration=0, task_id=0):
     """XXX"""
 
     (train_dataloader, valid_dataloader, test_dataloader) = (None, None, None)
@@ -458,9 +458,9 @@ def build_train_valid_test_data_iterators(neox_args,data_path=None,iteration=0):
     # Data loader only on rank 0 of each model parallel group.
     if mpu.get_model_parallel_rank() == 0 and pipe_load:
         # Number of train/valid/test samples.
-        train_iters = neox_args.train_iters
-        eval_iters = (train_iters // neox_args.eval_interval + 1) * neox_args.eval_iters
-        test_iters = neox_args.eval_iters
+        train_iters = neox_args.train_iters[task_id]
+        eval_iters = (train_iters // neox_args.eval_interval + 1) * neox_args.eval_iters[task_id]
+        test_iters = neox_args.eval_iters[task_id]
         train_val_test_num_samples = [
             train_iters * neox_args.train_batch_size,
             eval_iters * neox_args.train_batch_size,
@@ -484,8 +484,8 @@ def build_train_valid_test_data_iterators(neox_args,data_path=None,iteration=0):
 
         # Flags to know if we need to do training/validation/testing.
         do_train = train_dataloader is not None and neox_args.train_iters > 0
-        do_valid = valid_dataloader is not None and neox_args.eval_iters > 0
-        do_test = test_dataloader is not None and neox_args.eval_iters > 0
+        do_valid = valid_dataloader is not None and neox_args.eval_iters[task_id] > 0
+        do_test = test_dataloader is not None and neox_args.eval_iters[task_id] > 0
         # Need to broadcast num_tokens and num_type_tokens.
         flags = torch.cuda.LongTensor([int(do_train), int(do_valid), int(do_test)])
     else:
@@ -520,7 +520,7 @@ def build_train_valid_test_data_iterators(neox_args,data_path=None,iteration=0):
         start_iter_val = (
             (iteration * neox_args.gradient_accumulation_steps)
             // neox_args.eval_interval
-        ) * neox_args.eval_iters
+        ) * neox_args.eval_iters[task_id]
         valid_dataloader.batch_sampler.start_iter = start_iter_val % len(
             valid_dataloader
         )

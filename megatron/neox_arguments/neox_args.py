@@ -798,6 +798,28 @@ class NeoXArgsOther(NeoXArgsTemplate):
     """
     Set during launching
     """
+    
+    use_replay: bool = None
+    """
+    Use a replay buffer or not
+    """
+    
+    buffer_size: int = 3000000
+    """
+    Replay buffer size
+    """
+    
+    file_size: int = 1000
+    """
+    replay buffer file size
+    """
+    
+    buffer_dir: str = None
+    """
+    replay buffer save directory
+    """
+    
+    
 
 
 @dataclass
@@ -1005,7 +1027,10 @@ class NeoXArgsTraining(NeoXArgsTemplate):
     """
     training microbatch size per gpu
     """
-
+    eff_batch_size: int = None
+    """
+    effective_training microbatch size per gpu (due to inclusion of replay buffer)
+    """
     train_iters: int = None
     """
     Number of iterations to run for training.

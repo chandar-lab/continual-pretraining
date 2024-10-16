@@ -57,9 +57,9 @@ from megatron.utils import (
 from megatron.model.gpt2_model import cross_entropy
 
 from pickle import dump
-from continual_utils.replay_buffer import Buffer
+from continual_utils.replay_buffer import ReplayBuffer
 import os
-
+import numpy as np
 
 def mup_weights_reinit(neox_args, model):
     def has_method(o, name):
@@ -188,14 +188,17 @@ def pretrain(neox_args):
     # Initialize and get arguments, timers, and Tensorboard writer.
     initialize_megatron(neox_args=neox_args)
 
+    if neox_args.use_replay:
+        replay_buffer = ReplayBuffer(neox_args=neox_args)
+    else:
+        replay_buffer = None
     # Model, optimizer, and learning rate.
     timers("model and optimizer").start()
     model, optimizer, lr_scheduler = setup_model_and_optimizer(
         neox_args=neox_args, use_cache=False, iteration=neox_args.iteration
     )
-    task_id=None
+    task_id=0
     iteration = 0
-    # buffer = Buffer(int(1e9), neox_args.tokenizer)
     timers("model and optimizer").stop()
     if neox_args.load is not None:
         iteration, task_id = load_checkpoint(
@@ -203,14 +206,12 @@ def pretrain(neox_args):
             model=model,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
-            buffer=None,
+            buffer=replay_buffer,
         )
-
-    if task_id is None:
-        task_id = 0  # Start from the first task if not resuming    
-
+  
     _ , valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
-    neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0)
+    neox_args=neox_args, data_path=neox_args.train_data_paths[0],iteration=0, task_id=0)
+    
     for i in range(task_id, len(neox_args.train_data_paths)):
         train_data_path = neox_args.train_data_paths[i]
         print_rank_0(f"Starting pretraining on dataset {i+1}/{len(neox_args.train_data_paths)}: {train_data_path}")
@@ -222,7 +223,7 @@ def pretrain(neox_args):
         train_data_iterator = build_train_valid_test_data_iterators(
             neox_args=neox_args, data_path=train_data_path
         )[0]
-
+        iters_task = np.cumsum(neox_args.train_iters)
 
         iteration = train(
             neox_args=neox_args,
@@ -232,13 +233,12 @@ def pretrain(neox_args):
             lr_scheduler=lr_scheduler,
             train_data_iterator=train_data_iterator,
             valid_data_iterator=valid_data_iterator,
-            buffer=None,
+            buffer=replay_buffer,
             task_id=i,
             iteration=iteration,
+            iteration_task = iters_task
         )
         
-        iteration=0
-
         # Validation after training on the current dataset using the combined validation dataset.
         if neox_args.do_valid:
             prefix = f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data"   
@@ -251,6 +251,7 @@ def pretrain(neox_args):
                 iteration=iteration,
                 verbose=False,
                 timers=timers,
+                task_id=0,
             )
 
         # Save checkpoint after training on each dataset.
@@ -277,6 +278,7 @@ def pretrain(neox_args):
             verbose=True,
             timers=timers,
             chart_name="test",
+            task_id=0,
         )
 
 
@@ -917,6 +919,7 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
         reduced_loss = train_step_pipe(
             neox_args=neox_args, timers=timers, model=model, data_iterator=data_iterator,replay_buffer=replay_buffer
         )
+        reduce_metrics = reduced_loss
         if (
             neox_args.memory_profiling
             and neox_args.iteration >= neox_args.profile_step_start
@@ -926,18 +929,33 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
             save_snapshot(neox_args)
     else:
         losses = []
+        metric_dicts = defaultdict(list)
+
         for _ in range(neox_args.gradient_accumulation_steps):
+            if replay_buffer is not None:
+                current_batch = next(data_iterator)
+                buffer_batch = replay_buffer.get_batch(neox_args.replay_buffer_proportion)
+                batch = torch.cat([current_batch, buffer_batch], dim=0)
+                
+                # Add current batch to replay buffer
+                for sample in current_batch:
+                    replay_buffer.add(sample.cpu().numpy())
+                batch_iterator = iter(batch)
+            else:
+                batch_iterator = data_iterator
             # Forward model for one step.
             timers("forward").start()
-            loss = forward_step(
+            loss, metric_dict = forward_step(
                 neox_args=neox_args,
                 timers=timers,
-                data_iterator=data_iterator,
+                data_iterator=batch_iterator,
                 model=model,
                 is_train=True,
             )
             timers("forward").stop()
             losses.append(loss)
+            for key in metric_dict.keys():
+                metric_dicts[key].append(metric_dict[key])
             # Calculate gradients, reduce across processes, and clip.
             if (
                 neox_args.profile
@@ -986,9 +1004,12 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
                 and torch.distributed.get_rank() == 0
             ):
                 save_snapshot(neox_args)
-        reduced_loss = {
-            "lm_loss": reduce_losses(losses).mean()
-        }  # reduces losses across machines for logging
+        reduced_losses = reduce_losses(losses)
+        reduce_metrics = {key: reduce_losses(metric_dicts[key]).mean() for key in metric_dicts.keys()}
+        reduce_metrics["lm_loss"] = reduced_losses.mean()
+        # reduced_loss = {
+        #     "lm_loss": reduce_losses(losses).mean()
+        # }  # reduces losses across machines for logging
 
     if neox_args.precision == "fp16" and model.optimizer.overflow:
         skipped_iter = 1
@@ -996,7 +1017,7 @@ def train_step(neox_args, timers, data_iterator, model, optimizer,replay_buffer,
         skipped_iter = 0
 
     collect_loss_for_unit_test(reduced_loss["lm_loss"])
-    return reduced_loss, skipped_iter
+    return reduce_metrics, skipped_iter
 
 
 
@@ -1006,24 +1027,26 @@ def train_step_pipe(neox_args, timers, model, data_iterator,replay_buffer=None):
 
     assert neox_args.deepspeed
     inputs = next(data_iterator)
+    fill_buffer_iter = 0
+    while fill_buffer_iter < 10000:
+        buffer_init_inputs = next(data_iterator)
+        replay_buffer.add(buffer_init_inputs)
+        fill_buffer_iter += 1
+    
     if replay_buffer is not None:
-        replay_buffer.add_data(inputs['text'],inputs['label'])
-        if not replay_buffer.is_empty():
-            buf_inputs, buf_labels = replay_buffer.get_data(neox_args.batch_size)
-            buf_inputs_tensor = [x.unsqueeze(0) if x.dim() == 1 else x for x in buf_inputs]
-            buf_inputs_tensor = torch.cat(buf_inputs_tensor, dim=0)
-            
-            # Now buf_inputs_tensor should have the same number of dimensions as inputs['text']
-            combined_inputs = torch.cat([inputs['text'], buf_inputs_tensor], dim=0)
-            
-            # Create a dictionary with the combined inputs
-            combined_dict = {'text': combined_inputs}
-            
-            # labels = torch.cat((labels, buf_labels))
-            loss = model.train_batch(data_iter=iter([combined_dict]))
-
+        replay_buffer.add(inputs)
+        current_batch = next(data_iterator)
+        buffer_batch = replay_buffer.get_batch(neox_args.replay_buffer_proportion)
+        batch = torch.cat([current_batch, buffer_batch], dim=0)
+        
+        # Add current batch to replay buffer
+        for sample in current_batch:
+            replay_buffer.add(sample.cpu().numpy())
+        batch_iterator = iter(batch)
     else:
-        loss = model.train_batch(data_iter=data_iterator)
+        batch_iterator = data_iterator
+        
+    loss = model.train_batch(data_iter=iter([batch_iterator]))
 
     loss_dict = {"lm_loss": loss}
     # Don't break Megatron's timers because we changed code paths.
@@ -1049,6 +1072,7 @@ def train(
     buffer,
     task_id,
     iteration=0,
+    iteration_task=[],
 ):
     """Train the model function."""
 
@@ -1088,7 +1112,7 @@ def train(
             with_stack=True,
         )
         prof.start()
-    while iteration < neox_args.train_iters:
+    while iteration < iteration_task[task_id]:
         if neox_args.profile:
             prof.step()
         if neox_args.profile and iteration == neox_args.profile_step_start:
@@ -1139,14 +1163,25 @@ def train(
         # Checkpointing
         if iteration in neox_args.save_iters or iteration in [1, 1000 , 2000, 3000, 4000 , 5000 , 6000,7000 , 8000 , 9000 , 10000,11000, 12000, 13000, 14000,15000] or iteration == neox_args.train_iters:
             # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
-            save_checkpoint(
-                neox_args=neox_args,
-                iteration=iteration,
-                model=model,
-                optimizer=optimizer,
-                lr_scheduler=lr_scheduler,
-                task_id=task_id,
-            )
+            
+            if neox_args.use_replay:
+                buffer.save()
+                save_checkpoint(
+                    neox_args=neox_args,
+                    iteration=iteration,
+                    model=model,
+                    optimizer=optimizer,
+                    lr_scheduler=lr_scheduler,
+                )                 
+            else:
+                save_checkpoint(
+                    neox_args=neox_args,
+                    iteration=iteration,
+                    model=model,
+                    optimizer=optimizer,
+                    lr_scheduler=lr_scheduler,
+                    task_id=task_id,
+                )
         # Evaluation
         if (
             neox_args.eval_interval
@@ -1179,8 +1214,7 @@ def train(
     return iteration
 
 def evaluate(
-    neox_args, forward_step_fn, data_iterator, model, verbose=False, timers=None
-):
+    neox_args, forward_step_fn, data_iterator, model, verbose=False, timers=None, task_id=0):
     """Evaluation.
     neox_args: NeoX Arguments
     forward_step_fn: function with args `neox_args, timers,
@@ -1198,11 +1232,11 @@ def evaluate(
 
     with torch.no_grad():
         iteration = 0
-        while iteration < neox_args.eval_iters:
+        while iteration < neox_args.eval_iters[task_id]:
             iteration += 1
             if verbose and iteration % neox_args.log_interval == 0:
                 print_rank_0(
-                    "Evaluating iter {}/{}".format(iteration, neox_args.eval_iters)
+                    "Evaluating iter {}/{}".format(iteration, neox_args.eval_iters[task_id])
                 )
 
             # although we're not accumulating gradients here, we count one iter as train_batch_size_per_gpu * g.a.s
@@ -1273,6 +1307,7 @@ def evaluate_and_print_results(
     verbose=False,
     timers=None,
     chart_name="validation",
+    task_id=0,
 ):
     """Helper function to evaluate and dump results on screen."""
     total_loss_dict = evaluate(
@@ -1282,6 +1317,7 @@ def evaluate_and_print_results(
         model=model,
         verbose=verbose,
         timers=timers,
+        task_id=0,
     )
     string = f" {chart_name} results at {prefix} | "
     for k, v in total_loss_dict.items():

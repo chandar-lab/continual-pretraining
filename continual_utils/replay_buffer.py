@@ -1,152 +1,227 @@
-from typing import List, Tuple
+import os
+import random
 import numpy as np
 import torch
-import os
+from collections import deque
+from threading import Thread, Lock
+import time
 
-class Buffer:
-    """
-    Memory buffer for rehearsal methods in continual learning.
-    Specifically designed to store text data and their corresponding labels.
-    """
-
-    def __init__(self, buffer_size, device="cpu"):
-        """
-        Initialize the buffer.
-
-        Args:
-            buffer_size (int): Maximum capacity of the buffer.
-            device (str, optional): Device to store the buffer tensors. Defaults to "cpu".
-        """
-        self.buffer_size = buffer_size
+class ReplayBuffer:
+    def __init__(self, neox_args, device = torch.device('cuda'), prefetch_size=100):
+        self.neox_args = neox_args
+        self.buffer_size = self.neox_args.buffer_size 
+        self.file_size = self.neox_args.file_size
+        self.data_dir = self.neox_args.buffer_dir
         self.device = device
-        self.num_seen_examples = 0
-        self.attributes = ['texts', 'task_labels']  # Attributes stored in the buffer
+        self.prefetch_size = prefetch_size
+        
+        self.num_files = (self.buffer_size + self.file_size - 1) // self.file_size
+        self.current_size = 0
+        self.total_samples_seen = 0
+        
+        self.files = [f"{self.data_dir}/buffer_{i}.npy" for i in range(self.num_files)]
+        self.create_files()
+        
+        self.prefetch_queue = deque(maxlen=prefetch_size)
+        self.prefetch_lock = Lock()
+        self.prefetch_thread = Thread(target=self._prefetch_file, daemon=True)
+        self.prefetch_thread.start()
 
-    def to(self, device):
-        """Move the buffer tensors to the specified device."""
-        self.device = device
-        for attr_str in self.attributes:
-            if hasattr(self, attr_str):
-                setattr(self, attr_str, getattr(self, attr_str).to(device))
-        return self
+    def create_files(self):
+        os.makedirs(self.data_dir, exist_ok=True)
+        for file in self.files:
+            if not os.path.exists(file):
+                np.save(file, np.zeros((self.file_size,), dtype=np.int64))
+
+    def add(self, sample):
+        if self.current_size < self.buffer_size:
+            file_idx = self.current_size // self.file_size
+            sample_idx = self.current_size % self.file_size
+            self._write_to_file(file_idx, sample_idx, sample)
+            self.current_size += 1
+        else:
+            if random.random() < self.buffer_size / (self.total_samples_seen + 1):
+                replace_idx = random.randint(0, self.buffer_size - 1)
+                file_idx = replace_idx // self.file_size
+                sample_idx = replace_idx % self.file_size
+                self._write_to_file(file_idx, sample_idx, sample)
+        
+        self.total_samples_seen += 1
+
+    def _write_to_file(self, file_idx, sample_idx, sample):
+        file = self.files[file_idx]
+        data = np.load(file)
+        data[sample_idx] = sample
+        np.save(file, data)
+
+    def _prefetch_file(self):
+        while True:
+            if len(self.prefetch_queue) < self.prefetch_size:
+                file_idx = random.randint(0, self.num_files - 1)
+                file = self.files[file_idx]
+                data = np.load(file)
+                with self.prefetch_lock:
+                    self.prefetch_queue.append(data)
+            else:
+                time.sleep(0.1)
+
+    def get_batch(self, buffer_proportion=0.5):
+        buffer_size = int(self.neox_args.eff_batch_size * buffer_proportion)
+        
+        with self.prefetch_lock:
+            if self.prefetch_queue:
+                buffer_data = self.prefetch_queue.popleft()
+            else:
+                file_idx = random.randint(0, self.num_files - 1)
+                file = self.files[file_idx]
+                buffer_data = np.load(file)
+
+        if buffer_size > len(buffer_data):
+            buffer_size = len(buffer_data)
+
+        indices = np.random.choice(len(buffer_data), buffer_size, replace=False)
+        buffer_samples = buffer_data[indices]
+
+        return torch.tensor(buffer_samples, dtype=torch.long, device=self.device)
 
     def __len__(self):
-        """Return the current number of elements in the buffer."""
-        return min(self.num_seen_examples, self.buffer_size)
-
-    def init_tensors(self) -> None:
-        """Initialize the tensors for storing text and task_label data."""
-        self.texts = [None] * self.buffer_size  # List to hold text strings
-        self.task_labels = [None] * self.buffer_size  # List to hold task labels
-
-    def add_data(self, texts: List[str], task_labels: List[str]):
-        """
-        Add data to the buffer using reservoir sampling.
-
-        Args:
-            texts (List[str]): List of text strings.
-            task labels: List of corresponding task labels
-        """
-        if not hasattr(self, 'texts'):
-            self.init_tensors()
-
-        for text, task_label in zip(texts, task_labels):
-            index = reservoir(self.num_seen_examples, self.buffer_size)
-            self.num_seen_examples += 1
-            if index >= 0:
-                self.texts[index] = text 
-                self.task_labels[index] = task_label
-
-    def get_data(self, size: int, return_index=False) -> Tuple:
-        """
-        Sample a batch of data from the buffer.
-
-        Args:
-            size (int): Batch size.
-            return_index (bool, optional): Whether to return the indices of the sampled data. Defaults to False.
-
-        Returns:
-            Tuple: A tuple containing the sampled texts and task_labels. If return_index is True, the indices are included as the first element.
-        """
-        num_avail_samples = min(self.num_seen_examples, self.buffer_size)
-        if size > num_avail_samples:
-            size = num_avail_samples
-
-        choice = np.random.choice(num_avail_samples, size=size, replace=False)
-        sampled_texts = [self.texts[i] for i in choice]
-        # sampled_task_labels = self.task_labels[choice]
-        sampled_task_labels=[self.task_labels[i] for i in choice]
-
-        if not return_index:
-            return sampled_texts, sampled_task_labels 
-        else:
-            return torch.tensor(choice).to(self.device), sampled_texts, sampled_task_labels
-
-    def is_empty(self) -> bool:
-        """Check if the buffer is empty."""
-        return self.num_seen_examples == 0
-
-    def empty(self) -> None:
-        """Empty the buffer."""
-        self.num_seen_examples = 0
-        del self.texts, self.task_labels 
-
-
-    def save(self, directory: str):
-        """Save the buffer to disk.
-
-        Args:
-            directory (str): Directory to save the buffer data.
-        """
-        os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
-
-        # Save metadata
-        torch.save({'buffer_size': self.buffer_size
-        }, os.path.join(directory, 'metadata.pt'))
-
-        # Save data attributes
-        for attr_str in self.attributes:
-            if hasattr(self, attr_str):
-                torch.save(getattr(self, attr_str), os.path.join(directory, f'{attr_str}.pt'))
-
-
-    def load(self, directory: str):
-        """Load the buffer from disk.
-
-        Args:
-            directory (str): Directory from which to load the buffer data.
-        """
-        metadata = torch.load(os.path.join(directory, 'metadata.pt'))
-        self.buffer_size = metadata['buffer_size']
-        self.num_seen_examples = metadata.get('num_seen_examples', 0)  # Handle cases where it might not be saved
-
-        for attr_str in self.attributes:
-            path = os.path.join(directory, f'{attr_str}.pt')
-            if os.path.exists(path):
-                setattr(self, attr_str, torch.load(path))
+        return self.current_size
 
 
 
 
-def reservoir(num_seen_examples: int, buffer_size: int) -> int:
-    """Reservoir sampling strategy for adding data to the buffer."""
-    if num_seen_examples < buffer_size:
-        return num_seen_examples
 
-    rand = np.random.randint(0, num_seen_examples + 1)
-    if rand < buffer_size:
-        return rand
-    else:
-        return -1
+# import torch
+# import numpy as np
+# import os
+# import threading
+# import queue
 
-def get_all_data(self):
-    """Return all the data stored in the buffer."""
-    if self.num_seen_examples == 0:
-        return [], [] 
-    return self.texts[:self.num_seen_examples], self.task_labels[:self.num_seen_examples]
+# class ReplayBuffer:
+#     def __init__(self, buffer_size: int, file_size: int, data_dir: str, device: str = "cpu", prefetch_size: int = 10):
+#         self.buffer_size = buffer_size
+#         self.file_size = file_size
+#         self.data_dir = data_dir
+#         self.device = device
+#         self.num_seen_examples = 0
+        
+#         self.num_files = (buffer_size + file_size - 1) // file_size
+#         self.files = [None] * self.num_files
+        
+#         # Ensure data directory exists
+#         os.makedirs(self.data_dir, exist_ok=True)
+        
+#         # Prefetch queue
+#         self.prefetch_size = prefetch_size
+#         self.prefetch_queue = queue.Queue(maxsize=prefetch_size)
+#         self.prefetch_thread = threading.Thread(target=self._prefetch_files, daemon=True)
+#         self.prefetch_thread.start()
 
-def get_data_by_index(self, indexes):
-    """Get data from the buffer using specified indices."""
-    sampled_texts = [self.texts[i] for i in indexes]
-    sampled_task_labels = self.task_labels[indexes]
-    return sampled_texts, sampled_task_labels
+#     def add_data(self, tokens: torch.Tensor):
+#         tokens = tokens.to("cpu").flatten()
+#         for token in tokens:
+#             if self.num_seen_examples < self.buffer_size:
+#                 index = self.num_seen_examples
+#             else:
+#                 index = np.random.randint(0, self.num_seen_examples + 1)
+#                 if index >= self.buffer_size:
+#                     self.num_seen_examples += 1
+#                     continue
+            
+#             file_idx = index // self.file_size
+#             local_idx = index % self.file_size
+            
+#             if self.files[file_idx] is None:
+#                 self.files[file_idx] = torch.zeros(self.file_size, dtype=torch.int64)
+            
+#             self.files[file_idx][local_idx] = token
+#             self._save_file(file_idx)
+            
+#             self.num_seen_examples += 1
+
+#     def get_data(self, size: int) -> torch.Tensor:
+#         if self.num_seen_examples == 0:
+#             return torch.tensor([], dtype=torch.int64, device=self.device)
+        
+#         indices = np.random.choice(min(self.num_seen_examples, self.buffer_size), size, replace=True)
+#         result = torch.zeros(size, dtype=torch.int64, device=self.device)
+        
+#         for i, idx in enumerate(indices):
+#             file_idx = idx // self.file_size
+#             local_idx = idx % self.file_size
+            
+#             file_data = self._get_file(file_idx)
+#             result[i] = file_data[local_idx].to(self.device)
+        
+#         return result
+
+#     def _save_file(self, file_idx: int):
+#         file_path = os.path.join(self.data_dir, f"buffer_{file_idx}.pt")
+#         torch.save(self.files[file_idx], file_path)
+
+#     def _get_file(self, file_idx: int) -> torch.Tensor:
+#         if self.files[file_idx] is None:
+#             try:
+#                 file_data = self.prefetch_queue.get_nowait()
+#                 self.files[file_idx] = file_data
+#             except queue.Empty:
+#                 file_path = os.path.join(self.data_dir, f"buffer_{file_idx}.pt")
+#                 self.files[file_idx] = torch.load(file_path, map_location="cpu")
+#         return self.files[file_idx]
+
+#     def _prefetch_files(self):
+#         while True:
+#             file_indices = np.random.choice(self.num_files, self.prefetch_size, replace=False)
+#             for file_idx in file_indices:
+#                 if self.files[file_idx] is None:
+#                     file_path = os.path.join(self.data_dir, f"buffer_{file_idx}.pt")
+#                     file_data = torch.load(file_path, map_location="cpu")
+#                     self.prefetch_queue.put(file_data)
+
+#     def __len__(self):
+#         return min(self.num_seen_examples, self.buffer_size)
+
+#     def save_state(self, path: str):
+#         state = {
+#             'num_seen_examples': self.num_seen_examples,
+#             'buffer_size': self.buffer_size,
+#             'file_size': self.file_size,
+#             'data_dir': self.data_dir,
+#         }
+#         torch.save(state, path)
+
+#     @classmethod
+#     def load_state(cls, path: str, device: str = "cpu", prefetch_size: int = 10):
+#         state = torch.load(path)
+#         buffer = cls(
+#             buffer_size=state['buffer_size'],
+#             file_size=state['file_size'],
+#             data_dir=state['data_dir'],
+#             device=device,
+#             prefetch_size=prefetch_size
+#         )
+#         buffer.num_seen_examples = state['num_seen_examples']
+#         return buffer
+
+# Example usage
+# if __name__ == "__main__":
+#     buffer = ReplayBuffer(
+#         buffer_size=1000000,
+#         file_size=10000,
+#         data_dir="./buffer_data",
+#         device="cuda" if torch.cuda.is_available() else "cpu"
+#     )
+
+#     # Add some data
+#     for _ in range(10):
+#         buffer.add_data(torch.randint(0, 1000, (1000,)))
+
+#     # Get some data
+#     data = buffer.get_data(500)
+#     print(f"Retrieved {len(data)} tokens from buffer")
+
+#     # Save and load buffer state
+#     buffer.save_state("buffer_state.pt")
+#     loaded_buffer = ReplayBuffer.load_state("buffer_state.pt")
+#     print(f"Loaded buffer with {len(loaded_buffer)} tokens")
+

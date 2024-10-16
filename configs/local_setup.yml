@@ -1,79 +1,50 @@
-{ 
-  "pipe_parallel_size": 1,
-  "model_parallel_size": 1,
-   # model settings
-   "num_layers": 12,
-   "hidden_size": 768,
-   "num_attention_heads": 12,
-   "seq_length": 2048,
-   "max_position_embeddings": 2048,
-   "norm": "layernorm",
-   "pos_emb": "rotary",
-   "no_weight_tying": true,
-   "gpt_j_residual": false,
-   "output_layer_parallelism": "column",
-
-   # these should provide some speedup but takes a while to build, set to true if desired
+{
+   "pipe_parallel_size": 1,
+   "model_parallel_size": 1,
+  "num_layers": 24,
+  "hidden_size": 1024,
+  "num_attention_heads": 16,
+  "seq_length": 2048,
+  "max_position_embeddings": 2048,
+  "pos_emb": "rotary",
+  "rotary_pct": 0.25,
+  "no_weight_tying": true,
+  "gpt_j_residual": true,
+  "output_layer_parallelism": "column",
+  "attention_config": [[["flash"], 24]],
    "scaled_upper_triang_masked_softmax_fusion": false,
    "bias_gelu_fusion": false,
    "rope_fusion": false,
    "layernorm_fusion": false,
-
-   # init methods
-   "init_method": "small_init",
-   "output_layer_init_method": "wang_init",
-
-
-   # these should provide some speedup but takes a while to build, set to true if desired
-   "scaled_upper_triang_masked_softmax_fusion": false,
-   "bias_gelu_fusion": false,
-   "rope_fusion": false,
-   "layernorm_fusion": false,
-
-   # optimizer settings
    "optimizer": {
-      "type": "Adam",
-      "params": {
-        "lr": 3.0e-4,
-        "betas": [0.9, 0.95],
-        "eps": 1.0e-8,
-      }
-    },
-  "min_lr": 3.0e-5,
-  "lr-decay-style": "cosine",
-  # "num_repeats": 3,
-  "warmup": 0.01,
-
-
-   # for all zero_optimization options, see https://www.deepspeed.ai/docs/config-json/#zero-optimizations-for-fp16-training
+     "type": "Adam",
+     "params": {
+       "lr": 0.000004,
+       "betas": [0.9, 0.999],
+       "eps": 1.0e-8
+     }
+   },
    "zero_optimization": {
-    "stage": 0,
-    "allgather_partitions": True,
+    "stage": 1,
+    "allgather_partitions": true,
     "allgather_bucket_size": 500000000,
-    "overlap_comm": True,
-    "reduce_scatter": True,
+    "overlap_comm": true,
+    "reduce_scatter": true,
     "reduce_bucket_size": 500000000,
-    "contiguous_gradients": True,
+    "contiguous_gradients": true,
+    "cpu_offload": false
   },
-
-   # batch / data settings
-   "train_micro_batch_size_per_gpu": 2,
+   "train_batch_size": 32,
+   "gradient_accumulation_steps": 1,
    "data_impl": "mmap",
-   "split": "949,50,1",
-
-   # activation checkpointing
    "checkpoint_activations": true,
    "checkpoint_num_layers": 1,
    "partition_activations": true,
    "synchronize_each_layer": true,
-
-   # regularization
    "gradient_clipping": 1.0,
    "weight_decay": 0.0,
    "hidden_dropout": 0.0,
    "attention_dropout": 0.0,
-
-   # precision settings
    "fp16": {
      "enabled": true,
      "loss_scale": 0,
@@ -81,38 +52,34 @@
      "hysteresis": 2,
      "min_loss_scale": 1
    },
-
-   # misc. training settings
-   "train_iters": 6500,
-   "save_iters": [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500],
-   "lr_decay_iters": 210000,
+   "train_iters": 100,
+   "eval_iters": 40,
+   "eff_batch_size": 32,
+   "lr_decay_iters": 15000,
    "distributed_backend": "nccl",
+   "lr_decay_style": "cosine",
+   "warmup": 0.01,
    "checkpoint_factor": 10000,
-   "eval_interval": 10000,
-   "eval_iters": 0,
-
-   # logging
-   "log_interval": 100,
+   "eval_interval": 1000,
+   "eval_iters": 10,
+   "log_interval": 10,
    "steps_per_print": 10,
    "keep_last_n_checkpoints": 4,
    "wall_clock_breakdown": true,
-
-
-  "train_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/ArXiv/ArXiv","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Book/Book","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/C4/C4","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/CommonCrawl/CommonCrawl","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Github/Github","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/StackExchange/StackExchange","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Wikipedia/Wikipedia"],
-  "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
-  "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
-  # "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Book/tokenized_book_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/C4/tokenized_c4_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Github/tokenized_github_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
-  "split" : "50,30,20",
-  # "label_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/ArXiv/ArXiv","/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-100B/Book/Book"],
-  "tensorboard_dir": "test_tensorboard",
-  "tokenizer_type": "HFTokenizer",
-  "vocab_file": "20B_checkpoints/20B_tokenizer.json",
-  "checkpoint_validation_with_forward_pass": False,
-  "use_wandb": False,
-  "num_workers": 1,
-  "finetune": true,
-  "save": "checkpoints/pythia_125M_4500",
-  "log_dir": "logs",
-  "load": "checkpoints/pythia_125M_4500",
-
+  #  "launcher": "slurm",
+  #  "deepspeed_slurm": true,
+   "num_workers": 12,
+   "train_data_paths": ["/lustre/orion/bif151/scratch/istabrak/spj-llama-splitted-tokenized-small/RedPajamaBook"],
+   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
+   "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test"],
+  #  "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Book/tokenized_book_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/C4/tokenized_c4_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Github/tokenized_github_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
+  #  "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Book/tokenized_book_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/C4/tokenized_c4_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Github/tokenized_github_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
+   # "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/ArXiv/tokenized_arxiv_text_document", "/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Book/tokenized_book_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/C4/tokenized_c4_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/CommonCrawl/tokenized_commoncrawl_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Github/tokenized_github_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/StackExchange/tokenized_stackexchange_text_document","/lustre/orion/bif151/proj-shared/data/slim_pajama/test/Wikipedia/tokenized_wikipedia_text_document"],
+   "split" : "90,5,5",
+   "tokenizer_type": "HFTokenizer",
+   "vocab_file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
+   "deepspeed_mpi": true,
+   "save": "checkpoints/pythia_410M_15k",
+   "log_dir": "logs",
+   "load": "checkpoints/pythia_410M_15k",
 }
