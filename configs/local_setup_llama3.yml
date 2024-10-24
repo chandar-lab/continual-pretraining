@@ -1,0 +1,27 @@
+# Suggested data paths when using GPT-NeoX locally
+{
+
+
+  # or for weighted datasets:
+  "train-data-paths": ["data/debug/fr-val",],
+  "test-data-paths":["data/debug/fr-val",],
+  "valid-data-paths": ["data/debug/fr-val",],
+  "train-data-weights": [1.,],
+  "test-data-weights": [2.,],
+  "valid-data-weights": [0.5,],
+
+  # If weight_by_num_documents is True, Builds dataset weights from a multinomial distribution over groups of data according to the number of documents in each group.
+  # WARNING: setting this to True will override any user provided weights
+  # "weight_by_num_documents": false,
+  # "weighted_sampler_alpha": 0.3,
+
+  "vocab_file": "data/llama3_tokenizer.json",
+  # "merge_file": "data/gpt2-merges.txt",
+ "tokenizer_type": "HFTokenizer",
+  "save": "checkpoints",
+  "load": "checkpoints",
+  "checkpoint_validation_with_forward_pass": False,
+
+  "tensorboard_dir": "tensorboard",
+  "log_dir": "logs",
+}

@@ -28,31 +28,20 @@
    "output_layer_init_method": "wang_init",
 
 
-  #  # optimizer settings
-  #  "optimizer": {
-  #    "type": "Adam",
-  #    "params": {
-  #      "lr": 0.0006,
-  #      "betas": [0.9, 0.95],
-  #      "eps": 1.0e-8,
-  #    }
-  #  },
-
+   # optimizer settings
    "optimizer": {
-     "type": "sophia",
+     "type": "Adam",
      "params": {
-      "lr": 0.06,
-      "betas": [0.9, 0.95],
-      "rho": 0.05,
-      "weight_decay": 0.2
+       "lr": 0.0006,
+       "betas": [0.9, 0.95],
+       "eps": 1.0e-8,
      }
    },
-
    "min_lr": 0.00006,
 
    # for all zero_optimization options, see https://www.deepspeed.ai/docs/config-json/#zero-optimizations-for-fp16-training
    "zero_optimization": {
-    "stage": 0,
+    "stage": 1,
     "allgather_partitions": True,
     "allgather_bucket_size": 500000000,
     "overlap_comm": True,
@@ -64,8 +53,6 @@
    # batch / data settings
    "train_micro_batch_size_per_gpu": 4,
    "data_impl": "mmap",
-   "use_shared_fs":  false ,
-
 
    # activation checkpointing
    "checkpoint_activations": true,
@@ -75,12 +62,13 @@
 
    # regularization
    "gradient_clipping": 1.0,
+   "weight_decay": 0.1,
    "hidden_dropout": 0.0,
    "attention_dropout": 0.0,
 
    # precision settings
    "fp16": {
-     "enabled": false,
+     "enabled": true,
      "loss_scale": 0,
      "loss_scale_window": 1000,
      "hysteresis": 2,

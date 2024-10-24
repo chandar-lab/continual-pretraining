@@ -9,16 +9,16 @@
   "load": "./20B_checkpoints",
 
   # If finetuning, edit the following to the location of your finetuning dataset:
-  "data_path": "data/pile/train/pile_train",
+  "data_path": "./data/pile_20B_tokenizer/pile_20B_tokenizer_text_document",
 
   # parallelism settings ( you will want to change these based on your cluster setup, ideally scheduling pipeline stages
   # across the node boundaries )
-  "pipe_parallel_size": 1,
-  "model_parallel_size": 1,
+  "pipe_parallel_size": 4,
+  "model_parallel_size": 2,
 
   # model settings
   "num_layers": 44,
-  "hidden_size": 256,
+  "hidden_size": 6144,
   "num_attention_heads": 64,
   "seq_length": 2048,
   "max_position_embeddings": 2048,
@@ -51,7 +51,7 @@
 
   # for all zero_optimization options, see https://www.deepspeed.ai/docs/config-json/#zero-optimizations-for-fp16-training
   "zero_optimization": {
-  "stage": 0,
+  "stage": 1,
   "allgather_partitions": True,
   "allgather_bucket_size": 1260000000,
   "overlap_comm": True,

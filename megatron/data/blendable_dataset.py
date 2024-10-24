@@ -26,33 +26,6 @@ from megatron import print_rank_0
 from megatron import mpu
 
 
-class NonBlendableDataset(torch.utils.data.Dataset):
-    def __init__(self, datasets):
-        self.datasets = datasets
-        self.size = sum(len(dataset) for dataset in datasets)
-
-        # Build indices that directly map to the original datasets.
-        self.dataset_index = []
-        self.dataset_sample_index = []
-
-        current_index = 0
-        for dataset_id, dataset in enumerate(self.datasets):
-            for i in range(len(dataset)):
-                self.dataset_index.append(dataset_id)
-                self.dataset_sample_index.append(i)
-            current_index += len(dataset)
-
-    def __len__(self):
-        return self.size
-
-    def __getitem__(self, idx):
-        # Determine the dataset and the sample index within that dataset.
-        dataset_id = self.dataset_index[idx]
-        sample_idx = self.dataset_sample_index[idx]
-        return self.datasets[dataset_id][sample_idx]
-
-
-
 class BlendableDataset(torch.utils.data.Dataset):
     def __init__(self, datasets, weights):
         self.datasets = datasets

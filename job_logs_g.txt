@@ -1,0 +1,1205 @@
+Running "module reset". Resetting modules to system default. The following $MODULEPATH directories have been removed: /sw/frontier/spack-envs/modules/gcc/12.2.0/gcc-12.2.0 /opt/cray/pe/lmod/modulefiles/mpi/gnu/8.0/ofi/1.0/cray-mpich/8.0 /opt/cray/pe/lmod/modulefiles/mix_compilers /opt/cray/pe/lmod/modulefiles/compiler/gnu/8.0
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+There are messages associated with the following module(s):
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+libfabric/1.20.1:
+    A performance regression has been identified in libfabric version 1.20.1 (installed on Frontier during a maintenance window on August 20th, 2024).
+    This regression specifically affects the performance of sending and receiving CPU buffers in applications that frequently register and free new memory.
+    For workarounds see: https://docs.olcf.ornl.gov/systems/frontier_user_guide.html#olcfdev-1811-libfabric-1-20-1-cpu-buffer-performance-regression
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Activating Modules:
+  1) darshan-runtime/3.4.4-mpi
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) cray-libsci/23.12.5
+
+The following have been reloaded with a version change:
+  1) cray-mpich/8.1.27 => cray-mpich/8.1.28
+
+
+Lmod is automatically replacing "gcc/12.2.0" with "gcc-native/12.3".
+
+
+Lmod is automatically replacing "PrgEnv-cray/8.5.0" with "PrgEnv-gnu/8.5.0".
+
+
+Lmod is automatically replacing "cce/17.0.0" with "gcc/12.2.0".
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+There are messages associated with the following module(s):
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+gcc/12.2.0:
+    As of July 16, 2024, the 'gcc' module name is deprecated and has been replaced by 'gcc-native'. Running 'module load gcc' from a default login shell has undefined behavior due to this name change.
+    Please use 'module load PrgEnv-gnu gcc', or optionally 'module load PrgEnv-gnu cpe/23.09' to load older versions of the GNU toolchain.
+    See https://docs.olcf.ornl.gov/software/software-news.html#frontier-system-software-update-july-16-2024 for more information.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Inactive Modules:
+  1) darshan-runtime
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) cray-libsci/23.12.5
+
+The following have been reloaded with a version change:
+  1) cray-mpich/8.1.28 => cray-mpich/8.1.27
+
+rm: cannot remove 'megatron/fused_kernels/build/lock': No such file or directory
+[2024-10-18 17:04:17,521] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+NeoXArgs.from_ymls() ['./configs/local_setup_llama3.yml', './configs/slurm_125M.yml']
+INFO:root:NeoXArgs.calculate_derived() Total number of GPUs determined to be: 16
+-------------------- arguments --------------------
+  attention_config ................ ['flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash', 'flash']updated
+  batch_size ...................... 8...........................updated
+  checkpoint_activations .......... True........................updated
+  checkpoint_factor ............... 10000.......................updated
+  comment ......................... neox........................updated
+  config_files .................... {'local_setup_llama3.yml': '# Suggested data paths when using GPT-NeoX locally\n{\n\n\n  # or for weighted datasets:\n  "train-data-paths": ["data/debug/fr-val",],\n  "test-data-paths":["data/debug/fr-val",],\n  "valid-data-paths": ["data/debug/fr-val",],\n  "train-data-weights": [1.,],\n  "test-data-weights": [2.,],\n  "valid-data-weights": [0.5,],\n\n  # If weight_by_num_documents is True, Builds dataset weights from a multinomial distribution over groups of data according to the number of documents in each group.\n  # WARNING: setting this to True will override any user provided weights\n  # "weight_by_num_documents": false,\n  # "weighted_sampler_alpha": 0.3,\n\n  "vocab_file": "data/llama3_tokenizer.json",\n  # "merge_file": "data/gpt2-merges.txt",\n "tokenizer_type": "HFTokenizer",\n  "save": "checkpoints",\n  "load": "checkpoints",\n  "checkpoint_validation_with_forward_pass": False,\n\n  "tensorboard_dir": "tensorboard",\n  "log_dir": "logs",\n}\n', 'slurm_125M.yml': '{\n  "pipe_parallel_size": 1,\n  "model_parallel_size": 1,\n\n  ##########\n  #1.4B\n  ##########\n  "num_layers": 24,\n  "hidden_size": 2048,\n  "intermediate_size": 5632,\n  "num_attention_heads": 16,\n  "attention_config": [[["flash"], 24]],\n  ##########\n  #7B\n  # pp1 mp2 mbs1 == 49TFLOPs w/61% mem 1 node\n  # pp1 mp2 mbs4 == 69TFLOPs w/64% mem 1 node\n  # PP1 mp1 fits 1 node\n  ##########\n  # "num_layers": 32,\n  # "hidden_size": 4096,\n  # "num_attention_heads": 32,\n  # "intermediate_size": 11264,\n  # "attention_config": [[["flash"], 32]],\n  ##########\n  # #13B\n  # pp1 mp1 mbs1 == OOM 1 node\n  # pp1 mp2 mbs1 == 46TFLOPs 99%Vram 1 node\n  # pp1 mp2 mbs2 == 58.4TFLOPs 99%Vram 1 node\n  # pp1 mp2 mbs4 == 66.9TFLOPs 99%Vram 1 node\n  ##########\n  # "num_layers": 40,\n  # "hidden_size": 5120,\n  # "num_attention_heads": 40,\n  # "intermediate_size": 14264,\n  # "attention_config": [[["flash"], 40]],\n\n  ##########\n  # # 34B\n  #40B actually\n  # pp1 mp4 mbs1 == OOM 1 node\n  # pp1 mp8 mbs1 == OOM 1 node\n  # pp4 mp8 mbs1 == 13 TFLOPs 4 nodes\n  # pp3 mp8 mbs1 == 17 TFLOPs 3 nodes\n  # pp3 mp8 mbs8 == 17 TFLOPs 3 nodes (1575.1)\n  ##########\n  # "num_layers": 48,\n  # "hidden_size": 8192,\n  # "num_attention_heads": 64,\n  # "intermediate_size": 22528,\n  # "attention_config": [[["flash"], 48]],\n\n\n\n  "train_micro_batch_size_per_gpu": 8,\n  "data_impl": "mmap",\n  "split": "949,50,1",\n  "num_workers": 2,\n\n  "seq_length": 2048,\n  "max_position_embeddings": 2048,\n  "pos_emb": "rotary",\n  "rotary_pct": 1,\n  "no_weight_tying": true,\n  "gpt_j_residual": false,\n  "output_layer_parallelism": "column",\n  # "mlp_type": "llama",\n  "rms_norm_epsilon": 1.0e-5,\n\n  "scaled_upper_triang_masked_softmax_fusion": true,\n  "bias_gelu_fusion": false,\n\n  "init_method": "small_init",\n  "output_layer_init_method": "wang_init",\n\n  "optimizer": {\n    "type": "Adam",\n    "params": {\n      "lr": 0.0003,\n      "betas": [0.9, 0.95],\n      "eps": 1.0e-8\n    }\n  },\n  "min_lr": 0.00003,\n\n  "zero_optimization": {\n    "stage": 1,\n    "allgather_partitions": true,\n    "allgather_bucket_size": 500000000,\n    "overlap_comm": true,\n    "reduce_scatter": true,\n    "reduce_bucket_size": 500000000,\n    "contiguous_gradients": true,\n    "cpu_offload": false\n  },\n\n   "checkpoint_activations": true,\n   "checkpoint_num_layers": 1,\n   "partition_activations": true,\n   "synchronize_each_layer": true,\n   "gradient_clipping": 1.0,\n   "weight_decay": 0.0,\n   "hidden_dropout": 0.0,\n   "attention_dropout": 0.0,\n   "fp16": {\n     "enabled": true,\n     "loss_scale": 0,\n     "loss_scale_window": 1000,\n     "hysteresis": 2,\n     "min_loss_scale": 1\n   },\n   "train_iters": 320000,\n   "lr_decay_iters": 320000,\n   "distributed_backend": "nccl",\n   "lr_decay_style": "cosine",\n   "warmup": 0.01,\n   "checkpoint_factor": 10000,\n   "eval_interval": 1000,\n   "eval_iters": 10,\n   "log_interval": 10,\n   "steps_per_print": 10,\n   "keep_last_n_checkpoints": 4,\n   "wall_clock_breakdown": true,\n   "launcher": "slurm",\n   "deepspeed_slurm": true,\n   "comment": "neox"\n}\n'}updated
+  data_impl ....................... mmap........................updated
+  deepspeed_slurm ................. True........................updated
+  dynamic_loss_scale .............. True........................updated
+  eval_iters ...................... 10..........................updated
+  fp16 ............................ {'enabled': True, 'loss_scale': 0, 'loss_scale_window': 1000, 'hysteresis': 2, 'min_loss_scale': 1}updated
+  global_num_gpus ................. 16..........................updated
+  hidden_size ..................... 2048........................updated
+  init_method ..................... small_init..................updated
+  intermediate_size ............... 5632........................updated
+  is_pipe_parallel ................ True........................updated
+  keep_last_n_checkpoints ......... 4...........................updated
+  launcher ........................ slurm.......................updated
+  load ............................ checkpoints.................updated
+  log_dir ......................... logs........................updated
+  log_interval .................... 10..........................updated
+  lr .............................. 0.0003......................updated
+  lr_decay_iters .................. 320000......................updated
+  lr_decay_style .................. cosine......................updated
+  max_position_embeddings ......... 2048........................updated
+  min_lr .......................... 3e-05.......................updated
+  no_weight_tying ................. True........................updated
+  num_attention_heads ............. 16..........................updated
+  num_layers ...................... 24..........................updated
+  optimizer ....................... {'type': 'Adam', 'params': {'lr': 0.0003, 'betas': [0.9, 0.95], 'eps': 1e-08}}updated
+  optimizer_type .................. Adam........................updated
+  output_layer_init_method ........ wang_init...................updated
+  partition_activations ........... True........................updated
+  pipe_parallel_size .............. 1...........................updated
+  pos_emb ......................... rotary......................updated
+  precision ....................... fp16........................updated
+  rms_norm_epsilon ................ 1e-05.......................updated
+  save ............................ checkpoints.................updated
+  save_iters ...................... [10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000, 120000, 130000, 140000, 150000, 160000, 170000, 180000, 190000, 200000, 210000, 220000, 230000, 240000, 250000, 260000, 270000, 280000, 290000, 300000, 310000]updated
+  scaled_upper_triang_masked_softmax_fusion  True...............updated
+  seq_length ...................... 2048........................updated
+  sparsity_config ................. {}..........................updated
+  split ........................... 949,50,1....................updated
+  synchronize_each_layer .......... True........................updated
+  tensorboard_dir ................. tensorboard.................updated
+  test_data_paths ................. ['data/debug/fr-val'].......updated
+  test_data_weights ............... [2.0].......................updated
+  text_gen_type ................... unconditional...............updated
+  tokenizer_type .................. HFTokenizer.................updated
+  train_batch_size ................ 128.........................updated
+  train_data_paths ................ ['data/debug/fr-val'].......updated
+  train_data_weights .............. [1.0].......................updated
+  train_iters ..................... 320000......................updated
+  train_micro_batch_size_per_gpu .. 8...........................updated
+  user_script ..................... train.py....................updated
+  valid_data_paths ................ ['data/debug/fr-val'].......updated
+  valid_data_weights .............. [0.5].......................updated
+  vocab_file ...................... data/llama3_tokenizer.json..updated
+  wall_clock_breakdown ............ True........................updated
+  weight_decay .................... 0.0.........................updated
+  zero_allgather_bucket_size ...... 500000000...................updated
+  zero_contiguous_gradients ....... True........................updated
+  zero_optimization ............... {'stage': 1, 'allgather_partitions': True, 'allgather_bucket_size': 500000000, 'overlap_comm': True, 'reduce_scatter': True, 'reduce_bucket_size': 500000000, 'contiguous_gradients': True, 'cpu_offload': False}updated
+  zero_reduce_bucket_size ......... 500000000...................updated
+  zero_reduce_scatter ............. True........................updated
+  zero_stage ...................... 1...........................updated
+  account ......................... None........................default
+  activation ...................... gelu........................default
+  activation_checkpointing ........ None........................default
+  adlr_autoresume ................. False.......................default
+  adlr_autoresume_interval ........ 1000........................default
+  allow_chopped ................... True........................default
+  amp ............................. None........................default
+  apply_query_key_layer_scaling ... False.......................default
+  attention_dropout ............... 0.0.........................default
+  attention_softmax_in_fp32 ....... False.......................default
+  autotuning ...................... None........................default
+  autotuning_run .................. None........................default
+  base_shapes_file ................ None........................default
+  bf16 ............................ None........................default
+  bias_dropout_fusion ............. False.......................default
+  bias_gelu_fusion ................ False.......................default
+  char_level_ppl .................. False.......................default
+  checkpoint ...................... None........................default
+  checkpoint_in_cpu ............... False.......................default
+  checkpoint_num_layers ........... 1...........................default
+  checkpoint_scale ................ linear......................default
+  checkpoint_validation_with_forward_pass  False................default
+  clip_grad ....................... 1.0.........................default
+  comet_experiment_name ........... None........................default
+  comet_others .................... None........................default
+  comet_project ................... None........................default
+  comet_tags ...................... None........................default
+  comet_workspace ................. None........................default
+  comms_logger .................... None........................default
+  communication_data_type ......... None........................default
+  compression_training ............ None........................default
+  contiguous_checkpointing ........ False.......................default
+  coord_check ..................... False.......................default
+  create_moe_param_group .......... True........................default
+  csv_monitor ..................... None........................default
+  curriculum_learning ............. None........................default
+  curriculum_seqlen ............... 0...........................default
+  data_efficiency ................. None........................default
+  data_path ....................... None........................default
+  data_types ...................... None........................default
+  dataset_impl .................... gpt2........................default
+  deepscale ....................... False.......................default
+  deepscale_config ................ None........................default
+  deepspeed ....................... True........................default
+  deepspeed_activation_checkpointing  True......................default
+  deepspeed_extra_args ............ None........................default
+  deepspeed_mpi ................... False.......................default
+  detect_nvlink_pairs ............. False.......................default
+  distributed_backend ............. nccl........................default
+  do_test ......................... None........................default
+  do_train ........................ None........................default
+  do_valid ........................ None........................default
+  dpo_beta ........................ 0.1.........................default
+  dpo_fp32 ........................ True........................default
+  dpo_reference_free .............. False.......................default
+  dump_state ...................... False.......................default
+  elasticity ...................... None........................default
+  enable_expert_tensor_parallelism  False.......................default
+  eod_mask_loss ................... False.......................default
+  eval_interval ................... 1000........................default
+  eval_results_prefix ............. ............................default
+  eval_tasks ...................... None........................default
+  exclude ......................... None........................default
+  exit_interval ................... None........................default
+  expansion_factor ................ None........................default
+  expert_interval ................. 2...........................default
+  extra_save_iters ................ None........................default
+  finetune ........................ False.......................default
+  flops_profiler .................. None........................default
+  force_multi ..................... False.......................default
+  fp16_lm_cross_entropy ........... False.......................default
+  fp32_allreduce .................. False.......................default
+  git_hash ........................ 6691c5d4....................default
+  gmlp_attn_dim ................... 64..........................default
+  gpt_j_residual .................. False.......................default
+  gpt_j_tied ...................... False.......................default
+  gradient_accumulation_steps ..... 1...........................default
+  gradient_clipping ............... 1.0.........................default
+  gradient_noise_scale_cpu_offload  False.......................default
+  gradient_noise_scale_n_batches .. 5...........................default
+  gradient_predivide_factor ....... 1.0.........................default
+  hidden_dropout .................. 0.0.........................default
+  hostfile ........................ None........................default
+  hysteresis ...................... 2...........................default
+  include ......................... None........................default
+  init_method_std ................. 0.02........................default
+  iteration ....................... None........................default
+  kto_beta ........................ 0.1.........................default
+  kto_desirable_weight ............ 1.0.........................default
+  kto_fp32 ........................ True........................default
+  kto_undesirable_weight .......... 1.0.........................default
+  layernorm_epsilon ............... 1e-05.......................default
+  layernorm_fusion ................ False.......................default
+  lazy_mpu_init ................... False.......................default
+  local_rank ...................... None........................default
+  log_grad_norm ................... False.......................default
+  log_grad_pct_zeros .............. False.......................default
+  log_gradient_noise_scale ........ False.......................default
+  log_optimizer_states ............ False.......................default
+  log_param_norm .................. False.......................default
+  loss_scale ...................... None........................default
+  loss_scale_window ............... 1000.0......................default
+  make_vocab_size_divisible_by .... 128.........................default
+  mamba_causal_conv_fusion ........ False.......................default
+  mamba_inner_func_fusion ......... False.......................default
+  mamba_selective_fp32_params ..... True........................default
+  mamba_selective_scan_fusion ..... False.......................default
+  mamba_use_bias_in_conv .......... True........................default
+  mamba_use_bias_in_linears ....... False.......................default
+  master_addr ..................... None........................default
+  master_port ..................... 29500.......................default
+  maximum_tokens .................. 64..........................default
+  memory_profiling ................ False.......................default
+  memory_profiling_path ........... None........................default
+  merge_file ...................... None........................default
+  min_scale ....................... 1.0.........................default
+  mlp_multiple_of ................. 1...........................default
+  mmap_warmup ..................... False.......................default
+  model_parallel_size ............. 1...........................default
+  moe_eval_capacity_factor ........ 1.0.........................default
+  moe_expert_parallel_size ........ 1...........................default
+  moe_glu ......................... False.......................default
+  moe_jitter_eps .................. None........................default
+  moe_lbl_in_fp32 ................. False.......................default
+  moe_loss_coeff .................. 0.1.........................default
+  moe_min_capacity ................ 4...........................default
+  moe_num_experts ................. 1...........................default
+  moe_token_dropping .............. False.......................default
+  moe_top_k ....................... 1...........................default
+  moe_train_capacity_factor ....... 1.0.........................default
+  moe_type ........................ megablocks..................default
+  moe_use_residual ................ True........................default
+  mup_attn_temp ................... 1.0.........................default
+  mup_embedding_mult .............. 1.0.........................default
+  mup_init_scale .................. 1.0.........................default
+  mup_output_temp ................. 1.0.........................default
+  mup_rp_embedding_mult ........... 1.0.........................default
+  mup_width_scale ................. 2...........................default
+  neg_test_data_paths ............. None........................default
+  neg_test_label_data_paths ....... None........................default
+  neg_train_data_paths ............ None........................default
+  neg_train_label_data_paths ...... None........................default
+  neg_valid_data_paths ............ None........................default
+  neg_valid_label_data_paths ...... None........................default
+  no_load_optim ................... False.......................default
+  no_load_rng ..................... False.......................default
+  no_save_optim ................... False.......................default
+  no_save_rng ..................... False.......................default
+  no_ssh_check .................... False.......................default
+  norm ............................ layernorm...................default
+  num_gpus ........................ None........................default
+  num_kv_heads .................... None........................default
+  num_nodes ....................... -1..........................default
+  num_samples ..................... 1...........................default
+  num_unique_layers ............... None........................default
+  num_workers ..................... 2...........................default
+  onnx_safe ....................... False.......................default
+  opt_pos_emb_offset .............. 0...........................default
+  output_layer_parallelism ........ column......................default
+  override_lr_scheduler ........... False.......................default
+  pack_impl ....................... packed......................default
+  padded_vocab_size ............... None........................default
+  param_sharing_style ............. grouped.....................default
+  pipe_partition_method ........... type:transformer|mlp........default
+  pos_test_data_paths ............. None........................default
+  pos_test_label_data_paths ....... None........................default
+  pos_train_data_paths ............ None........................default
+  pos_train_label_data_paths ...... None........................default
+  pos_valid_data_paths ............ None........................default
+  pos_valid_label_data_paths ...... None........................default
+  precompute_model_name ........... None........................default
+  prescale_gradients .............. False.......................default
+  profile ......................... False.......................default
+  profile_backward ................ False.......................default
+  profile_step_start .............. 10..........................default
+  profile_step_stop ............... 12..........................default
+  prompt_end ...................... 
+...........................default
+  rank ............................ None........................default
+  recompute ....................... False.......................default
+  return_logits ................... False.......................default
+  rmsnorm_fusion .................. False.......................default
+  rope_fusion ..................... False.......................default
+  rotary_emb_base ................. 10000.......................default
+  rotary_pct ...................... 1...........................default
+  rotary_save_freqs_buffer ........ False.......................default
+  rpe_max_distance ................ 128.........................default
+  rpe_num_buckets ................. 32..........................default
+  s3_chunk_size ................... 104857600...................default
+  s3_path ......................... None........................default
+  sample_input_file ............... None........................default
+  sample_output_file .............. samples.txt.................default
+  save_base_shapes ................ False.......................default
+  scaled_masked_softmax_fusion .... False.......................default
+  scalenorm_epsilon ............... 1e-08.......................default
+  scheduler ....................... None........................default
+  seed ............................ 1234........................default
+  sequence_parallel ............... False.......................default
+  short_seq_prob .................. 0.1.........................default
+  sliding_window_width ............ None........................default
+  soft_prompt_tuning .............. None........................default
+  sparse_attention ................ None........................default
+  sparse_gradients ................ False.......................default
+  steps_per_print ................. 10..........................default
+  temperature ..................... 0.0.........................default
+  tensorboard ..................... None........................default
+  test_label_data_paths ........... None........................default
+  test_reward_data_paths .......... None........................default
+  top_k ........................... 0...........................default
+  top_p ........................... 0.0.........................default
+  train_impl ...................... normal......................default
+  train_label_data_paths .......... None........................default
+  train_reward_data_paths ......... None........................default
+  use_bias_in_attn_linear ......... True........................default
+  use_bias_in_mlp ................. True........................default
+  use_bias_in_norms ............... True........................default
+  use_bnb_optimizer ............... False.......................default
+  use_checkpoint_lr_scheduler ..... False.......................default
+  use_comet ....................... None........................default
+  use_cpu_initialization .......... False.......................default
+  use_flashattn_swiglu ............ False.......................default
+  use_mup ......................... False.......................default
+  use_qk_layernorm ................ False.......................default
+  use_shared_fs ................... True........................default
+  use_tutel ....................... False.......................default
+  use_wandb ....................... None........................default
+  valid_label_data_paths .......... None........................default
+  valid_reward_data_paths ......... None........................default
+  wandb ........................... None........................default
+  wandb_group ..................... None........................default
+  wandb_host ...................... https://api.wandb.ai........default
+  wandb_init_all_ranks ............ False.......................default
+  wandb_project ................... neox........................default
+  wandb_team ...................... None........................default
+  warmup .......................... 0.01........................default
+  weight_by_num_documents ......... False.......................default
+  weighted_sampler_alpha .......... 1.0.........................default
+  world_size ...................... None........................default
+---------------- end of arguments ----------------
+NeoXArgs.configure_distributed_args() using world size: 2 and model-parallel size: 1 
+[2024-10-18 17:04:21,500] [INFO] [runner.py:586:main] cmd = srun -n 16 --comment neox --export=ALL,PYTHONSTARTUP=/etc/pythonstart,PYTHONPATH=/lustre/orion/bif151/scratch/btherien/neox/gpt-neox /lustre/orion/bif151/scratch/btherien/neox/miniconda3/bin/python -u train.py --deepspeed_config eyJ0cmFpbl9iYXRjaF9zaXplIjogMTI4LCAidHJhaW5fbWljcm9fYmF0Y2hfc2l6ZV9wZXJfZ3B1IjogOCwgIm9wdGltaXplciI6IHsidHlwZSI6ICJBZGFtIiwgInBhcmFtcyI6IHsibHIiOiAwLjAwMDMsICJiZXRhcyI6IFswLjksIDAuOTVdLCAiZXBzIjogMWUtMDh9fSwgImZwMTYiOiB7ImVuYWJsZWQiOiB0cnVlLCAibG9zc19zY2FsZSI6IDAsICJsb3NzX3NjYWxlX3dpbmRvdyI6IDEwMDAsICJoeXN0ZXJlc2lzIjogMiwgIm1pbl9sb3NzX3NjYWxlIjogMX0sICJ6ZXJvX29wdGltaXphdGlvbiI6IHsic3RhZ2UiOiAxLCAiYWxsZ2F0aGVyX3BhcnRpdGlvbnMiOiB0cnVlLCAiYWxsZ2F0aGVyX2J1Y2tldF9zaXplIjogNTAwMDAwMDAwLCAib3ZlcmxhcF9jb21tIjogdHJ1ZSwgInJlZHVjZV9zY2F0dGVyIjogdHJ1ZSwgInJlZHVjZV9idWNrZXRfc2l6ZSI6IDUwMDAwMDAwMCwgImNvbnRpZ3VvdXNfZ3JhZGllbnRzIjogdHJ1ZSwgImNwdV9vZmZsb2FkIjogZmFsc2V9LCAid2FsbF9jbG9ja19icmVha2Rvd24iOiB0cnVlfQ== --megatron_config eyJsYXVuY2hlciI6ICJzbHVybSIsICJjb21tZW50IjogIm5lb3giLCAidHJhaW5fYmF0Y2hfc2l6ZSI6IDEyOCwgInRyYWluX21pY3JvX2JhdGNoX3NpemVfcGVyX2dwdSI6IDgsICJvcHRpbWl6ZXIiOiB7InR5cGUiOiAiQWRhbSIsICJwYXJhbXMiOiB7ImxyIjogMC4wMDAzLCAiYmV0YXMiOiBbMC45LCAwLjk1XSwgImVwcyI6IDFlLTA4fX0sICJmcDE2IjogeyJlbmFibGVkIjogdHJ1ZSwgImxvc3Nfc2NhbGUiOiAwLCAibG9zc19zY2FsZV93aW5kb3ciOiAxMDAwLCAiaHlzdGVyZXNpcyI6IDIsICJtaW5fbG9zc19zY2FsZSI6IDF9LCAiemVyb19vcHRpbWl6YXRpb24iOiB7InN0YWdlIjogMSwgImFsbGdhdGhlcl9wYXJ0aXRpb25zIjogdHJ1ZSwgImFsbGdhdGhlcl9idWNrZXRfc2l6ZSI6IDUwMDAwMDAwMCwgIm92ZXJsYXBfY29tbSI6IHRydWUsICJyZWR1Y2Vfc2NhdHRlciI6IHRydWUsICJyZWR1Y2VfYnVja2V0X3NpemUiOiA1MDAwMDAwMDAsICJjb250aWd1b3VzX2dyYWRpZW50cyI6IHRydWUsICJjcHVfb2ZmbG9hZCI6IGZhbHNlfSwgIndhbGxfY2xvY2tfYnJlYWtkb3duIjogdHJ1ZSwgInByZWNpc2lvbiI6ICJmcDE2IiwgIm51bV9sYXllcnMiOiAyNCwgImhpZGRlbl9zaXplIjogMjA0OCwgImludGVybWVkaWF0ZV9zaXplIjogNTYzMiwgIm51bV9hdHRlbnRpb25faGVhZHMiOiAxNiwgInNlcV9sZW5ndGgiOiAyMDQ4LCAibWF4X3Bvc2l0aW9uX2VtYmVkZGluZ3MiOiAyMDQ4LCAicm1zX25vcm1fZXBzaWxvbiI6IDFlLTA1LCAicG9zX2VtYiI6ICJyb3RhcnkiLCAibm9fd2VpZ2h0X3R5aW5nIjogdHJ1ZSwgImF0dGVudGlvbl9jb25maWciOiBbImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIiwgImZsYXNoIl0sICJzcGFyc2l0eV9jb25maWciOiB7fSwgInNjYWxlZF91cHBlcl90cmlhbmdfbWFza2VkX3NvZnRtYXhfZnVzaW9uIjogdHJ1ZSwgImluaXRfbWV0aG9kIjogInNtYWxsX2luaXQiLCAib3V0cHV0X2xheWVyX2luaXRfbWV0aG9kIjogIndhbmdfaW5pdCIsICJscl9kZWNheV9zdHlsZSI6ICJjb3NpbmUiLCAibHJfZGVjYXlfaXRlcnMiOiAzMjAwMDAsICJtaW5fbHIiOiAzZS0wNSwgIm9wdGltaXplcl90eXBlIjogIkFkYW0iLCAiemVyb19zdGFnZSI6IDEsICJ6ZXJvX3JlZHVjZV9zY2F0dGVyIjogdHJ1ZSwgInplcm9fY29udGlndW91c19ncmFkaWVudHMiOiB0cnVlLCAiemVyb19yZWR1Y2VfYnVja2V0X3NpemUiOiA1MDAwMDAwMDAsICJ6ZXJvX2FsbGdhdGhlcl9idWNrZXRfc2l6ZSI6IDUwMDAwMDAwMCwgImxyIjogMC4wMDAzLCAidG9rZW5pemVyX3R5cGUiOiAiSEZUb2tlbml6ZXIiLCAidHJhaW5fZGF0YV9wYXRocyI6IFsiZGF0YS9kZWJ1Zy9mci12YWwiXSwgInRlc3RfZGF0YV9wYXRocyI6IFsiZGF0YS9kZWJ1Zy9mci12YWwiXSwgInZhbGlkX2RhdGFfcGF0aHMiOiBbImRhdGEvZGVidWcvZnItdmFsIl0sICJ0cmFpbl9kYXRhX3dlaWdodHMiOiBbMS4wXSwgInZhbGlkX2RhdGFfd2VpZ2h0cyI6IFswLjVdLCAidGVzdF9kYXRhX3dlaWdodHMiOiBbMi4wXSwgImRhdGFfaW1wbCI6ICJtbWFwIiwgInNhdmUiOiAiY2hlY2twb2ludHMiLCAiY29uZmlnX2ZpbGVzIjogeyJsb2NhbF9zZXR1cF9sbGFtYTMueW1sIjogIiMgU3VnZ2VzdGVkIGRhdGEgcGF0aHMgd2hlbiB1c2luZyBHUFQtTmVvWCBsb2NhbGx5XG57XG5cblxuICAjIG9yIGZvciB3ZWlnaHRlZCBkYXRhc2V0czpcbiAgXCJ0cmFpbi1kYXRhLXBhdGhzXCI6IFtcImRhdGEvZGVidWcvZnItdmFsXCIsXSxcbiAgXCJ0ZXN0LWRhdGEtcGF0aHNcIjpbXCJkYXRhL2RlYnVnL2ZyLXZhbFwiLF0sXG4gIFwidmFsaWQtZGF0YS1wYXRoc1wiOiBbXCJkYXRhL2RlYnVnL2ZyLXZhbFwiLF0sXG4gIFwidHJhaW4tZGF0YS13ZWlnaHRzXCI6IFsxLixdLFxuICBcInRlc3QtZGF0YS13ZWlnaHRzXCI6IFsyLixdLFxuICBcInZhbGlkLWRhdGEtd2VpZ2h0c1wiOiBbMC41LF0sXG5cbiAgIyBJZiB3ZWlnaHRfYnlfbnVtX2RvY3VtZW50cyBpcyBUcnVlLCBCdWlsZHMgZGF0YXNldCB3ZWlnaHRzIGZyb20gYSBtdWx0aW5vbWlhbCBkaXN0cmlidXRpb24gb3ZlciBncm91cHMgb2YgZGF0YSBhY2NvcmRpbmcgdG8gdGhlIG51bWJlciBvZiBkb2N1bWVudHMgaW4gZWFjaCBncm91cC5cbiAgIyBXQVJOSU5HOiBzZXR0aW5nIHRoaXMgdG8gVHJ1ZSB3aWxsIG92ZXJyaWRlIGFueSB1c2VyIHByb3ZpZGVkIHdlaWdodHNcbiAgIyBcIndlaWdodF9ieV9udW1fZG9jdW1lbnRzXCI6IGZhbHNlLFxuICAjIFwid2VpZ2h0ZWRfc2FtcGxlcl9hbHBoYVwiOiAwLjMsXG5cbiAgXCJ2b2NhYl9maWxlXCI6IFwiZGF0YS9sbGFtYTNfdG9rZW5pemVyLmpzb25cIixcbiAgIyBcIm1lcmdlX2ZpbGVcIjogXCJkYXRhL2dwdDItbWVyZ2VzLnR4dFwiLFxuIFwidG9rZW5pemVyX3R5cGVcIjogXCJIRlRva2VuaXplclwiLFxuICBcInNhdmVcIjogXCJjaGVja3BvaW50c1wiLFxuICBcImxvYWRcIjogXCJjaGVja3BvaW50c1wiLFxuICBcImNoZWNrcG9pbnRfdmFsaWRhdGlvbl93aXRoX2ZvcndhcmRfcGFzc1wiOiBGYWxzZSxcblxuICBcInRlbnNvcmJvYXJkX2RpclwiOiBcInRlbnNvcmJvYXJkXCIsXG4gIFwibG9nX2RpclwiOiBcImxvZ3NcIixcbn1cbiIsICJzbHVybV8xMjVNLnltbCI6ICJ7XG4gIFwicGlwZV9wYXJhbGxlbF9zaXplXCI6IDEsXG4gIFwibW9kZWxfcGFyYWxsZWxfc2l6ZVwiOiAxLFxuXG4gICMjIyMjIyMjIyNcbiAgIzEuNEJcbiAgIyMjIyMjIyMjI1xuICBcIm51bV9sYXllcnNcIjogMjQsXG4gIFwiaGlkZGVuX3NpemVcIjogMjA0OCxcbiAgXCJpbnRlcm1lZGlhdGVfc2l6ZVwiOiA1NjMyLFxuICBcIm51bV9hdHRlbnRpb25faGVhZHNcIjogMTYsXG4gIFwiYXR0ZW50aW9uX2NvbmZpZ1wiOiBbW1tcImZsYXNoXCJdLCAyNF1dLFxuICAjIyMjIyMjIyMjXG4gICM3QlxuICAjIHBwMSBtcDIgbWJzMSA9PSA0OVRGTE9QcyB3LzYxJSBtZW0gMSBub2RlXG4gICMgcHAxIG1wMiBtYnM0ID09IDY5VEZMT1BzIHcvNjQlIG1lbSAxIG5vZGVcbiAgIyBQUDEgbXAxIGZpdHMgMSBub2RlXG4gICMjIyMjIyMjIyNcbiAgIyBcIm51bV9sYXllcnNcIjogMzIsXG4gICMgXCJoaWRkZW5fc2l6ZVwiOiA0MDk2LFxuICAjIFwibnVtX2F0dGVudGlvbl9oZWFkc1wiOiAzMixcbiAgIyBcImludGVybWVkaWF0ZV9zaXplXCI6IDExMjY0LFxuICAjIFwiYXR0ZW50aW9uX2NvbmZpZ1wiOiBbW1tcImZsYXNoXCJdLCAzMl1dLFxuICAjIyMjIyMjIyMjXG4gICMgIzEzQlxuICAjIHBwMSBtcDEgbWJzMSA9PSBPT00gMSBub2RlXG4gICMgcHAxIG1wMiBtYnMxID09IDQ2VEZMT1BzIDk5JVZyYW0gMSBub2RlXG4gICMgcHAxIG1wMiBtYnMyID09IDU4LjRURkxPUHMgOTklVnJhbSAxIG5vZGVcbiAgIyBwcDEgbXAyIG1iczQgPT0gNjYuOVRGTE9QcyA5OSVWcmFtIDEgbm9kZVxuICAjIyMjIyMjIyMjXG4gICMgXCJudW1fbGF5ZXJzXCI6IDQwLFxuICAjIFwiaGlkZGVuX3NpemVcIjogNTEyMCxcbiAgIyBcIm51bV9hdHRlbnRpb25faGVhZHNcIjogNDAsXG4gICMgXCJpbnRlcm1lZGlhdGVfc2l6ZVwiOiAxNDI2NCxcbiAgIyBcImF0dGVudGlvbl9jb25maWdcIjogW1tbXCJmbGFzaFwiXSwgNDBdXSxcblxuICAjIyMjIyMjIyMjXG4gICMgIyAzNEJcbiAgIzQwQiBhY3R1YWxseVxuICAjIHBwMSBtcDQgbWJzMSA9PSBPT00gMSBub2RlXG4gICMgcHAxIG1wOCBtYnMxID09IE9PTSAxIG5vZGVcbiAgIyBwcDQgbXA4IG1iczEgPT0gMTMgVEZMT1BzIDQgbm9kZXNcbiAgIyBwcDMgbXA4IG1iczEgPT0gMTcgVEZMT1BzIDMgbm9kZXNcbiAgIyBwcDMgbXA4IG1iczggPT0gMTcgVEZMT1BzIDMgbm9kZXMgKDE1NzUuMSlcbiAgIyMjIyMjIyMjI1xuICAjIFwibnVtX2xheWVyc1wiOiA0OCxcbiAgIyBcImhpZGRlbl9zaXplXCI6IDgxOTIsXG4gICMgXCJudW1fYXR0ZW50aW9uX2hlYWRzXCI6IDY0LFxuICAjIFwiaW50ZXJtZWRpYXRlX3NpemVcIjogMjI1MjgsXG4gICMgXCJhdHRlbnRpb25fY29uZmlnXCI6IFtbW1wiZmxhc2hcIl0sIDQ4XV0sXG5cblxuXG4gIFwidHJhaW5fbWljcm9fYmF0Y2hfc2l6ZV9wZXJfZ3B1XCI6IDgsXG4gIFwiZGF0YV9pbXBsXCI6IFwibW1hcFwiLFxuICBcInNwbGl0XCI6IFwiOTQ5LDUwLDFcIixcbiAgXCJudW1fd29ya2Vyc1wiOiAyLFxuXG4gIFwic2VxX2xlbmd0aFwiOiAyMDQ4LFxuICBcIm1heF9wb3NpdGlvbl9lbWJlZGRpbmdzXCI6IDIwNDgsXG4gIFwicG9zX2VtYlwiOiBcInJvdGFyeVwiLFxuICBcInJvdGFyeV9wY3RcIjogMSxcbiAgXCJub193ZWlnaHRfdHlpbmdcIjogdHJ1ZSxcbiAgXCJncHRfal9yZXNpZHVhbFwiOiBmYWxzZSxcbiAgXCJvdXRwdXRfbGF5ZXJfcGFyYWxsZWxpc21cIjogXCJjb2x1bW5cIixcbiAgIyBcIm1scF90eXBlXCI6IFwibGxhbWFcIixcbiAgXCJybXNfbm9ybV9lcHNpbG9uXCI6IDEuMGUtNSxcblxuICBcInNjYWxlZF91cHBlcl90cmlhbmdfbWFza2VkX3NvZnRtYXhfZnVzaW9uXCI6IHRydWUsXG4gIFwiYmlhc19nZWx1X2Z1c2lvblwiOiBmYWxzZSxcblxuICBcImluaXRfbWV0aG9kXCI6IFwic21hbGxfaW5pdFwiLFxuICBcIm91dHB1dF9sYXllcl9pbml0X21ldGhvZFwiOiBcIndhbmdfaW5pdFwiLFxuXG4gIFwib3B0aW1pemVyXCI6IHtcbiAgICBcInR5cGVcIjogXCJBZGFtXCIsXG4gICAgXCJwYXJhbXNcIjoge1xuICAgICAgXCJsclwiOiAwLjAwMDMsXG4gICAgICBcImJldGFzXCI6IFswLjksIDAuOTVdLFxuICAgICAgXCJlcHNcIjogMS4wZS04XG4gICAgfVxuICB9LFxuICBcIm1pbl9sclwiOiAwLjAwMDAzLFxuXG4gIFwiemVyb19vcHRpbWl6YXRpb25cIjoge1xuICAgIFwic3RhZ2VcIjogMSxcbiAgICBcImFsbGdhdGhlcl9wYXJ0aXRpb25zXCI6IHRydWUsXG4gICAgXCJhbGxnYXRoZXJfYnVja2V0X3NpemVcIjogNTAwMDAwMDAwLFxuICAgIFwib3ZlcmxhcF9jb21tXCI6IHRydWUsXG4gICAgXCJyZWR1Y2Vfc2NhdHRlclwiOiB0cnVlLFxuICAgIFwicmVkdWNlX2J1Y2tldF9zaXplXCI6IDUwMDAwMDAwMCxcbiAgICBcImNvbnRpZ3VvdXNfZ3JhZGllbnRzXCI6IHRydWUsXG4gICAgXCJjcHVfb2ZmbG9hZFwiOiBmYWxzZVxuICB9LFxuXG4gICBcImNoZWNrcG9pbnRfYWN0aXZhdGlvbnNcIjogdHJ1ZSxcbiAgIFwiY2hlY2twb2ludF9udW1fbGF5ZXJzXCI6IDEsXG4gICBcInBhcnRpdGlvbl9hY3RpdmF0aW9uc1wiOiB0cnVlLFxuICAgXCJzeW5jaHJvbml6ZV9lYWNoX2xheWVyXCI6IHRydWUsXG4gICBcImdyYWRpZW50X2NsaXBwaW5nXCI6IDEuMCxcbiAgIFwid2VpZ2h0X2RlY2F5XCI6IDAuMCxcbiAgIFwiaGlkZGVuX2Ryb3BvdXRcIjogMC4wLFxuICAgXCJhdHRlbnRpb25fZHJvcG91dFwiOiAwLjAsXG4gICBcImZwMTZcIjoge1xuICAgICBcImVuYWJsZWRcIjogdHJ1ZSxcbiAgICAgXCJsb3NzX3NjYWxlXCI6IDAsXG4gICAgIFwibG9zc19zY2FsZV93aW5kb3dcIjogMTAwMCxcbiAgICAgXCJoeXN0ZXJlc2lzXCI6IDIsXG4gICAgIFwibWluX2xvc3Nfc2NhbGVcIjogMVxuICAgfSxcbiAgIFwidHJhaW5faXRlcnNcIjogMzIwMDAwLFxuICAgXCJscl9kZWNheV9pdGVyc1wiOiAzMjAwMDAsXG4gICBcImRpc3RyaWJ1dGVkX2JhY2tlbmRcIjogXCJuY2NsXCIsXG4gICBcImxyX2RlY2F5X3N0eWxlXCI6IFwiY29zaW5lXCIsXG4gICBcIndhcm11cFwiOiAwLjAxLFxuICAgXCJjaGVja3BvaW50X2ZhY3RvclwiOiAxMDAwMCxcbiAgIFwiZXZhbF9pbnRlcnZhbFwiOiAxMDAwLFxuICAgXCJldmFsX2l0ZXJzXCI6IDEwLFxuICAgXCJsb2dfaW50ZXJ2YWxcIjogMTAsXG4gICBcInN0ZXBzX3Blcl9wcmludFwiOiAxMCxcbiAgIFwia2VlcF9sYXN0X25fY2hlY2twb2ludHNcIjogNCxcbiAgIFwid2FsbF9jbG9ja19icmVha2Rvd25cIjogdHJ1ZSxcbiAgIFwibGF1bmNoZXJcIjogXCJzbHVybVwiLFxuICAgXCJkZWVwc3BlZWRfc2x1cm1cIjogdHJ1ZSxcbiAgIFwiY29tbWVudFwiOiBcIm5lb3hcIlxufVxuIn0sICJsb2FkIjogImNoZWNrcG9pbnRzIiwgImNoZWNrcG9pbnRfZmFjdG9yIjogMTAwMDAsICJiYXRjaF9zaXplIjogOCwgInRyYWluX2l0ZXJzIjogMzIwMDAwLCAiZXZhbF9pdGVycyI6IDEwLCAia2VlcF9sYXN0X25fY2hlY2twb2ludHMiOiA0LCAic3BsaXQiOiAiOTQ5LDUwLDEiLCAidm9jYWJfZmlsZSI6ICJkYXRhL2xsYW1hM190b2tlbml6ZXIuanNvbiIsICJ3ZWlnaHRfZGVjYXkiOiAwLjAsICJjaGVja3BvaW50X2FjdGl2YXRpb25zIjogdHJ1ZSwgInN5bmNocm9uaXplX2VhY2hfbGF5ZXIiOiB0cnVlLCAicGFydGl0aW9uX2FjdGl2YXRpb25zIjogdHJ1ZSwgImR5bmFtaWNfbG9zc19zY2FsZSI6IHRydWUsICJwaXBlX3BhcmFsbGVsX3NpemUiOiAxLCAid29ybGRfc2l6ZSI6IDIsICJpc19waXBlX3BhcmFsbGVsIjogdHJ1ZSwgImxvZ19kaXIiOiAibG9ncyIsICJ0ZW5zb3Jib2FyZF9kaXIiOiAidGVuc29yYm9hcmQiLCAibG9nX2ludGVydmFsIjogMTAsICJ0ZXh0X2dlbl90eXBlIjogInVuY29uZGl0aW9uYWwiLCAibG9jYWxfcmFuayI6IDAsICJyYW5rIjogMCwgImRlZXBzcGVlZF9zbHVybSI6IHRydWUsICJ1c2VyX3NjcmlwdCI6ICJ0cmFpbi5weSIsICJzYXZlX2l0ZXJzIjogWzEwMDAwLCAyMDAwMCwgMzAwMDAsIDQwMDAwLCA1MDAwMCwgNjAwMDAsIDcwMDAwLCA4MDAwMCwgOTAwMDAsIDEwMDAwMCwgMTEwMDAwLCAxMjAwMDAsIDEzMDAwMCwgMTQwMDAwLCAxNTAwMDAsIDE2MDAwMCwgMTcwMDAwLCAxODAwMDAsIDE5MDAwMCwgMjAwMDAwLCAyMTAwMDAsIDIyMDAwMCwgMjMwMDAwLCAyNDAwMDAsIDI1MDAwMCwgMjYwMDAwLCAyNzAwMDAsIDI4MDAwMCwgMjkwMDAwLCAzMDAwMDAsIDMxMDAwMF0sICJnbG9iYWxfbnVtX2dwdXMiOiAxNn0=
+[2024-10-18 17:04:26,033] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:26,033] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:26,033] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:26,033] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:26,033] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:26,033] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:26,033] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:26,033] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+NeoXArgs.configure_distributed_args() using world size: 16 and model-parallel size: 1 
+> building HFTokenizer tokenizer ...
+ > padded vocab (size: 128256) with 0 dummy tokens (new size: 128256)
+WARNING: TensorBoard writing requested but is not available (are you using PyTorch 1.1.0 or later and do you have tensorboard installed?), no TensorBoard logs will be written.
+[92mSuccessfully preprocessed all matching files.[0m
+[92mSuccessfully preprocessed all matching files.[0m
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 6 neox_args.local_rank: 6 device: 6 device_count 8
+[2024-10-18 17:04:32,307] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[92mSuccessfully preprocessed all matching files.[0m
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 2 neox_args.local_rank: 2 device: 2 device_count 8
+[2024-10-18 17:04:32,891] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+Loading extension module scaled_upper_triang_masked_softmax_cuda...
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 4 neox_args.local_rank: 4 device: 4 device_count 8
+[2024-10-18 17:04:33,345] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+Loading extension module scaled_masked_softmax_cuda...
+neox_args.rank: 5 neox_args.local_rank: 5 device: 5 device_count 8
+neox_args.rank: 1 neox_args.local_rank: 1 device: 1 device_count 8
+neox_args.rank: 3 neox_args.local_rank: 3 device: 3 device_count 8
+neox_args.rank: 7 neox_args.local_rank: 7 device: 7 device_count 8
+[2024-10-18 17:04:33,369] [INFO] [comm.py:637:init_distributed] cdb=None
+[2024-10-18 17:04:33,369] [INFO] [comm.py:637:init_distributed] cdb=None
+[2024-10-18 17:04:33,369] [INFO] [comm.py:637:init_distributed] cdb=None
+[2024-10-18 17:04:33,369] [INFO] [comm.py:637:init_distributed] cdb=None
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/fused_rotary_positional_embedding.cpp -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/fused_rotary_positional_embedding.cpp [skipped, no changes]
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/fused_rotary_positional_embedding.h -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/fused_rotary_positional_embedding_hip.h [skipped, already hipified]
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/compat.h -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/compat.h [skipped, no changes]
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/type_shim.h -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/type_shim_hip.h [skipped, already hipified]
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/fused_rotary_positional_embedding_cuda.cu -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/fused_rotary_positional_embedding_hip.hip [skipped, already hipified]
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/fused_rotary_positional_embedding.h -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/fused_rotary_positional_embedding_hip.h [skipped, already hipified]
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/scaled_upper_triang_masked_softmax.h -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/scaled_upper_triang_masked_softmax_hip.h [skipped, already hipified]
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/compat.h -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/compat.h [skipped, no changes]
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/type_shim.h -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/type_shim_hip.h [skipped, already hipified]
+/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/scaled_masked_softmax.h -> /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/scaled_masked_softmax_hip.h [skipped, already hipified]
+Total number of unsupported CUDA function calls: 0
+
+[92mSuccessfully preprocessed all matching files.[0m
+
+Total number of replaced kernel launches: 56
+Detected CUDA files, patching ldflags
+Emitting ninja build file /lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/fused_kernels/build/build.ninja...
+Building extension module fused_rotary_positional_embedding...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module fused_rotary_positional_embedding...
+> initializing torch distributed ...
+neox_args.rank: 0 neox_args.local_rank: 0 device: 0 device_count 8
+[2024-10-18 17:04:33,543] [INFO] [comm.py:637:init_distributed] cdb=None
+[2024-10-18 17:04:33,543] [INFO] [comm.py:668:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
+[W socket.cpp:464] [c10d] The server socket cannot be initialized on [::]:12802 (errno: 97 - Address family not supported by protocol).
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[2024-10-18 17:04:33,711] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:33,711] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:33,711] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:33,711] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:33,711] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:33,711] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:33,711] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2024-10-18 17:04:33,711] [INFO] [real_accelerator.py:161:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+[2024-10-18 17:04:36,532] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:36,532] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:36,532] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:36,532] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:36,532] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:36,532] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:36,532] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install boto3 either using requirements/requirements-s3.txt or https://github.com/boto/boto3
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+For s3 checkpointing, please install hf_transfer either using requirements/requirements-s3.txt or https://github.com/huggingface/hf_transfer
+[92mSuccessfully preprocessed all matching files.[0m
+[92mSuccessfully preprocessed all matching files.[0m
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 12 neox_args.local_rank: 4 device: 4 device_count 8
+[2024-10-18 17:04:40,525] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[92mSuccessfully preprocessed all matching files.[0m
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 9 neox_args.local_rank: 1 device: 1 device_count 8
+[2024-10-18 17:04:41,333] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 10 neox_args.local_rank: 2 device: 2 device_count 8
+[2024-10-18 17:04:41,744] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 13 neox_args.local_rank: 5 device: 5 device_count 8
+[2024-10-18 17:04:42,033] [INFO] [comm.py:637:init_distributed] cdb=None
+neox_args.rank: 11 neox_args.local_rank: 3 device: 3 device_count 8
+[2024-10-18 17:04:42,039] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 14 neox_args.local_rank: 6 device: 6 device_count 8
+[2024-10-18 17:04:42,235] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 15 neox_args.local_rank: 7 device: 7 device_count 8
+[2024-10-18 17:04:42,460] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+[92mSuccessfully preprocessed all matching files.[0m
+neox_args.rank: 8 neox_args.local_rank: 0 device: 0 device_count 8
+[2024-10-18 17:04:42,946] [INFO] [comm.py:637:init_distributed] cdb=None
+[W socket.cpp:697] [c10d] The client socket cannot be initialized to connect to [frontier09319.frontier.olcf.ornl.gov]:12802 (errno: 97 - Address family not supported by protocol).
+> initializing model parallel with size 1
+MPU DP: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+MPU PP: [0]
+MPU PP: [1]
+MPU PP: [2]
+MPU PP: [3]
+MPU PP: [4]
+MPU PP: [5]
+MPU PP: [6]
+MPU PP: [7]
+MPU PP: [8]
+MPU PP: [9]
+MPU PP: [10]
+MPU PP: [11]
+MPU PP: [12]
+MPU PP: [13]
+MPU PP: [14]
+MPU PP: [15]
+MPU MP: [0]
+MPU MP: [1]
+MPU MP: [2]
+MPU MP: [3]
+MPU MP: [4]
+MPU MP: [5]
+MPU MP: [6]
+MPU MP: [7]
+MPU MP: [8]
+MPU MP: [9]
+MPU MP: [10]
+MPU MP: [11]
+MPU MP: [12]
+MPU MP: [13]
+MPU MP: [14]
+MPU MP: [15]
+> setting random seeds to 1234 ...
+make: Entering directory '/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/data'
+[2024-10-18 17:04:42,978] [INFO] [checkpointing.py:227:model_parallel_cuda_manual_seed] > initializing model parallel cuda seeds on global rank 0, model parallel rank 0, and data parallel rank 0 with model parallel seed: 3952 and data parallel seed: 1234
+make: Entering directory '/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/data'
+make: Nothing to be done for 'default'.
+make: Leaving directory '/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/data'
+make: Nothing to be done for 'default'.
+make: Leaving directory '/lustre/orion/bif151/scratch/btherien/neox/gpt-neox/megatron/data'
+building GPT2 model ...
+SEED_LAYERS=False BASE_SEED=1234 SEED_FN=None
+Using topology: {ProcessCoord(pipe=0, data=0, model=0): 0, ProcessCoord(pipe=0, data=1, model=0): 1, ProcessCoord(pipe=0, data=2, model=0): 2, ProcessCoord(pipe=0, data=3, model=0): 3, ProcessCoord(pipe=0, data=4, model=0): 4, ProcessCoord(pipe=0, data=5, model=0): 5, ProcessCoord(pipe=0, data=6, model=0): 6, ProcessCoord(pipe=0, data=7, model=0): 7, ProcessCoord(pipe=0, data=8, model=0): 8, ProcessCoord(pipe=0, data=9, model=0): 9, ProcessCoord(pipe=0, data=10, model=0): 10, ProcessCoord(pipe=0, data=11, model=0): 11, ProcessCoord(pipe=0, data=12, model=0): 12, ProcessCoord(pipe=0, data=13, model=0): 13, ProcessCoord(pipe=0, data=14, model=0): 14, ProcessCoord(pipe=0, data=15, model=0): 15}
+[2024-10-18 17:04:43,025] [INFO] [module.py:375:_partition_layers] Partitioning pipeline stages with method type:transformer|mlp
+stage=0 layers=29
+     0: EmbeddingPipe
+     1: _pre_transformer_block
+     2: ParallelTransformerLayerPipe
+     3: ParallelTransformerLayerPipe
+     4: ParallelTransformerLayerPipe
+     5: ParallelTransformerLayerPipe
+     6: ParallelTransformerLayerPipe
+     7: ParallelTransformerLayerPipe
+     8: ParallelTransformerLayerPipe
+     9: ParallelTransformerLayerPipe
+    10: ParallelTransformerLayerPipe
+    11: ParallelTransformerLayerPipe
+    12: ParallelTransformerLayerPipe
+    13: ParallelTransformerLayerPipe
+    14: ParallelTransformerLayerPipe
+    15: ParallelTransformerLayerPipe
+    16: ParallelTransformerLayerPipe
+    17: ParallelTransformerLayerPipe
+    18: ParallelTransformerLayerPipe
+    19: ParallelTransformerLayerPipe
+    20: ParallelTransformerLayerPipe
+    21: ParallelTransformerLayerPipe
+    22: ParallelTransformerLayerPipe
+    23: ParallelTransformerLayerPipe
+    24: ParallelTransformerLayerPipe
+    25: ParallelTransformerLayerPipe
+    26: _post_transformer_block
+    27: NormPipe
+    28: ParallelLinearPipe
+  loss: partial
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+[2024-10-18 17:04:43,453] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:43,453] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+[2024-10-18 17:04:43,577] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+Configuring Optimizer type: Adam with params: {'lr': 0.0003, 'betas': [0.9, 0.95], 'eps': 1e-08}
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+[2024-10-18 17:04:44,135] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:44,135] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:44,135] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+[2024-10-18 17:04:44,390] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+> learning rate decay style: cosine
+DeepSpeed is enabled.
+[2024-10-18 17:04:44,836] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed info: version=0.12.4+02e2ebf, git-hash=02e2ebf, git-branch=HEAD
+[2024-10-18 17:04:44,837] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/apex/optimizers/fused_adam.py:77: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:78.)
+  self._dummy_overflow_buf = torch.cuda.IntTensor([0])
+[2024-10-18 17:04:44,845] [WARNING] [config_utils.py:69:_process_deprecated_field] Config parameter cpu_offload is deprecated use offload_optimizer instead
+[2024-10-18 17:04:46,434] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Flops Profiler Enabled: False
+[2024-10-18 17:04:46,438] [INFO] [logging.py:96:log_dist] [Rank 0] Using client Optimizer as basic optimizer
+[2024-10-18 17:04:46,438] [INFO] [logging.py:96:log_dist] [Rank 0] Removing param_group that has no 'params' in the basic Optimizer
+[2024-10-18 17:04:46,446] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Basic Optimizer = FusedAdam
+[2024-10-18 17:04:46,447] [INFO] [utils.py:56:is_zero_supported_optimizer] Checking ZeRO support for optimizer=FusedAdam type=<class 'apex.optimizers.fused_adam.FusedAdam'>
+[2024-10-18 17:04:46,447] [INFO] [logging.py:96:log_dist] [Rank 0] Creating torch.float16 ZeRO stage 1 optimizer
+[2024-10-18 17:04:46,447] [INFO] [stage_1_and_2.py:149:__init__] Reduce bucket size 500000000
+[2024-10-18 17:04:46,447] [INFO] [stage_1_and_2.py:150:__init__] Allgather bucket size 500000000
+[2024-10-18 17:04:46,447] [INFO] [stage_1_and_2.py:151:__init__] CPU Offload: False
+[2024-10-18 17:04:46,447] [INFO] [stage_1_and_2.py:152:__init__] Round robin gradient partitioning: False
+[2024-10-18 17:04:50,717] [INFO] [utils.py:802:see_memory_usage] Before initializing optimizer states
+[2024-10-18 17:04:50,718] [INFO] [utils.py:803:see_memory_usage] MA 3.11 GB         Max_MA 3.28 GB         CA 3.28 GB         Max_CA 3 GB 
+[2024-10-18 17:04:50,718] [INFO] [utils.py:810:see_memory_usage] CPU Virtual Memory:  used = 38.13 GB, percent = 7.6%
+[2024-10-18 17:04:50,737] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,744] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,750] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,756] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,760] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,776] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,779] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,779] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,779] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,780] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,780] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,781] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,782] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,788] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,824] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:50,911] [INFO] [utils.py:802:see_memory_usage] After initializing optimizer states
+[2024-10-18 17:04:50,912] [INFO] [utils.py:803:see_memory_usage] MA 3.8 GB         Max_MA 4.14 GB         CA 4.32 GB         Max_CA 4 GB 
+[2024-10-18 17:04:50,912] [INFO] [utils.py:810:see_memory_usage] CPU Virtual Memory:  used = 38.35 GB, percent = 7.6%
+[2024-10-18 17:04:50,912] [INFO] [stage_1_and_2.py:517:__init__] optimizer state initialized
+[2024-10-18 17:04:50,991] [INFO] [utils.py:802:see_memory_usage] After initializing ZeRO optimizer
+[2024-10-18 17:04:50,991] [INFO] [utils.py:803:see_memory_usage] MA 3.8 GB         Max_MA 3.8 GB         CA 4.32 GB         Max_CA 4 GB 
+[2024-10-18 17:04:50,991] [INFO] [utils.py:810:see_memory_usage] CPU Virtual Memory:  used = 38.35 GB, percent = 7.6%
+[2024-10-18 17:04:50,992] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed Final Optimizer = FusedAdam
+[2024-10-18 17:04:50,992] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed using client LR scheduler
+[2024-10-18 17:04:50,992] [INFO] [logging.py:96:log_dist] [Rank 0] DeepSpeed LR Scheduler = <megatron.learning_rates.AnnealingLR object at 0x7fffed3af6b0>
+[2024-10-18 17:04:50,992] [INFO] [logging.py:96:log_dist] [Rank 0] step=0, skipped=0, lr=[0.0], mom=[[0.9, 0.95]]
+[2024-10-18 17:04:50,993] [INFO] [config.py:979:print] DeepSpeedEngine configuration:
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   activation_checkpointing_config  {
+    "partition_activations": false, 
+    "contiguous_memory_optimization": false, 
+    "cpu_checkpointing": false, 
+    "number_checkpoints": null, 
+    "synchronize_checkpoint_boundary": false, 
+    "profile": false
+}
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   aio_config ................... {'block_size': 1048576, 'queue_depth': 8, 'thread_count': 1, 'single_submit': False, 'overlap_events': True}
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   amp_enabled .................. False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   amp_params ................... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   autotuning_config ............ {
+    "enabled": false, 
+    "start_step": null, 
+    "end_step": null, 
+    "metric_path": null, 
+    "arg_mappings": null, 
+    "metric": "throughput", 
+    "model_info": null, 
+    "results_dir": "autotuning_results", 
+    "exps_dir": "autotuning_exps", 
+    "overwrite": true, 
+    "fast": true, 
+    "start_profile_step": 3, 
+    "end_profile_step": 5, 
+    "tuner_type": "gridsearch", 
+    "tuner_early_stopping": 5, 
+    "tuner_num_trials": 50, 
+    "model_info_path": null, 
+    "mp_size": 1, 
+    "max_train_batch_size": null, 
+    "min_train_batch_size": 1, 
+    "max_train_micro_batch_size_per_gpu": 1.024000e+03, 
+    "min_train_micro_batch_size_per_gpu": 1, 
+    "num_tuning_micro_batch_sizes": 3
+}
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   bfloat16_enabled ............. False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   checkpoint_parallel_write_pipeline  False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   checkpoint_tag_validation_enabled  True
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   checkpoint_tag_validation_fail  False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   comms_config ................. <deepspeed.comm.config.DeepSpeedCommsConfig object at 0x7ff5dfc15dc0>
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   communication_data_type ...... None
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   compression_config ........... {'weight_quantization': {'shared_parameters': {'enabled': False, 'quantizer_kernel': False, 'schedule_offset': 0, 'quantize_groups': 1, 'quantize_verbose': False, 'quantization_type': 'symmetric', 'quantize_weight_in_forward': False, 'rounding': 'nearest', 'fp16_mixed_quantize': False, 'quantize_change_ratio': 0.001}, 'different_groups': {}}, 'activation_quantization': {'shared_parameters': {'enabled': False, 'quantization_type': 'symmetric', 'range_calibration': 'dynamic', 'schedule_offset': 1000}, 'different_groups': {}}, 'sparse_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'row_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'head_pruning': {'shared_parameters': {'enabled': False, 'method': 'topk', 'schedule_offset': 1000}, 'different_groups': {}}, 'channel_pruning': {'shared_parameters': {'enabled': False, 'method': 'l1', 'schedule_offset': 1000}, 'different_groups': {}}, 'layer_reduction': {'enabled': False}}
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   curriculum_enabled_legacy .... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   curriculum_params_legacy ..... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   data_efficiency_config ....... {'enabled': False, 'seed': 1234, 'data_sampling': {'enabled': False, 'num_epochs': 1000, 'num_workers': 0, 'curriculum_learning': {'enabled': False}}, 'data_routing': {'enabled': False, 'random_ltd': {'enabled': False, 'layer_token_lr_schedule': {'enabled': False}}}}
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   data_efficiency_enabled ...... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   dataloader_drop_last ......... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   disable_allgather ............ False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   dump_state ................... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   dynamic_loss_scale_args ...... {'init_scale': 65536, 'scale_window': 1000, 'delayed_shift': 2, 'consecutive_hysteresis': False, 'min_scale': 1}
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   eigenvalue_enabled ........... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   eigenvalue_gas_boundary_resolution  1
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   eigenvalue_layer_name ........ bert.encoder.layer
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   eigenvalue_layer_num ......... 0
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   eigenvalue_max_iter .......... 100
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   eigenvalue_stability ......... 1e-06
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   eigenvalue_tol ............... 0.01
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   eigenvalue_verbose ........... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   elasticity_enabled ........... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   flops_profiler_config ........ {
+    "enabled": false, 
+    "recompute_fwd_factor": 0.0, 
+    "profile_step": 1, 
+    "module_depth": -1, 
+    "top_modules": 1, 
+    "detailed": true, 
+    "output_file": null
+}
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   fp16_auto_cast ............... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   fp16_enabled ................. True
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   fp16_master_weights_and_gradients  False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   global_rank .................. 0
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   grad_accum_dtype ............. None
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   gradient_accumulation_steps .. 1
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   gradient_clipping ............ 0.0
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   gradient_predivide_factor .... 1.0
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   hybrid_engine ................ enabled=False max_out_tokens=512 inference_tp_size=1 release_inference_cache=False pin_parameters=True tp_gather_partition_size=8
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   initial_dynamic_scale ........ 65536
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   load_universal_checkpoint .... False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   loss_scale ................... 0
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   memory_breakdown ............. False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   mics_hierarchial_params_gather  False
+[2024-10-18 17:04:50,993] [INFO] [config.py:983:print]   mics_shard_size .............. -1
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   monitor_config ............... tensorboard=TensorBoardConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') wandb=WandbConfig(enabled=False, group=None, team=None, project='deepspeed') csv_monitor=CSVConfig(enabled=False, output_path='', job_name='DeepSpeedJobName') enabled=False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   nebula_config ................ {
+    "enabled": false, 
+    "persistent_storage_path": null, 
+    "persistent_time_interval": 100, 
+    "num_of_version_in_retention": 2, 
+    "enable_nebula_load": true, 
+    "load_path": null
+}
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   optimizer_legacy_fusion ...... False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   optimizer_name ............... adam
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   optimizer_params ............. {'lr': 0.0003, 'betas': [0.9, 0.95], 'eps': 1e-08}
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   pipeline ..................... {'stages': 'auto', 'partition': 'best', 'seed_layers': False, 'activation_checkpoint_interval': 0, 'pipe_partitioned': True, 'grad_partitioned': True}
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   pld_enabled .................. False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   pld_params ................... False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   prescale_gradients ........... False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   scheduler_name ............... None
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   scheduler_params ............. None
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   seq_parallel_communication_data_type  torch.float32
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   sparse_attention ............. None
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   sparse_gradients_enabled ..... False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   steps_per_print .............. 10
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   train_batch_size ............. 128
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   train_micro_batch_size_per_gpu  8
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   use_data_before_expert_parallel_  False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   use_node_local_storage ....... False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   wall_clock_breakdown ......... True
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   weight_quantization_config ... None
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   world_size ................... 16
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   zero_allow_untested_optimizer  False
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   zero_config .................. stage=1 contiguous_gradients=True reduce_scatter=True reduce_bucket_size=500000000 use_multi_rank_bucket_allreduce=True allgather_partitions=True allgather_bucket_size=500000000 overlap_comm=True load_from_fp32_weights=True elastic_checkpoint=False offload_param=None offload_optimizer=None sub_group_size=1,000,000,000 cpu_offload_param=None cpu_offload_use_pin_memory=None prefetch_bucket_size=50,000,000 param_persistence_threshold=100,000 model_persistence_threshold=sys.maxsize max_live_parameters=1,000,000,000 max_reuse_distance=1,000,000,000 gather_16bit_weights_on_model_save=False stage3_gather_fp16_weights_on_model_save=False ignore_unused_parameters=True legacy_stage1=False round_robin_gradients=False zero_hpz_partition_size=1 zero_quantized_weights=False zero_quantized_nontrainable_weights=False zero_quantized_gradients=False mics_shard_size=-1 mics_hierarchical_params_gather=False memory_efficient_linear=True pipeline_loading_checkpoint=False override_module_apply=True
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   zero_enabled ................. True
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   zero_force_ds_cpu_optimizer .. True
+[2024-10-18 17:04:50,994] [INFO] [config.py:983:print]   zero_optimization_stage ...... 1
+[2024-10-18 17:04:50,994] [INFO] [config.py:969:print_user_config]   json = {
+    "train_batch_size": 128, 
+    "train_micro_batch_size_per_gpu": 8, 
+    "optimizer": {
+        "type": "Adam", 
+        "params": {
+            "lr": 0.0003, 
+            "betas": [0.9, 0.95], 
+            "eps": 1e-08
+        }
+    }, 
+    "fp16": {
+        "enabled": true, 
+        "loss_scale": 0, 
+        "loss_scale_window": 1000, 
+        "hysteresis": 2, 
+        "min_loss_scale": 1
+    }, 
+    "zero_optimization": {
+        "stage": 1, 
+        "allgather_partitions": true, 
+        "allgather_bucket_size": 5.000000e+08, 
+        "overlap_comm": true, 
+        "reduce_scatter": true, 
+        "reduce_bucket_size": 5.000000e+08, 
+        "contiguous_gradients": true, 
+        "cpu_offload": false
+    }, 
+    "wall_clock_breakdown": true
+}
+[2024-10-18 17:04:50,994] [INFO] [engine.py:99:__init__] CONFIG: micro_batches=1 micro_batch_size=8
+[2024-10-18 17:04:50,994] [INFO] [engine.py:139:__init__] is_pipe_partitioned= False is_grad_partitioned= False
+[2024-10-18 17:04:51,030] [INFO] [engine.py:158:__init__] RANK=0 STAGE=0 LAYERS=29 [0, 29) STAGE_PARAMS=1482219520 (1482.220M) TOTAL_PARAMS=1482219520 (1482.220M) UNIQUE_PARAMS=1482219520 (1482.220M)
+ > number of parameters on model parallel rank 0: 1482219520
+ > total params: 1,482,219,520
+[2024-10-18 17:04:51,711] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,711] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,711] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,711] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,711] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,711] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,711] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,711] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+Unable to load checkpoint.
+Loading checkpoint and starting from iteration 0
+> building train, validation, and test datasets ...
+[2024-10-18 17:04:51,713] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,713] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,713] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,713] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,713] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,713] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,713] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+[2024-10-18 17:04:51,714] [WARNING] [engine.py:2703:load_checkpoint] Unable to find latest file at checkpoints/latest, if trying to load latest checkpoint please ensure this file exists or pass an explicit checkpoint tag when loading a checkpoint.
+    reading sizes...
+    reading pointers...
+    reading document index...
+    creating numpy buffer of mmap...
+    creating memory view of numpy buffer...
+    train_0:
+     no. of documents:79000
+ > WARNING: could not find index map files, building the indices on rank 0 ...
+ > elapsed time to build and save doc-idx mapping (seconds): 3.494723
+    using:
+     number of documents:       79000
+     number of epochs:          721
+     sequence length:           2048
+     total number of samples:   41217386
+ > elapsed time to build and save sample-idx mapping (seconds): 0.762055
+ > elapsed time to build and save shuffle-idx mapping (seconds): 1.984482
+ > loading doc-idx mapping from data/debug/fr-val_train_0_indexmap_41164800ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from data/debug/fr-val_train_0_indexmap_41164800ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from data/debug/fr-val_train_0_indexmap_41164800ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.021 seconds
+    total number of samples: 41217387
+    total number of epochs: 721
+    reading sizes...
+    reading pointers...
+    reading document index...
+    creating numpy buffer of mmap...
+    creating memory view of numpy buffer...
+    valid_0:
+     no. of documents:79000
+ > WARNING: could not find index map files, building the indices on rank 0 ...
+ > elapsed time to build and save doc-idx mapping (seconds): 0.018561
+    using:
+     number of documents:       79000
+     number of epochs:          8
+     sequence length:           2048
+     total number of samples:   457335
+ > elapsed time to build and save sample-idx mapping (seconds): 0.008611
+ > elapsed time to build and save shuffle-idx mapping (seconds): 0.012023
+ > loading doc-idx mapping from data/debug/fr-val_valid_0_indexmap_412935ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from data/debug/fr-val_valid_0_indexmap_412935ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from data/debug/fr-val_valid_0_indexmap_412935ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 457336
+    total number of epochs: 8
+    reading sizes...
+    reading pointers...
+    reading document index...
+    creating numpy buffer of mmap...
+    creating memory view of numpy buffer...
+    test_0:
+     no. of documents:79000
+ > WARNING: could not find index map files, building the indices on rank 0 ...
+ > elapsed time to build and save doc-idx mapping (seconds): 0.003896
+    using:
+     number of documents:       79000
+     number of epochs:          1
+     sequence length:           2048
+     total number of samples:   57166
+ > elapsed time to build and save sample-idx mapping (seconds): 0.002539
+ > elapsed time to build and save shuffle-idx mapping (seconds): 0.002003
+ > loading doc-idx mapping from data/debug/fr-val_test_0_indexmap_1287ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from data/debug/fr-val_test_0_indexmap_1287ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from data/debug/fr-val_test_0_indexmap_1287ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.001 seconds
+    total number of samples: 57167
+    total number of epochs: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+> RANK 0 elapsed time for building blendable dataset indices: 0.15 (sec)
+> building indices for blendable datasets ...
+> RANK 3 elapsed time for building blendable dataset indices: 0.15 (sec)
+> RANK 1 elapsed time for building blendable dataset indices: 0.15 (sec)
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+> RANK 0 elapsed time for building blendable dataset indices: 0.00 (sec)
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+> RANK 0 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 3 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 3 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 1 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 1 elapsed time for building blendable dataset indices: 0.00 (sec)
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+setting training data start iteration to 0
+setting validation data start iteration to 0
+> RANK 2 elapsed time for building blendable dataset indices: 0.15 (sec)
+> RANK 5 elapsed time for building blendable dataset indices: 0.15 (sec)
+> RANK 4 elapsed time for building blendable dataset indices: 0.15 (sec)
+> RANK 6 elapsed time for building blendable dataset indices: 0.15 (sec)
+> RANK 7 elapsed time for building blendable dataset indices: 0.15 (sec)
+> RANK 2 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 2 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 5 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 4 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 5 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 6 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 4 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 6 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 7 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 10 elapsed time for building blendable dataset indices: 0.16 (sec)
+> RANK 7 elapsed time for building blendable dataset indices: 0.00 (sec)
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+> RANK 10 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 10 elapsed time for building blendable dataset indices: 0.00 (sec)
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+> RANK 11 elapsed time for building blendable dataset indices: 0.16 (sec)
+> RANK 14 elapsed time for building blendable dataset indices: 0.16 (sec)
+> RANK 15 elapsed time for building blendable dataset indices: 0.16 (sec)
+> RANK 8 elapsed time for building blendable dataset indices: 0.16 (sec)
+> RANK 11 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 11 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 9 elapsed time for building blendable dataset indices: 0.16 (sec)
+> RANK 14 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 15 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 14 elapsed time for building blendable dataset indices: 0.00 (sec)
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+> RANK 15 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 13 elapsed time for building blendable dataset indices: 0.16 (sec)
+> RANK 12 elapsed time for building blendable dataset indices: 0.16 (sec)
+> RANK 8 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 8 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 9 elapsed time for building blendable dataset indices: 0.00 (sec)
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+> RANK 9 elapsed time for building blendable dataset indices: 0.00 (sec)
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+> RANK 13 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 12 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 13 elapsed time for building blendable dataset indices: 0.00 (sec)
+> RANK 12 elapsed time for building blendable dataset indices: 0.00 (sec)
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 2 worker processes in total. Our suggested max number of worker in current system is 1, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+done with setups ...
+time (ms) | model and optimizer: 8688.97 | train/valid/test data iterators: 9013.42
+training ...
+[2024-10-18 17:05:03,525] [INFO] [checkpointing.py:540:forward] Activation Checkpointing Information
+[2024-10-18 17:05:03,525] [INFO] [checkpointing.py:541:forward] ----Partition Activations True, CPU CHECKPOINTING False
+[2024-10-18 17:05:03,525] [INFO] [checkpointing.py:542:forward] ----contiguous Memory Checkpointing False with 24 total layers
+[2024-10-18 17:05:03,525] [INFO] [checkpointing.py:544:forward] ----Synchronization True
+[2024-10-18 17:05:03,525] [INFO] [checkpointing.py:545:forward] ----Profiling time in checkpointing False
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/lustre/orion/bif151/scratch/btherien/neox/miniconda3/lib/python3.12/site-packages/torch/autograd/graph.py:744: UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (Triggered internally at ../torch/csrc/autograd/autograd_not_implemented_fallback.cpp:63.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[2024-10-18 17:05:16,424] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 436.17 | optimizer_gradients: 1.34 | optimizer_step: 2.95
+[2024-10-18 17:05:20,114] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 447.15 | optimizer_gradients: 1.28 | optimizer_step: 2.95
+[2024-10-18 17:05:23,818] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 439.23 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:05:27,539] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 455.94 | optimizer_gradients: 1.29 | optimizer_step: 2.93
+[2024-10-18 17:05:31,199] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 414.33 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:05:34,832] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 439.49 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:05:38,479] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 448.76 | optimizer_gradients: 1.28 | optimizer_step: 2.93
+[2024-10-18 17:05:42,097] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 421.52 | optimizer_gradients: 1.28 | optimizer_step: 2.96
+[2024-10-18 17:05:45,783] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 450.30 | optimizer_gradients: 1.30 | optimizer_step: 2.93
+[2024-10-18 17:05:49,412] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 441.13 | optimizer_gradients: 1.31 | optimizer_step: 2.94
+[2024-10-18 17:05:49,412] [INFO] [logging.py:96:log_dist] [Rank 0] step=10, skipped=0, lr=[9.374999999999999e-07], mom=[[0.9, 0.95]]
+[2024-10-18 17:05:49,413] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 597.96 | fwd_microstep: 12010.44 | bwd_microstep: 18389.80 | bwd_inner_microstep: 18389.22 | bwd_allreduce_microstep: 0.10 | step_microstep: 4767.95
+[2024-10-18 17:05:49,413] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 12010.23 | bwd: 18389.64 | bwd_inner: 18389.09 | bwd_allreduce: 0.09 | step: 4768.03
+steps: 10 loss: 11.4417 iter time (s): 4.671 samples/sec: 27.406
+[2024-10-18 17:05:49,427] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 26.283 | iteration       10/  320000 | elapsed time per iteration (ms): 4870.2 | learning rate: 9.375E-07 | approx flops per GPU: 43.2TFLOPS | lm_loss: 1.178475E+01 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+after 10 iterations memory (MB) | allocated: 7902.4638671875 | max allocated: 21594.71533203125 | reserved: 22764.0 | max reserved: 22764.0
+time (ms)
+[2024-10-18 17:05:53,051] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 430.95 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:05:56,825] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 437.69 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:06:00,472] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 453.90 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:06:04,102] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 451.02 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:06:07,719] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 431.50 | optimizer_gradients: 1.30 | optimizer_step: 2.93
+[2024-10-18 17:06:11,326] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 414.85 | optimizer_gradients: 1.28 | optimizer_step: 2.95
+[2024-10-18 17:06:14,947] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 432.10 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:06:18,560] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 449.57 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:06:22,222] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 419.59 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:06:25,802] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 440.75 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:06:25,803] [INFO] [logging.py:96:log_dist] [Rank 0] step=20, skipped=0, lr=[1.8749999999999998e-06], mom=[[0.9, 0.95]]
+[2024-10-18 17:06:25,803] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 15.63 | fwd_microstep: 5420.73 | bwd_microstep: 16703.74 | bwd_inner_microstep: 16703.13 | bwd_allreduce_microstep: 0.07 | step_microstep: 4607.24
+[2024-10-18 17:06:25,804] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 5420.50 | bwd: 16703.55 | bwd_inner: 16703.02 | bwd_allreduce: 0.07 | step: 4607.36
+steps: 20 loss: 10.6155 iter time (s): 3.638 samples/sec: 35.184
+[2024-10-18 17:06:25,818] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 35.173 | iteration       20/  320000 | elapsed time per iteration (ms): 3639.1 | learning rate: 1.875E-06 | approx flops per GPU: 57.9TFLOPS | lm_loss: 1.095154E+01 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+time (ms)
+[2024-10-18 17:06:29,502] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 464.41 | optimizer_gradients: 1.28 | optimizer_step: 2.93
+[2024-10-18 17:06:33,156] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 460.27 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:06:36,857] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 425.63 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:06:40,492] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 437.00 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:06:44,066] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 418.05 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:06:47,703] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 431.28 | optimizer_gradients: 1.30 | optimizer_step: 2.94
+[2024-10-18 17:06:51,320] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 444.37 | optimizer_gradients: 1.28 | optimizer_step: 2.92
+[2024-10-18 17:06:54,922] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 414.80 | optimizer_gradients: 1.32 | optimizer_step: 2.93
+[2024-10-18 17:06:58,567] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 457.47 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:07:02,184] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 432.38 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:07:02,184] [INFO] [logging.py:96:log_dist] [Rank 0] step=30, skipped=0, lr=[2.8124999999999998e-06], mom=[[0.9, 0.95]]
+[2024-10-18 17:07:02,185] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 16.26 | fwd_microstep: 5383.56 | bwd_microstep: 16672.36 | bwd_inner_microstep: 16671.77 | bwd_allreduce_microstep: 0.07 | step_microstep: 4552.31
+[2024-10-18 17:07:02,186] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 5383.41 | bwd: 16672.21 | bwd_inner: 16671.70 | bwd_allreduce: 0.08 | step: 4552.41
+steps: 30 loss: 10.2992 iter time (s): 3.638 samples/sec: 35.184
+[2024-10-18 17:07:02,207] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 35.176 | iteration       30/  320000 | elapsed time per iteration (ms): 3638.9 | learning rate: 2.812E-06 | approx flops per GPU: 57.9TFLOPS | lm_loss: 1.041970E+01 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+time (ms)
+[2024-10-18 17:07:05,820] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 440.73 | optimizer_gradients: 1.30 | optimizer_step: 2.94
+[2024-10-18 17:07:09,456] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 443.22 | optimizer_gradients: 1.29 | optimizer_step: 2.93
+[2024-10-18 17:07:13,070] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 423.59 | optimizer_gradients: 1.31 | optimizer_step: 2.93
+[2024-10-18 17:07:16,716] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 436.92 | optimizer_gradients: 1.28 | optimizer_step: 2.92
+[2024-10-18 17:07:20,436] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 448.55 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:07:24,111] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 424.11 | optimizer_gradients: 1.28 | optimizer_step: 2.93
+[2024-10-18 17:07:27,744] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 432.52 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:07:31,351] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 423.82 | optimizer_gradients: 1.31 | optimizer_step: 2.93
+[2024-10-18 17:07:34,970] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 423.11 | optimizer_gradients: 1.28 | optimizer_step: 2.93
+[2024-10-18 17:07:38,618] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 411.55 | optimizer_gradients: 1.29 | optimizer_step: 2.93
+[2024-10-18 17:07:38,619] [INFO] [logging.py:96:log_dist] [Rank 0] step=40, skipped=0, lr=[3.7499999999999997e-06], mom=[[0.9, 0.95]]
+[2024-10-18 17:07:38,619] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 14.75 | fwd_microstep: 5371.02 | bwd_microstep: 16657.09 | bwd_inner_microstep: 16656.54 | bwd_allreduce_microstep: 0.08 | step_microstep: 4611.65
+[2024-10-18 17:07:38,620] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 5370.69 | bwd: 16656.96 | bwd_inner: 16656.46 | bwd_allreduce: 0.08 | step: 4611.76
+steps: 40 loss: 10.1054 iter time (s): 3.642 samples/sec: 35.146
+[2024-10-18 17:07:38,635] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 35.138 | iteration       40/  320000 | elapsed time per iteration (ms): 3642.8 | learning rate: 3.750E-06 | approx flops per GPU: 57.8TFLOPS | lm_loss: 1.019729E+01 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+time (ms)
+[2024-10-18 17:07:42,236] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 449.65 | optimizer_gradients: 1.34 | optimizer_step: 2.94
+[2024-10-18 17:07:46,419] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 463.75 | optimizer_gradients: 1.30 | optimizer_step: 2.93
+[2024-10-18 17:07:50,060] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 430.34 | optimizer_gradients: 1.28 | optimizer_step: 2.92
+[2024-10-18 17:07:53,735] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 427.46 | optimizer_gradients: 1.28 | optimizer_step: 2.95
+[2024-10-18 17:07:57,375] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 415.30 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:08:01,006] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 431.56 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:08:04,596] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 432.37 | optimizer_gradients: 1.28 | optimizer_step: 2.92
+[2024-10-18 17:08:08,227] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 435.32 | optimizer_gradients: 1.28 | optimizer_step: 2.95
+[2024-10-18 17:08:11,848] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 440.99 | optimizer_gradients: 1.31 | optimizer_step: 2.93
+[2024-10-18 17:08:15,526] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 426.88 | optimizer_gradients: 1.28 | optimizer_step: 2.93
+[2024-10-18 17:08:15,527] [INFO] [logging.py:96:log_dist] [Rank 0] step=50, skipped=0, lr=[4.6875e-06], mom=[[0.9, 0.95]]
+[2024-10-18 17:08:15,527] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 16.28 | fwd_microstep: 5377.08 | bwd_microstep: 16675.02 | bwd_inner_microstep: 16674.42 | bwd_allreduce_microstep: 0.08 | step_microstep: 4637.39
+[2024-10-18 17:08:15,528] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 5376.79 | bwd: 16674.84 | bwd_inner: 16674.34 | bwd_allreduce: 0.08 | step: 4637.49
+steps: 50 loss: 9.8696 iter time (s): 3.689 samples/sec: 34.700
+[2024-10-18 17:08:15,529] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 34.694 | iteration       50/  320000 | elapsed time per iteration (ms): 3689.4 | learning rate: 4.687E-06 | approx flops per GPU: 57.1TFLOPS | lm_loss: 9.995791E+00 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+time (ms)
+[2024-10-18 17:08:19,082] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 418.81 | optimizer_gradients: 1.28 | optimizer_step: 2.95
+[2024-10-18 17:08:22,691] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 408.02 | optimizer_gradients: 1.29 | optimizer_step: 2.93
+[2024-10-18 17:08:26,271] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 411.62 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:08:29,926] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 420.08 | optimizer_gradients: 1.29 | optimizer_step: 2.93
+[2024-10-18 17:08:33,512] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 424.56 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:08:37,180] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 428.71 | optimizer_gradients: 1.31 | optimizer_step: 2.94
+[2024-10-18 17:08:40,811] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 436.89 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:08:44,455] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 418.68 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:08:48,108] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 440.41 | optimizer_gradients: 1.29 | optimizer_step: 2.96
+[2024-10-18 17:08:51,717] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 429.72 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:08:51,717] [INFO] [logging.py:96:log_dist] [Rank 0] step=60, skipped=0, lr=[5.6249999999999995e-06], mom=[[0.9, 0.95]]
+[2024-10-18 17:08:51,718] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 16.70 | fwd_microstep: 5404.05 | bwd_microstep: 16716.02 | bwd_inner_microstep: 16715.46 | bwd_allreduce_microstep: 0.07 | step_microstep: 4495.41
+[2024-10-18 17:08:51,718] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 5403.91 | bwd: 16715.90 | bwd_inner: 16715.40 | bwd_allreduce: 0.07 | step: 4495.51
+steps: 60 loss: 9.5620 iter time (s): 3.618 samples/sec: 35.375
+[2024-10-18 17:08:51,720] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 35.367 | iteration       60/  320000 | elapsed time per iteration (ms): 3619.2 | learning rate: 5.625E-06 | approx flops per GPU: 58.2TFLOPS | lm_loss: 9.720547E+00 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+time (ms)
+[2024-10-18 17:08:55,311] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 418.48 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:08:58,967] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 451.76 | optimizer_gradients: 1.29 | optimizer_step: 2.92
+[2024-10-18 17:09:02,636] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 439.63 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:09:06,300] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 436.93 | optimizer_gradients: 1.28 | optimizer_step: 2.95
+[2024-10-18 17:09:09,913] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 425.77 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:09:13,552] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 432.66 | optimizer_gradients: 1.32 | optimizer_step: 2.94
+[2024-10-18 17:09:17,195] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 423.93 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:09:20,795] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 439.02 | optimizer_gradients: 1.33 | optimizer_step: 2.94
+[2024-10-18 17:09:24,421] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 436.91 | optimizer_gradients: 1.29 | optimizer_step: 2.93
+[2024-10-18 17:09:28,115] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 428.35 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:09:28,116] [INFO] [logging.py:96:log_dist] [Rank 0] step=70, skipped=0, lr=[6.5624999999999994e-06], mom=[[0.9, 0.95]]
+[2024-10-18 17:09:28,116] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 15.63 | fwd_microstep: 5422.88 | bwd_microstep: 16746.97 | bwd_inner_microstep: 16746.40 | bwd_allreduce_microstep: 0.07 | step_microstep: 4577.43
+[2024-10-18 17:09:28,117] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 5422.73 | bwd: 16746.82 | bwd_inner: 16746.25 | bwd_allreduce: 0.07 | step: 4577.53
+steps: 70 loss: 9.2980 iter time (s): 3.639 samples/sec: 35.175
+[2024-10-18 17:09:28,118] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 35.167 | iteration       70/  320000 | elapsed time per iteration (ms): 3639.8 | learning rate: 6.562E-06 | approx flops per GPU: 57.8TFLOPS | lm_loss: 9.399570E+00 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+time (ms)
+[2024-10-18 17:09:31,747] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 436.58 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:09:35,384] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 429.52 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:09:39,074] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 423.16 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:09:42,777] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 441.74 | optimizer_gradients: 1.30 | optimizer_step: 2.94
+[2024-10-18 17:09:46,386] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 415.46 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:09:49,983] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 411.19 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:09:53,614] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 430.85 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:09:57,256] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 452.58 | optimizer_gradients: 1.30 | optimizer_step: 2.94
+[2024-10-18 17:10:00,903] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 432.76 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:10:04,627] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 468.67 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:10:04,627] [INFO] [logging.py:96:log_dist] [Rank 0] step=80, skipped=0, lr=[7.499999999999999e-06], mom=[[0.9, 0.95]]
+[2024-10-18 17:10:04,628] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 14.72 | fwd_microstep: 5438.15 | bwd_microstep: 16758.69 | bwd_inner_microstep: 16758.09 | bwd_allreduce_microstep: 0.07 | step_microstep: 4585.12
+[2024-10-18 17:10:04,628] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 5437.75 | bwd: 16758.51 | bwd_inner: 16758.01 | bwd_allreduce: 0.07 | step: 4585.22
+steps: 80 loss: 8.9023 iter time (s): 3.651 samples/sec: 35.063
+[2024-10-18 17:10:04,630] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 35.058 | iteration       80/  320000 | elapsed time per iteration (ms): 3651.1 | learning rate: 7.500E-06 | approx flops per GPU: 57.7TFLOPS | lm_loss: 9.075768E+00 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+time (ms)
+[2024-10-18 17:10:08,275] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 424.25 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:10:11,955] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 435.69 | optimizer_gradients: 1.29 | optimizer_step: 2.92
+[2024-10-18 17:10:15,612] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 429.62 | optimizer_gradients: 1.29 | optimizer_step: 2.93
+[2024-10-18 17:10:19,252] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 433.54 | optimizer_gradients: 1.28 | optimizer_step: 2.93
+[2024-10-18 17:10:22,933] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 441.83 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:10:26,574] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 415.04 | optimizer_gradients: 1.28 | optimizer_step: 2.94
+[2024-10-18 17:10:30,291] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 425.60 | optimizer_gradients: 1.29 | optimizer_step: 2.95
+[2024-10-18 17:10:33,923] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 411.65 | optimizer_gradients: 1.28 | optimizer_step: 2.91
+[2024-10-18 17:10:37,572] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 429.27 | optimizer_gradients: 1.29 | optimizer_step: 2.94
+[2024-10-18 17:10:41,215] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 431.03 | optimizer_gradients: 1.31 | optimizer_step: 2.94
+[2024-10-18 17:10:41,215] [INFO] [logging.py:96:log_dist] [Rank 0] step=90, skipped=0, lr=[8.437499999999998e-06], mom=[[0.9, 0.95]]
+[2024-10-18 17:10:41,216] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | batch_input: 15.14 | fwd_microstep: 5440.35 | bwd_microstep: 16761.50 | bwd_inner_microstep: 16760.90 | bwd_allreduce_microstep: 0.07 | step_microstep: 4516.17
+[2024-10-18 17:10:41,217] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | fwd: 5440.16 | bwd: 16761.34 | bwd_inner: 16760.81 | bwd_allreduce: 0.07 | step: 4516.28
+steps: 90 loss: 8.5976 iter time (s): 3.658 samples/sec: 34.988
+[2024-10-18 17:10:41,222] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms)
+ samples/sec: 34.980 | iteration       90/  320000 | elapsed time per iteration (ms): 3659.3 | learning rate: 8.437E-06 | approx flops per GPU: 57.5TFLOPS | lm_loss: 8.725148E+00 | loss scale: 65536.0 | number of skipped iterations:   0 | number of nan iterations:   0 |
+time (ms)
+[2024-10-18 17:10:44,490] [INFO] [loss_scaler.py:190:update_scale] [deepspeed] OVERFLOW! Rank 0 Skipping step. Attempted loss scale: 65536, but hysteresis is 2. Reducing hysteresis to 1
+[2024-10-18 17:10:47,702] [INFO] [loss_scaler.py:183:update_scale] [deepspeed] OVERFLOW! Rank 0 Skipping step. Attempted loss scale: 65536, reducing to 32768
+[2024-10-18 17:10:51,328] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 424.33 | optimizer_gradients: 1.31 | optimizer_step: 2.97
+[2024-10-18 17:10:54,959] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 431.22 | optimizer_gradients: 1.28 | optimizer_step: 2.93
+[2024-10-18 17:10:58,594] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 426.29 | optimizer_gradients: 1.30 | optimizer_step: 2.94
+[2024-10-18 17:11:02,205] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 417.72 | optimizer_gradients: 1.29 | optimizer_step: 2.93
+[2024-10-18 17:11:05,849] [INFO] [logging.py:96:log_dist] [Rank 0] time (ms) | optimizer_allgather: 438.04 | optimizer_gradients: 1.29 | optimizer_step: 2.94

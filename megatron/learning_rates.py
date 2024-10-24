@@ -1,8 +1,7 @@
-
-# Copyright (c) 2021, EleutherAI
+# Copyright (c) 2024, EleutherAI
 # This file is based on code by the authors denoted below and has been modified from its original version.
 #
-# Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +21,7 @@ import math
 
 from megatron import print_rank_0
 
+
 class AnnealingLR(object):
     """Anneals the learning rate."""
 
@@ -34,41 +34,18 @@ class AnnealingLR(object):
         decay_style,
         last_iter,
         min_lr=0.0,
-        constant_lr=None,
-        num_repeats=None,
-        constant_iters_percent=None,
-        cooldown_iters_percent=None,
-        timescale=None, 
         use_checkpoint_lr_scheduler=True,
         override_lr_scheduler=False,
         use_mup=False,
     ):
 
         # Class values.
-        
         self.optimizer = optimizer
         self.start_lr = start_lr
         self.min_lr = min_lr
-        self.constant_lr = constant_lr
         self.warmup_iter = warmup_iter
         self.num_iters = last_iter
         self.end_iter = total_iters
-        self.constant_iter = constant_iters_percent
-        self.cooldown_iter = cooldown_iters_percent
-
-        self.timescale = timescale
-
-        if constant_iters_percent is not None:
-            self.constant_iter = constant_iters_percent * total_iters
-        if cooldown_iters_percent is not None:
-            self.cooldown_iter = cooldown_iters_percent * total_iters
-        
-        if decay_style != 'cosine-inf':
-            num_repeats = 1
-            
-        if num_repeats is not None: 
-            assert total_iters % num_repeats == 0
-            self.repeat_iter_interval = int( total_iters / num_repeats )
         assert self.end_iter > 0
         self.decay_style = decay_style
         self.override_lr_scheduler = override_lr_scheduler
@@ -90,36 +67,24 @@ class AnnealingLR(object):
         num_iters_ = self.num_iters
         # Warmup.
         if self.warmup_iter > 0 and self.num_iters <= self.warmup_iter:
-            print_rank_0("In get_lr, using warmup")
             return float(self.start_lr) * num_iters_ / self.warmup_iter
-        elif self.decay_style == 'cosine-inf' \
-        and self.warmup_iter > 0 \
-        and num_iters_ % self.repeat_iter_interval <= self.warmup_iter:
-            print_rank_0("In get_lr, using warmup")
-            return float(self.min_lr) + float(self.start_lr - self.min_lr) * (num_iters_ % self.repeat_iter_interval) / self.warmup_iter
-            
 
-        num_iters_ = (num_iters_%self.repeat_iter_interval) - self.warmup_iter
+        num_iters_ = num_iters_ - self.warmup_iter
         if self.decay_style == "linear":
-            lr = self.start_lr * (self.end_iter - num_iters_) / self.end_iter
+            end_iter_ = self.end_iter - self.warmup_iter
+            lr = self.start_lr * (end_iter_ - num_iters_) / end_iter_
         elif self.decay_style == "cosine":
             end_iter_ = self.end_iter - self.warmup_iter
             lr = self.min_lr + (
-                (self.start_lr-self.min_lr)
-                / 2.0
-                * (math.cos(math.pi * num_iters_ / end_iter_) + 1)
-            )
-        elif self.decay_style == "cosine-inf":
-            end_iter_ = self.repeat_iter_interval - self.warmup_iter
-            lr = self.min_lr + (
-                (self.start_lr-self.min_lr)
+                (self.start_lr - self.min_lr)
                 / 2.0
                 * (math.cos(math.pi * num_iters_ / end_iter_) + 1)
             )
         elif self.decay_style == "exponential":
             # exp(-0.693) = 1/2
-            lr = self.start_lr * math.exp(-0.693 * num_iters_ / self.end_iter)
-        
+            end_iter = self.end_iter - self.warmup_iter
+            lr = self.start_lr * math.exp(-0.693 * num_iters_ / end_iter)
+            
         elif "infinite" in self.decay_style:
             if num_iters_ <= self.constant_iter:
                 if num_iters_ <= self.cooldown_iter:
@@ -216,10 +181,3 @@ class AnnealingLR(object):
 
         self.num_iters = sd["num_iters"]
         self.step(self.num_iters)
-
-
-    def reload_optimizer(self):
-        if self.decay_style == 'cosine-inf':
-            return self.num_iters % self.repeat_iter_interval == 0
-        else:
-            return False

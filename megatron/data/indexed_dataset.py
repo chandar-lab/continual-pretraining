@@ -142,6 +142,7 @@ class IndexedDataset(torch.utils.data.Dataset):
     def read_index(self, path):
         with open(index_file_path(path), "rb") as f:
             magic = f.read(8)
+            print(magic)
             assert magic == self._HDR_MAGIC, (
                 "Index file doesn't match expected format. "
                 "Make sure that --dataset-impl is configured properly."
