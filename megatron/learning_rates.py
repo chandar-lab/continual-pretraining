@@ -164,8 +164,11 @@ class AnnealingLR(object):
         self.step(self.num_iters)
 
 
-    def reload_optimizer(self):
+    def reload_optimizer(self,iteration,cumulative):
         if self.decay_style == 'cosine-inf':
-            return self.num_iters % self.repeat_iter_interval == 0
+            if iteration in cumulative:
+                print_rank_0(f"loaded optimizer state at iteration {self.num_iters}")
+                return True
+            # return self.num_iters % self.repeat_iter_interval == 0
         else:
             return False

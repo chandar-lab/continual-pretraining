@@ -204,17 +204,17 @@ def pretrain(neox_args):
     # Initialize and get arguments, timers, and Tensorboard writer.
     initialize_megatron(neox_args=neox_args)
 
-    if lr_scheduler.reload_optimizer():
-        # reload optimizer parameters to simulate restarting the decay on a checkpoint
-        # without available optimizer states
-        # optimizer.initialize_optimizer_states()
-        print_rank_0("no reloading this time")
+
         
     # Model, optimizer, and learning rate.
     timers("model and optimizer").start()
     model, optimizer, lr_scheduler, reference_model = setup_model_and_optimizer(
         neox_args=neox_args, use_cache=False, iteration=neox_args.iteration
     )
+
+
+
+
     timers("model and optimizer").stop()
     task_id=0
     iteration = 0
@@ -242,7 +242,9 @@ def pretrain(neox_args):
     iters_task = np.cumsum(task_iters)
     train_data_iterator, valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
     neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=task_iters, task_id=0)
-    
+
+
+
     # Data stuff.
     # timers("train/valid/test data iterators").start()
     # (
@@ -1138,6 +1140,20 @@ def get_learning_rate_scheduler(optimizer, neox_args):
     return lr_scheduler
 
 
+
+def reset_optimizer(model,lr_scheduler,neox_args):
+    optimizer, param_groups = get_optimizer(model=model, neox_args=neox_args)
+    model, optimizer, _, lr_scheduler = deepspeed.initialize(
+        model=model,
+        optimizer=optimizer,
+        args=neox_args,
+        lr_scheduler=lr_scheduler,
+        dist_init_required=False,
+        model_parameters=param_groups,
+        config_params=neox_args.deepspeed_config,
+        mpu=mpu if not neox_args.is_pipe_parallel else None,
+    )
+
 def setup_model_and_optimizer(neox_args, use_cache=False, iteration=None):
     """Setup memory profiler"""
     if neox_args.memory_profiling:
@@ -1535,8 +1551,16 @@ def train(
         #         optimizer=optimizer,
         #         lr_scheduler=lr_scheduler,
         #     )
+
+        ## INFINITE LR SCHEDULER UPDATE THE  RELOAD CHECK IF cosine_inf AND END OF TASK ##
+        ## OTHER APPROACH CAN BE TO CHECK IF iteration == iteration_task[task_id] and cosine_inf ##
+        if lr_scheduler.reload_optimizer(iteration,iteration_task):
+            reset_optimizer(neox_args, optimizer, lr_scheduler)
+            print_rank_0("reloading this time")
+
+
+        ## SAVE CHECKPOINT ##   
         
-        # Checkpointing
         if neox_args.save and iteration in neox_args.save_iters or iteration in [1, 1000 , 2000, 3000, 4000 , 5000 , 6000,7000 , 8000 , 9000 , 10000,11000, 12000, 13000, 14000,15000] or iteration == neox_args.train_iters:
         # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
         
@@ -1560,6 +1584,11 @@ def train(
                     lr_scheduler=lr_scheduler,
                     task_id=task_id,
                 )
+
+
+
+
+
         # Evaluation
         if (
             neox_args.eval_interval
