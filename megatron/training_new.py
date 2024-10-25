@@ -204,7 +204,11 @@ def pretrain(neox_args):
     # Initialize and get arguments, timers, and Tensorboard writer.
     initialize_megatron(neox_args=neox_args)
 
-
+    if lr_scheduler.reload_optimizer():
+        # reload optimizer parameters to simulate restarting the decay on a checkpoint
+        # without available optimizer states
+        # optimizer.initialize_optimizer_states()
+        print_rank_0("no reloading this time")
         
     # Model, optimizer, and learning rate.
     timers("model and optimizer").start()
@@ -1111,7 +1115,12 @@ def get_learning_rate_scheduler(optimizer, neox_args):
         num_iters = neox_args.train_iters
     num_iters = max(1, num_iters)
     init_step = 0
-    warmup_iter = neox_args.warmup * num_iters
+    # warmup_iter = neox_args.warmup * num_iters
+    if neox_args.lr_decay_style == 'cosine-inf':
+        warmup_iter = neox_args.warmup * int(num_iters / neox_args.num_repeats)
+    else:
+        warmup_iter = neox_args.warmup * num_iters
+        
     lr_scheduler = AnnealingLR(
         optimizer,
         start_lr=neox_args.lr,
@@ -1119,6 +1128,7 @@ def get_learning_rate_scheduler(optimizer, neox_args):
         total_iters=num_iters,
         decay_style=neox_args.lr_decay_style,
         last_iter=init_step,
+        num_repeats=neox_args.num_repeats,
         min_lr=neox_args.min_lr,
         use_checkpoint_lr_scheduler=neox_args.use_checkpoint_lr_scheduler,
         override_lr_scheduler=neox_args.override_lr_scheduler,
@@ -1745,3 +1755,16 @@ def save_snapshot(neox_args):
         os.makedirs(snapshot_path)
     with open(os.path.join(snapshot_path, "mem_snapshot.pickle"), "wb") as f:
         dump(snapshot, f)
+        
+def reset_optimizer(model,lr_scheduler,neox_args):
+    optimizer, param_groups = get_optimizer(model=model, neox_args=neox_args)
+    model, optimizer, _, lr_scheduler = deepspeed.initialize(
+        model=model,
+        optimizer=optimizer,
+        args=neox_args,
+        lr_scheduler=lr_scheduler,
+        dist_init_required=False,
+        model_parameters=param_groups,
+        config_params=neox_args.deepspeed_config,
+        mpu=mpu if not neox_args.is_pipe_parallel else None,
+    )

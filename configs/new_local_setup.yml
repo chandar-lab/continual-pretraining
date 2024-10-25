@@ -24,7 +24,12 @@
        "betas": [0.9, 0.999],
        "eps": 1.0e-8
      }
-   },
+    },
+    # "min_lr": 3.0e-5,
+    # "lr_decay_style": "cosine-inf",
+    # "num_repeats": 3,
+    # "warmup": 0.01, 
+   "lr_decay_style": "cosine",
    "zero_optimization": {
     "stage": 1,
     "allgather_partitions": true,
@@ -53,10 +58,9 @@
      "hysteresis": 2,
      "min_loss_scale": 1
    },
-   "train_iters": 15000,
-   "lr_decay_iters": 15000,
+   "train_iters": 30000,
+   "lr_decay_iters": 30000,
    "distributed_backend": "nccl",
-   "lr_decay_style": "cosine",
    "warmup": 0.01,
    "checkpoint_factor": 10000,
    "eval_interval": 1000,
@@ -77,12 +81,13 @@
   #  "vocab_file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
    "vocab-file": "data/20B_tokenizer.json",
    "use_replay": true,
-   "buffer_size": 1000,
-   "file_size": 100,
+   "buffer_size": 10000,
+   "file_size": 1000,
    "replay_buffer_proportion" : 0.5,
    "buffer_dir": "/lustre/orion/bif151/scratch/gopeshh/for_gopeshh/gpt-neox/data/buffer_save",
   #  "deepspeed_mpi": true,
    "save": "checkpoints/pythia_410M_15k",
    "log_dir": "logs",
-  #  "load": "checkpoints/pythia_410M_15k",
+   "tensorboard_dir": "tensorboard",
+   "load": "checkpoints/pythia_410M_15k",
 }
