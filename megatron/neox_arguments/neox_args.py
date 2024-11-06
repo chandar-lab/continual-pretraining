@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 try:
     from .template import NeoXArgsTemplate
@@ -565,8 +565,13 @@ class NeoXArgsLRScheduler(NeoXArgsTemplate):
     """
     LR Scheduler Arguments
     """
-
-    lr_decay_style: Literal["constant", "linear", "cosine", "exponential"] = "linear"
+    lr_decay_style: Literal["constant", "linear", "cosine", "cosine-inf", "exponential"] = "linear"
+    
+    num_repeats: int = 1
+    """
+    the number of times the smalle schedule is repeated for infinite cosine decay
+    """
+    
     """
     Learning rate decay function. Choose from 'constant', 'linear', 'cosine', 'exponential'.
     """
@@ -861,6 +866,31 @@ class NeoXArgsOther(NeoXArgsTemplate):
     """
     Set during launching
     """
+    
+    use_replay: bool = None
+    """
+    Use a replay buffer or not
+    """
+    
+    buffer_size: int = 3000000
+    """
+    Replay buffer size
+    """
+    
+    file_size: int = 1000
+    """
+    replay buffer file size
+    """
+    
+    buffer_dir: str = None
+    """
+    replay buffer save directory
+    """
+    
+    fill_buffer_size: int = 100
+    """
+    replay buffer save directory
+    """
 
 
 @dataclass
@@ -873,6 +903,7 @@ class NeoXArgsTokenizer(NeoXArgsTemplate):
         "GPT2BPETokenizer",
         "HFTokenizer",
         "HFGPT2Tokenizer",
+        "Llama3HFTokenizer",
         "SPMTokenizer",
         "CharLevelTokenizer",
         "TiktokenTokenizer",
@@ -1189,12 +1220,26 @@ class NeoXArgsTraining(NeoXArgsTemplate):
     """
     training microbatch size per gpu
     """
-
+    eff_batch_size: int = 64
+    """
+    training effective batch size 
+    """
     train_iters: int = None
     """
     Number of iterations to run for training.
     """
-
+    iters_task: list = None
+    """
+    Number of iterations to run for each task.
+    """
+    train_proportion: list = None
+    """
+    proportion of train iters for each task
+    """
+    replay_buffer_proportion: float = 0.5
+    """
+    proportion of replay buffer samples in batch
+    """
     eval_iters: int = 100
     """
     Number of iterations to run for evaluation validation/test for.

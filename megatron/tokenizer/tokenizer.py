@@ -32,10 +32,6 @@ def build_tokenizer(args):
     if args.rank == 0:
         print("> building {} tokenizer ...".format(args.tokenizer_type), flush=True)
 
-    assert (
-        args.tokenizer_type is not None
-    ), "tokenizer_type must be specified in the .yml config"
-
     # Select and instantiate the tokenizer.
     if args.tokenizer_type.lower() == "GPT2BPETokenizer".lower():
         assert args.vocab_file is not None
@@ -47,6 +43,11 @@ def build_tokenizer(args):
     elif args.tokenizer_type.lower() == "HFTokenizer".lower():
         assert args.vocab_file is not None
         tokenizer = HFTokenizer(args.vocab_file)
+
+    elif args.tokenizer_type.lower() == "Llama3HFTokenizer".lower():
+        assert args.vocab_file is not None
+        tokenizer = Llama3HFTokenizer(args.vocab_file)
+
     elif args.tokenizer_type.lower() == "HFGPT2Tokenizer".lower():
         if args.vocab_file is None:
             print(
@@ -402,3 +403,40 @@ class TiktokenTokenizer(AbstractTokenizer):
     @property
     def pad(self):
         raise NotImplementedError
+
+
+class Llama3HFTokenizer(AbstractTokenizer):
+    """Designed to Integrate HF's Tokenizer library with Llama3 tokenizer."""
+    def __init__(self, vocab_file):
+        name = "Llama3HFTokenizer"
+        super().__init__(name)
+
+        self.tokenizer = Tokenizer.from_file(vocab_file)
+        self.eod_id = self.tokenizer.token_to_id("<|end_of_text|>")
+        self.pad_id = self.tokenizer.token_to_id("<|padding|>")
+
+
+    @property
+    def vocab_size(self):
+        return self.tokenizer.get_vocab_size()
+
+    @property
+    def vocab(self):
+        return self.tokenizer.get_vocab()
+
+    @property
+    def inv_vocab(self):
+        return self.tokenizer.decoder
+
+    def tokenize(self, text: str):
+        return self.tokenizer.encode(text).ids
+
+    def tokenize_batch(self, text_batch: Union[List[str], str]):
+        return self.tokenizer.encode_batch(text_batch)
+
+    def detokenize(self, token_ids):
+        return self.tokenizer.decode(token_ids)
+
+    @property
+    def eod(self):
+        return self.eod_id

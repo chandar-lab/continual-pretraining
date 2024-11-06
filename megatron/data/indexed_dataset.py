@@ -142,6 +142,7 @@ class IndexedDataset(torch.utils.data.Dataset):
     def read_index(self, path):
         with open(index_file_path(path), "rb") as f:
             magic = f.read(8)
+            print(magic)
             assert magic == self._HDR_MAGIC, (
                 "Index file doesn't match expected format. "
                 "Make sure that --dataset-impl is configured properly."
@@ -517,21 +518,60 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
             sents = np.split(np_array, offsets[:-1])
             return sents
 
+    # def get(self, idx, offset=0, length=None):
+    #     """Retrieves a single item from the dataset with the option to only
+    #     return a portion of the item.
+
+    #     get(idx) is the same as [idx] but get() does not support slicing.
+    #     """
+    #     ptr, size = self._index[idx]
+    #     if length is None:
+    #         length = size - offset
+    #     ptr += offset * np.dtype(self._index.dtype).itemsize
+    #     # print("INSIDE GET FUNC:", length)
+    #     np_array = np.frombuffer(
+    #         self._bin_buffer, dtype=self._index.dtype, count=length, offset=ptr
+    #     )
+    #     return np_array
+    # def get(self, idx, offset=0, length=None):
+    #     """Retrieves a single item from the dataset with the option to only
+    #     return a portion of the item.
+    #     get(idx) is the same as [idx] but get() does not support slicing.
+    #     """
+    #     ptr, size = self._index[idx]
+    #     if length is None:
+    #         length = size - offset
+    #     # Calculate maximum possible length to prevent buffer overflow
+    #     max_length = (len(self._bin_buffer) - (ptr + offset * np.dtype(self._index.dtype).itemsize)) // np.dtype(self._index.dtype).itemsize
+    #     length = min(length, max_length)
+    #     print("length and offset:", length, ptr)
+    #     # Calculate final pointer with offset
+    #     ptr += offset * np.dtype(self._index.dtype).itemsize
+    #     np_array = np.frombuffer(
+    #         self._bin_buffer, dtype=self._index.dtype, count=length, offset=ptr
+    #     )
+    #     return np_array
     def get(self, idx, offset=0, length=None):
         """Retrieves a single item from the dataset with the option to only
         return a portion of the item.
-
-        get(idx) is the same as [idx] but get() does not support slicing.
         """
         ptr, size = self._index[idx]
+        # Adjust length to avoid overflow if it's not specified or exceeds available size
         if length is None:
             length = size - offset
+        # Calculate maximum permissible length based on the buffer size
+        buffer_remainder = len(self._bin_buffer) - ptr - (offset * np.dtype(self._index.dtype).itemsize)
+        length = min(length, buffer_remainder // np.dtype(self._index.dtype).itemsize)
+        # Calculate final pointer with offset, ensuring within bounds
         ptr += offset * np.dtype(self._index.dtype).itemsize
+        # print("length and offset:", length, ptr)
+        if ptr + length * np.dtype(self._index.dtype).itemsize > len(self._bin_buffer):
+            raise ValueError("Requested data length exceeds available buffer size.")
         np_array = np.frombuffer(
             self._bin_buffer, dtype=self._index.dtype, count=length, offset=ptr
         )
         return np_array
-
+    
     @property
     def sizes(self):
         return self._index.sizes

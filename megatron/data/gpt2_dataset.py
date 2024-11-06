@@ -91,6 +91,8 @@ class GPT2Dataset(torch.utils.data.Dataset):
         try:
             # Get the shuffled index.
             idx = self.shuffle_idx[idx]
+            if idx>= len(self.sample_idx):
+                idx=idx%len(self.sample_idx)
             # Start and end documents and offsets.
             doc_index_f = self.sample_idx[idx][0]
             doc_index_l = self.sample_idx[idx + 1][0]
