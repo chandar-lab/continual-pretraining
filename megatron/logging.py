@@ -1,3 +1,4 @@
+
 # Copyright (c) 2024, EleutherAI.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -120,7 +121,9 @@ def get_flops(neox_args, iter_time_s) -> float:
                 + (vocab_size / (16.0 * num_layers * hidden_size))
             )
         )
+    # return flops_per_iteration / (iter_time_s * world_size)
     return flops_per_iteration / (iter_time_s * world_size)
+
 
 
 def training_log(
@@ -316,16 +319,17 @@ def training_log(
         # log other stuff every neox_args.log_interval iters
         elapsed_time = timers("interval time").elapsed()
         iteration_time = elapsed_time / neox_args.log_interval
-        samples_per_sec = neox_args.train_batch_size / iteration_time
-        log_string = " samples/sec: {:.3f} |".format(samples_per_sec)
-        tb_wandb_log(
-            "runtime/samples_per_sec",
-            samples_per_sec,
-            iteration,
-            use_wandb=neox_args.use_wandb,
-            tensorboard_writer=neox_args.tensorboard_writer,
-            comet_experiment=neox_args.comet_experiment,
-        )
+        log_string = ""
+        # samples_per_sec = neox_args.train_batch_size / iteration_time
+        # log_string = " samples/sec: {:.3f} |".format(samples_per_sec)
+        # tb_wandb_log(
+        #     "runtime/samples_per_sec",
+        #       samples_per_sec,
+        #     iteration,
+        #     use_wandb=neox_args.use_wandb,
+        #     tensorboard_writer=neox_args.tensorboard_writer,
+        #     comet_experiment=neox_args.comet_experiment,
+        # )
         tb_wandb_log(
             "runtime/iteration_time",
             iteration_time,
