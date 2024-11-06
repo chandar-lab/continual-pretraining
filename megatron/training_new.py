@@ -330,31 +330,31 @@ def pretrain(neox_args):
             chart_name="test",
             task_id=0,
         )
-    # if neox_args.do_train and neox_args.train_iters > 0:
-    #     iteration = train(
-    #         neox_args=neox_args,
-    #         timers=timers,
-    #         model=model,
-    #         reference_model=reference_model,
-    #         optimizer=optimizer,
-    #         lr_scheduler=lr_scheduler,
-    #         train_data_iterator=train_data_iterator,
-    #         valid_data_iterator=valid_data_iterator,
-    #     )
+    if neox_args.do_train and neox_args.train_iters > 0:
+        iteration = train(
+            neox_args=neox_args,
+            timers=timers,
+            model=model,
+            reference_model=reference_model,
+            optimizer=optimizer,
+            lr_scheduler=lr_scheduler,
+            train_data_iterator=train_data_iterator,
+            valid_data_iterator=valid_data_iterator,
+        )
 
-    # if neox_args.do_valid:
-    #     prefix = "the end of training for val data"
-    #     evaluate_and_print_results(
-    #         neox_args=neox_args,
-    #         prefix=prefix,
-    #         forward_step_func=forward_step,
-    #         data_iterator=valid_data_iterator,
-    #         model=model,
-    #         iteration=iteration,
-    #         verbose=False,
-    #         timers=timers,
-    #         reference_model=reference_model,
-    #     )
+    if neox_args.do_valid:
+        prefix = "the end of training for val data"
+        evaluate_and_print_results(
+            neox_args=neox_args,
+            prefix=prefix,
+            forward_step_func=forward_step,
+            data_iterator=valid_data_iterator,
+            model=model,
+            iteration=iteration,
+            verbose=False,
+            timers=timers,
+            reference_model=reference_model,
+        )
 
     # if neox_args.save and iteration != 0:
     #     save_checkpoint(
@@ -1404,28 +1404,32 @@ def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None,
 
     assert neox_args.deepspeed
     inputs = next(data_iterator)
-    while fill_buffer_iter < 100:
-        buffer_init_inputs = next(data_iterator)
-        replay_buffer.add(buffer_init_inputs['text'])
-        fill_buffer_iter += 1
-        # print("FILL ITERATION:", fill_buffer_iter)
         
     if neox_args.use_replay:
 
-    # if replay_buffer is not None:
-        replay_buffer.add(inputs['text'])
-        current_batch = next(data_iterator)
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        buffer_batch = replay_buffer.get_batch(neox_args.replay_buffer_proportion)
-        batch = torch.cat([current_batch['text'].to(device), buffer_batch], dim=0)
-        combined_batch = {'text': batch}
-        # Add current batch to replay buffer
-        for sample in current_batch['text']:
-            replay_buffer.add(sample)
-            
-        loss = model.train_batch(data_iter=iter([combined_batch]))
+        if fill_buffer_iter > neox_args.fill_buffer_size:
+        
+            replay_buffer.add(inputs['text'])
+            current_batch = next(data_iterator)
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            buffer_batch = replay_buffer.get_batch(neox_args.replay_buffer_proportion)
+            if buffer_batch is not None and buffer_batch.size(0)>0:
+                batch = torch.cat([current_batch['text'].to(device), buffer_batch], dim=0)
+                combined_batch = {'text': batch}
+            else:
+                combined_batch = current_batch
+            # Add current batch to replay buffer
+            for sample in current_batch['text']:
+                replay_buffer.add(sample)
+                
+            loss = model.train_batch(data_iter=iter([combined_batch]))
+        else:
+            replay_buffer.add(inputs['text'])
+            loss = model.train_batch(data_iter=data_iterator)
+            fill_buffer_iter += 1
+
     else:
-        loss = model.train_batch(data_iter=data_iterator)
+            loss = model.train_batch(data_iter=data_iterator)
 
     loss_dict = {"lm_loss": loss}
     # Don't break Megatron's timers because we changed code paths.

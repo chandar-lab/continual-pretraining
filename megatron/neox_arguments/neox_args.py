@@ -565,8 +565,13 @@ class NeoXArgsLRScheduler(NeoXArgsTemplate):
     """
     LR Scheduler Arguments
     """
-
     lr_decay_style: Literal["constant", "linear", "cosine", "cosine-inf", "exponential"] = "linear"
+    
+    num_repeats: int = 1
+    """
+    the number of times the smalle schedule is repeated for infinite cosine decay
+    """
+    
     """
     Learning rate decay function. Choose from 'constant', 'linear', 'cosine', 'exponential'.
     """
@@ -595,10 +600,7 @@ class NeoXArgsLRScheduler(NeoXArgsTemplate):
     """
     Use checkpoint to set the values of the scheduler (learning rate, warmup iterations, minimum learning rate, maximum number of iterations, and decay style from checkpoint and ignore input arguments.
     """
-    num_repeats: int = 1
-    """
-    the number of times the smalle schedule is repeated for infinite cosine decay
-    """
+
 
 @dataclass
 class NeoXArgsLogging(NeoXArgsTemplate):
@@ -884,6 +886,11 @@ class NeoXArgsOther(NeoXArgsTemplate):
     """
     replay buffer save directory
     """
+    
+    fill_buffer_size: int = 100
+    """
+    replay buffer save directory
+    """
 
 
 @dataclass
@@ -896,6 +903,7 @@ class NeoXArgsTokenizer(NeoXArgsTemplate):
         "GPT2BPETokenizer",
         "HFTokenizer",
         "HFGPT2Tokenizer",
+        "Llama3HFTokenizer",
         "SPMTokenizer",
         "CharLevelTokenizer",
         "TiktokenTokenizer",
@@ -1220,7 +1228,11 @@ class NeoXArgsTraining(NeoXArgsTemplate):
     """
     Number of iterations to run for training.
     """
-    train_proportion: List[int] = None
+    iters_task: list = None
+    """
+    Number of iterations to run for each task.
+    """
+    train_proportion: list = None
     """
     proportion of train iters for each task
     """

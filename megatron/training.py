@@ -49,7 +49,7 @@ from megatron.model import (
 )
 from megatron.mpu.mappings import gather_from_model_parallel_region
 from megatron.checkpointing import load_checkpoint, save_checkpoint
-from megatron.data.data_utils import build_train_valid_test_data_iterators
+from megatron.data.data_utils_new import build_train_valid_test_data_iterators
 from megatron.initialize import initialize_megatron
 from megatron.learning_rates import AnnealingLR
 from megatron.logging import tb_wandb_log, training_log
@@ -63,7 +63,9 @@ from megatron.model.gpt2_model import cross_entropy
 from megatron.mpu import vocab_parallel_cross_entropy
 
 from pickle import dump
+from continual_utils.replay_buffer import ReplayBuffer
 import os
+import numpy as np
 
 
 def mup_weights_reinit(neox_args, model):
@@ -186,6 +188,10 @@ def pretrain(neox_args):
         neox_args: an instance of NeoXArgs containing the configuration for pretrain
 
     """
+    if neox_args.use_replay:
+        replay_buffer = ReplayBuffer(neox_args=neox_args)
+    else:
+        replay_buffer = None
     # setup logging and timers
     init_wandb(neox_args=neox_args)
     timers = Timers(
@@ -193,45 +199,137 @@ def pretrain(neox_args):
         tensorboard_writer=neox_args.tensorboard_writer,
         comet_experiment=neox_args.comet_experiment,
     )
+    print_rank_0("creating model ...")
 
     # Initialize and get arguments, timers, and Tensorboard writer.
     initialize_megatron(neox_args=neox_args)
 
+
+        
     # Model, optimizer, and learning rate.
     timers("model and optimizer").start()
     model, optimizer, lr_scheduler, reference_model = setup_model_and_optimizer(
         neox_args=neox_args, use_cache=False, iteration=neox_args.iteration
     )
+
+
+
+
     timers("model and optimizer").stop()
+    task_id=0
+    iteration = 0
+    if neox_args.load is not None:
+        iteration, task_id = load_checkpoint(
+            neox_args=neox_args,
+            model=model,
+            optimizer=optimizer,
+            lr_scheduler=lr_scheduler,
+            buffer=replay_buffer,
+        )
+    task_iters = []
+    cumulative = 0
+    if neox_args.train_proportion is None:
+        neox_args.train_proportion = [1,]
+        
+    for prop in neox_args.train_proportion[:-1]:  # Process all but the last proportion
+        number = round(prop * neox_args.train_iters)
+        task_iters.append(number)
+        cumulative += number
+    
+    # The last split gets the remainder to ensure the total is correct
+    task_iters.append(neox_args.train_iters - cumulative) 
+    
+    iters_task = np.cumsum(task_iters)
+    train_data_iterator, valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
+    neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=task_iters, task_id=0)
+
+
 
     # Data stuff.
-    timers("train/valid/test data iterators").start()
-    (
-        train_data_iterator,
-        valid_data_iterator,
-        test_data_iterator,
-    ) = build_train_valid_test_data_iterators(neox_args=neox_args)
-    timers("train/valid/test data iterators").stop()
+    # timers("train/valid/test data iterators").start()
+    # (
+    #     train_data_iterator,
+    #     valid_data_iterator,
+    #     test_data_iterator,
+    # ) = build_train_valid_test_data_iterators(neox_args=neox_args)
+    # timers("train/valid/test data iterators").stop()
 
     if neox_args.use_mup and neox_args.coord_check:
         mup_coord_check(neox_args, timers, lr_scheduler, train_data_iterator)
 
     # Print setup timing.
     print_rank_0("done with setups ...")
-    timers.log(["model and optimizer", "train/valid/test data iterators"])
+    # timers.log(["model and optimizer", "train/valid/test data iterators"])
     print_rank_0("training ...")
 
-    iteration = neox_args.iteration
+    # iteration = neox_args.iteration
     # edge case: save step 0 checkpoint if requested and we're starting from step 0
-    if neox_args.save and 0 in neox_args.save_iters and iteration == 0:
-        save_checkpoint(
+    # if neox_args.save and 0 in neox_args.save_iters and iteration == 0:
+    #     save_checkpoint(
+    #         neox_args=neox_args,
+    #         iteration=iteration,
+    #         model=model,
+    #         optimizer=optimizer,
+    #         lr_scheduler=lr_scheduler,
+    #     )
+    fill_buffer_iter = 0
+    for i in range(task_id, len(neox_args.train_data_paths)):
+        train_data_path = neox_args.train_data_paths[i]
+        print_rank_0(f"Starting pretraining on dataset {i+1}/{len(neox_args.train_data_paths)}: {train_data_path}")
+
+        # Update the neox_args for the current dataset.
+        # neox_args.data_path = train_data_path
+
+        # Rebuild the training data iterator for the current dataset.
+        train_data_iterator = build_train_valid_test_data_iterators(
+            neox_args=neox_args, data_path=train_data_path, iteration = iteration, task_iters=task_iters
+        )[0]
+
+        iteration, fill_buffer_iter = train(
             neox_args=neox_args,
-            iteration=iteration,
+            timers=timers,
             model=model,
+            reference_model=reference_model,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
+            train_data_iterator=train_data_iterator,
+            valid_data_iterator=valid_data_iterator,
+            buffer=replay_buffer,
+            task_id=i,
+            iteration=iteration,
+            iteration_task=iters_task,
+            fill_buffer_iter=fill_buffer_iter
         )
-
+        
+        # Validation after training on the current dataset using the combined validation dataset.
+        if neox_args.do_valid:
+            prefix = f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data"   
+            evaluate_and_print_results(
+                neox_args=neox_args,
+                prefix=prefix,
+                forward_step_func=forward_step,
+                data_iterator=valid_data_iterator,
+                model=model,
+                iteration=iteration,
+                verbose=False,
+                timers=timers,
+                task_id=0,
+            )
+    # Final test evaluation after training on all datasets using the combined test dataset.
+    if neox_args.do_test:
+        prefix = "The end of pretraining on all datasets for test data"       
+        evaluate_and_print_results(
+            neox_args=neox_args,
+            prefix=prefix,
+            forward_step_func=forward_step,
+            data_iterator=test_data_iterator,
+            model=model,
+            iteration=iteration,
+            verbose=True,
+            timers=timers,
+            chart_name="test",
+            task_id=0,
+        )
     if neox_args.do_train and neox_args.train_iters > 0:
         iteration = train(
             neox_args=neox_args,
@@ -258,30 +356,30 @@ def pretrain(neox_args):
             reference_model=reference_model,
         )
 
-    if neox_args.save and iteration != 0:
-        save_checkpoint(
-            neox_args=neox_args,
-            iteration=iteration,
-            model=model,
-            optimizer=optimizer,
-            lr_scheduler=lr_scheduler,
-        )
+    # if neox_args.save and iteration != 0:
+    #     save_checkpoint(
+    #         neox_args=neox_args,
+    #         iteration=iteration,
+    #         model=model,
+    #         optimizer=optimizer,
+    #         lr_scheduler=lr_scheduler,
+    #     )
 
-    if neox_args.do_test:
-        # Run on test data.
-        prefix = "the end of training for test data"
-        evaluate_and_print_results(
-            neox_args=neox_args,
-            prefix=prefix,
-            forward_step_func=forward_step,
-            data_iterator=test_data_iterator,
-            model=model,
-            iteration=iteration,
-            verbose=True,
-            timers=timers,
-            chart_name="test",
-            reference_model=reference_model,
-        )
+    # if neox_args.do_test:
+    #     # Run on test data.
+    #     prefix = "the end of training for test data"
+    #     evaluate_and_print_results(
+    #         neox_args=neox_args,
+    #         prefix=prefix,
+    #         forward_step_func=forward_step,
+    #         data_iterator=test_data_iterator,
+    #         model=model,
+    #         iteration=iteration,
+    #         verbose=True,
+    #         timers=timers,
+    #         chart_name="test",
+    #         reference_model=reference_model,
+    #     )
 
 
 def _get_batch(neox_args, tokenizer, keys, data, datatype, label_mask_zero=False):
@@ -1019,7 +1117,12 @@ def get_learning_rate_scheduler(optimizer, neox_args):
         num_iters = neox_args.train_iters
     num_iters = max(1, num_iters)
     init_step = 0
-    warmup_iter = neox_args.warmup * num_iters
+    # warmup_iter = neox_args.warmup * num_iters
+    if neox_args.lr_decay_style == 'cosine-inf':
+        warmup_iter = neox_args.warmup * int(num_iters / neox_args.num_repeats)
+    else:
+        warmup_iter = neox_args.warmup * num_iters
+        
     lr_scheduler = AnnealingLR(
         optimizer,
         start_lr=neox_args.lr,
@@ -1027,6 +1130,7 @@ def get_learning_rate_scheduler(optimizer, neox_args):
         total_iters=num_iters,
         decay_style=neox_args.lr_decay_style,
         last_iter=init_step,
+        num_repeats=neox_args.num_repeats,
         min_lr=neox_args.min_lr,
         use_checkpoint_lr_scheduler=neox_args.use_checkpoint_lr_scheduler,
         override_lr_scheduler=neox_args.override_lr_scheduler,
@@ -1035,6 +1139,20 @@ def get_learning_rate_scheduler(optimizer, neox_args):
 
     return lr_scheduler
 
+
+
+def reset_optimizer(model,lr_scheduler,neox_args):
+    optimizer, param_groups = get_optimizer(model=model, neox_args=neox_args)
+    model, optimizer, _, lr_scheduler = deepspeed.initialize(
+        model=model,
+        optimizer=optimizer,
+        args=neox_args,
+        lr_scheduler=lr_scheduler,
+        dist_init_required=False,
+        model_parameters=param_groups,
+        config_params=neox_args.deepspeed_config,
+        mpu=mpu if not neox_args.is_pipe_parallel else None,
+    )
 
 def setup_model_and_optimizer(neox_args, use_cache=False, iteration=None):
     """Setup memory profiler"""
@@ -1179,15 +1297,17 @@ def train_step(
     data_iterator,
     model,
     optimizer,
+    replay_buffer,
     lr_scheduler,
     reference_model=None,
+    fill_buffer_iter =0,
 ):
     """Single training step."""
 
     # Pipeline parallelism schedules forward/backward/step
     if neox_args.is_pipe_parallel:
-        reduced_loss = train_step_pipe(
-            neox_args=neox_args, timers=timers, model=model, data_iterator=data_iterator
+        reduced_loss, fill_buffer_iter = train_step_pipe(
+            neox_args=neox_args, timers=timers, model=model, data_iterator=data_iterator, replay_buffer=replay_buffer, fill_buffer_iter = 0
         )
         reduce_metrics = reduced_loss
         if (
@@ -1276,15 +1396,35 @@ def train_step(
         skipped_iter = 0
 
     collect_loss_for_unit_test(reduce_metrics["lm_loss"])
-    return reduce_metrics, skipped_iter
+    return reduce_metrics, skipped_iter, fill_buffer_iter
 
 
-def train_step_pipe(neox_args, timers, model, data_iterator):
+def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None, fill_buffer_iter =0):
     """Single training step with DeepSpeed's pipeline parallel engine."""
 
     assert neox_args.deepspeed
-    loss = model.train_batch(data_iter=data_iterator)
+    inputs = next(data_iterator)
+    if replay_buffer is not None:
+        replay_buffer.add_data(inputs['text'],None)
+        if not replay_buffer.is_empty():
+            buf_inputs, buf_labels = replay_buffer.get_data(neox_args.batch_size)
+            buf_inputs_tensor = [x.unsqueeze(0) if x.dim() == 1 else x for x in buf_inputs]
+            buf_inputs_tensor = torch.cat(buf_inputs_tensor, dim=0)
+            
+            # Now buf_inputs_tensor should have the same number of dimensions as inputs['text']
+            combined_inputs = torch.cat([inputs['text'], buf_inputs_tensor], dim=0)
+            
+            # Create a dictionary with the combined inputs
+            combined_dict = {'text': combined_inputs}
+            
+            # labels = torch.cat((labels, buf_labels))
+            loss = model.train_batch(data_iter=iter([combined_dict]))
+
+    else:
+        loss = model.train_batch(data_iter=data_iterator)
+
     loss_dict = {"lm_loss": loss}
+
     # Don't break Megatron's timers because we changed code paths.
     for t in [
         "forward",
@@ -1295,7 +1435,7 @@ def train_step_pipe(neox_args, timers, model, data_iterator):
         "data loader",
     ]:
         timers(t).reset()
-    return loss_dict
+    return loss_dict, fill_buffer_iter
 
 
 def train(
@@ -1307,6 +1447,11 @@ def train(
     lr_scheduler,
     train_data_iterator,
     valid_data_iterator,
+    buffer,
+    task_id,
+    iteration=0,
+    iteration_task=[],
+    fill_buffer_iter =0,
 ):
     """Train the model function."""
 
@@ -1346,19 +1491,21 @@ def train(
             with_stack=True,
         )
         prof.start()
-    while iteration < neox_args.train_iters:
+    while iteration < iteration_task[task_id]:
         if neox_args.profile:
             prof.step()
         if neox_args.profile and iteration == neox_args.profile_step_start:
             torch.cuda.cudart().cudaProfilerStart()
-        loss_dict, skipped_iter = train_step(
+        loss_dict, skipped_iter, fill_buffer_iter = train_step(
             neox_args=neox_args,
             timers=timers,
             data_iterator=train_data_iterator,
             model=model,
             optimizer=optimizer,
+            replay_buffer=buffer,
             lr_scheduler=lr_scheduler,
             reference_model=reference_model,
+            fill_buffer_iter =0,
         )
         if neox_args.profile and iteration == neox_args.profile_step_stop:
             torch.cuda.cudart().cudaProfilerStop()
@@ -1393,15 +1540,52 @@ def train(
             noise_scale_logger=noise_scale_logger,
         )
 
-        # Checkpointing
-        if neox_args.save and iteration in neox_args.save_iters:
-            save_checkpoint(
-                neox_args=neox_args,
-                iteration=iteration,
-                model=model,
-                optimizer=optimizer,
-                lr_scheduler=lr_scheduler,
-            )
+        # if neox_args.save and iteration in neox_args.save_iters:
+        #     save_checkpoint(
+        #         neox_args=neox_args,
+        #         iteration=iteration,
+        #         model=model,
+        #         optimizer=optimizer,
+        #         lr_scheduler=lr_scheduler,
+        #     )
+
+        ## INFINITE LR SCHEDULER UPDATE THE  RELOAD CHECK IF cosine_inf AND END OF TASK ##
+        ## OTHER APPROACH CAN BE TO CHECK IF iteration == iteration_task[task_id] and cosine_inf ##
+        if lr_scheduler.reload_optimizer(iteration,iteration_task):
+            reset_optimizer(neox_args, optimizer, lr_scheduler)
+            print_rank_0("reloading this time")
+
+
+        ## SAVE CHECKPOINT ##   
+        
+        if neox_args.save and iteration in neox_args.save_iters or iteration in [1, 1000 , 2000, 3000, 4000 , 5000 , 6000,7000 , 8000 , 9000 , 10000,11000, 12000, 13000, 14000,15000] or iteration == neox_args.train_iters:
+        # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
+        
+            if neox_args.use_replay:
+                # buffer.save()
+                save_checkpoint(
+                    neox_args=neox_args,
+                    iteration=iteration,
+                    model=model,
+                    optimizer=optimizer,
+                    lr_scheduler=lr_scheduler,
+                    task_id=task_id,
+
+                )                 
+            else:
+                save_checkpoint(
+                    neox_args=neox_args,
+                    iteration=iteration,
+                    model=model,
+                    optimizer=optimizer,
+                    lr_scheduler=lr_scheduler,
+                    task_id=task_id,
+                )
+
+
+
+
+
         # Evaluation
         if (
             neox_args.eval_interval
@@ -1432,7 +1616,7 @@ def train(
             )
             sys.exit()
 
-    return iteration
+    return iteration, fill_buffer_iter
 
 
 def evaluate(
@@ -1597,3 +1781,16 @@ def save_snapshot(neox_args):
         os.makedirs(snapshot_path)
     with open(os.path.join(snapshot_path, "mem_snapshot.pickle"), "wb") as f:
         dump(snapshot, f)
+        
+def reset_optimizer(model,lr_scheduler,neox_args):
+    optimizer, param_groups = get_optimizer(model=model, neox_args=neox_args)
+    model, optimizer, _, lr_scheduler = deepspeed.initialize(
+        model=model,
+        optimizer=optimizer,
+        args=neox_args,
+        lr_scheduler=lr_scheduler,
+        dist_init_required=False,
+        model_parameters=param_groups,
+        config_params=neox_args.deepspeed_config,
+        mpu=mpu if not neox_args.is_pipe_parallel else None,
+    )

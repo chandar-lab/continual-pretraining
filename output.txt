@@ -1,0 +1,2138 @@
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.031 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.026 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.017 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.018 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.019 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.017 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.017 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.018 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.013 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.013 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.014 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.015 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.019 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.018 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.017 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.019 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+done with setups ...
+training ...
+Starting pretraining on dataset 1/14: CommonCrawl/CommonCrawl
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 2/14: /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 3/14: C4/C4
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 4/14: /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 5/14: Github/Github
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 6/14: /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 7/14: Book/Book
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 8/14: /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 9/14: ArXiv/ArXiv
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 10/14: /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 11/14: Wikipedia/Wikipedia
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.005 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.006 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 12/14: /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 13/14: StackExchange/StackExchange
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 0.0243537, achieved: 0.0243537
+   dataset 1, input: 0.0121768, achieved: 0.0121768
+   dataset 2, input: 0.0273992, achieved: 0.0273992
+   dataset 3, input: 0.0136996, achieved: 0.0136996
+   dataset 4, input: 0.179944, achieved: 0.179944
+   dataset 5, input: 0.0899718, achieved: 0.0899718
+   dataset 6, input: 0.0266963, achieved: 0.0266963
+   dataset 7, input: 0.0133482, achieved: 0.0133482
+   dataset 8, input: 0.035084, achieved: 0.035084
+   dataset 9, input: 0.017542, achieved: 0.017542
+   dataset 10, input: 0.0223269, achieved: 0.0223269
+   dataset 11, input: 0.0111635, achieved: 0.0111635
+   dataset 12, input: 0.350863, achieved: 0.350863
+   dataset 13, input: 0.175432, achieved: 0.175432
+> building indices for blendable datasets ...
+>> sample ratios:
+   dataset 0, input: 1, achieved: 1
+> building indices for blendable datasets ...
+ > sample ratios:
+   dataset 0, input: 1, achieved: 1
+setting training data start iteration to 0
+setting validation data start iteration to 0
+Starting pretraining on dataset 14/14: /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange
+> building train, validation, and test datasets ...
+
+    train_0:
+     no. of documents:61500000
+ > loading doc-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from CommonCrawl/CommonCrawl_train_0_indexmap_242486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 50732253
+    valid_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_valid_0_indexmap_10130400ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 10336006
+    total number of epochs: 41
+
+    test_0:
+     no. of documents:502268
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test_test_0_indexmap_225120ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 252098
+    train_1:
+     no. of documents:30700000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/CommonCrawl/CommonCrawl_train_1_indexmap_121243ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 25324081
+    train_2:
+     no. of documents:107000000
+ > loading doc-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from C4/C4_train_2_indexmap_272809ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 26002932
+    train_3:
+     no. of documents:53264307
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/C4/C4_train_3_indexmap_136405ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 12943412
+    train_4:
+     no. of documents:7000000
+ > loading doc-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Github/Github_train_4_indexmap_1791668ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 5089347
+    train_5:
+     no. of documents:3400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github_train_5_indexmap_895834ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 2482433
+    train_6:
+     no. of documents:64996
+ > loading doc-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Book/Book_train_6_indexmap_265811ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 4019461
+    train_7:
+     no. of documents:33300
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book_train_7_indexmap_132906ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.002 seconds
+    total number of samples: 2071145
+    train_8:
+     no. of documents:432627
+ > loading doc-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from ArXiv/ArXiv_train_8_indexmap_349326ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 3821897
+    train_9:
+     no. of documents:200000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv_train_9_indexmap_174663ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 1770674
+    train_10:
+     no. of documents:8800000
+ > loading doc-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from Wikipedia/Wikipedia_train_10_indexmap_222306ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3864627
+    train_11:
+     no. of documents:4400000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia_train_11_indexmap_111153ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 1932529
+    train_12:
+     no. of documents:9700000
+ > loading doc-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from StackExchange/StackExchange_train_12_indexmap_3493486ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.003 seconds
+    total number of samples: 6536142
+    total number of epochs: 2
+
+    train_13:
+     no. of documents:4900000
+ > loading doc-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_doc_idx.npy
+ > loading sample-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_sample_idx.npy
+ > loading shuffle-idx mapping from /lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange_train_13_indexmap_1746743ns_2048sl_1234s_packedpi_ac_shuffle_idx.npy
+    loaded indexed file in 0.004 seconds
+    total number of samples: 3300681
+    total number of epochs: 2
+> building indices for blendable datasets ...
