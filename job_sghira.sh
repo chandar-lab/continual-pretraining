@@ -2,14 +2,14 @@
 #!/bin/bash
 #SBATCH -A bif151
 #SBATCH -t 24:00:00
-#SBATCH --nodes=32
+#SBATCH --nodes=8
 #SBATCH -p extended
 #SBATCH --gpus-per-node=8
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=istabrak.abbes@mila.quebec
 #SBATCH --mail-type=all
-#SBATCH --output=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/ex/train_%A.out
-#SBATCH --error=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/ex/train_%A.err
+#SBATCH --output=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/410M_no_buffer/train_%A.out
+#SBATCH --error=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/410M_no_buffer/train_%A.err
 
 srun pkill python
 
@@ -28,4 +28,4 @@ rm -rf ./megatron/fused_kernels/build/lock
 rm -rf /autofs/nccs-svm1_home2/istabrak/.cache/torch_extensions/py312_cpu/fused_adam/lock
 
 
-python ./deepy.py train_new.py ./configs/new_local_setup.yml
+python ./deepy.py train_new.py ./configs/new_local_setup_replay_doubling.yml

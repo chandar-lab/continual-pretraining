@@ -63,7 +63,7 @@ from megatron.model.gpt2_model import cross_entropy
 from megatron.mpu import vocab_parallel_cross_entropy
 
 from pickle import dump
-from continual_utils.replay_buffer import ReplayBuffer
+from continual_utils.double_buffering import ReplayBuffer
 import os
 import numpy as np
 
@@ -241,7 +241,7 @@ def pretrain(neox_args):
     
     iters_task = np.cumsum(task_iters)
     neox_args.iters_task = iters_task
-    valid_data_iterator, test_data_iterator, _ = build_train_valid_test_data_iterators(
+    train_data_iterator, valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
     neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=task_iters, task_id=0)
     
     # Data stuff.
@@ -284,8 +284,6 @@ def pretrain(neox_args):
         train_data_iterator = build_train_valid_test_data_iterators(
             neox_args=neox_args, data_path=train_data_path, iteration = iteration, task_iters=task_iters
         )[0]
-
-        torch.distributed.barrier()
         
         if i==0:
             timers("interval time").start()
@@ -616,10 +614,7 @@ def forward_step(
 ):
     """Forward step."""
     if neox_args.is_pipe_parallel:
-        try:
-            return model.eval_batch(data_iterator, return_logits=return_logits)
-        except:
-            print("!!!!! Fchel")
+        return model.eval_batch(data_iterator, return_logits=return_logits)
 
     # Get the batch.
     if neox_args.memory_profiling and neox_args.it:
@@ -1408,8 +1403,6 @@ def train(
                 )
             )
             sys.exit()
-            
-    # reset_optimizer(neox_args, optimizer, lr_scheduler)
 
     return iteration, fill_buffer_iter
 
@@ -1576,17 +1569,3 @@ def save_snapshot(neox_args):
         os.makedirs(snapshot_path)
     with open(os.path.join(snapshot_path, "mem_snapshot.pickle"), "wb") as f:
         dump(snapshot, f)
-
-
-def reset_optimizer(model,lr_scheduler,neox_args):
-    optimizer, param_groups = get_optimizer(model=model, neox_args=neox_args)
-    model, optimizer, _, lr_scheduler = deepspeed.initialize(
-        model=model,
-        optimizer=optimizer,
-        args=neox_args,
-        lr_scheduler=lr_scheduler,
-        dist_init_required=False,
-        model_parameters=param_groups,
-        config_params=neox_args.deepspeed_config,
-        mpu=mpu if not neox_args.is_pipe_parallel else None,
-    )

@@ -19,17 +19,24 @@ from pathlib import Path
 import subprocess
 
 
-def _get_cuda_bare_metal_version(cuda_dir):
-    raw_output = subprocess.check_output(
-        [cuda_dir + "/bin/nvcc", "-V"], universal_newlines=True
-    )
-    output = raw_output.split()
-    release_idx = output.index("release") + 1
-    release = output[release_idx].split(".")
-    bare_metal_major = release[0]
-    bare_metal_minor = release[1][0]
+def _get_cuda_bare_metal_version(cuda_dir=None):
+    # Check for hipcc in ROCm environment
+    compiler = f"{cuda_dir}/bin/hipcc" if cuda_dir else None
+    print("compiler",compiler)
+    if not compiler:
+        raise EnvironmentError("CUDA_HOME or ROCM_PATH not set correctly.")
+    
+    try:
+        raw_output = subprocess.check_output([compiler, "--version"], universal_newlines=True)
+        output = raw_output.split()
+        version_idx = output.index("version:") + 1
+        release = output[version_idx].split(".")
+        bare_metal_major = release[0]
+        bare_metal_minor = release[1][0]
+        return raw_output, bare_metal_major, bare_metal_minor
+    except (FileNotFoundError, IndexError) as e:
+        raise EnvironmentError(f"Failed to determine version using {compiler}. Ensure ROCm is installed correctly.") from e
 
-    return raw_output, bare_metal_major, bare_metal_minor
 
 
 srcpath = Path(__file__).parent.absolute()
