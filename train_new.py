@@ -18,12 +18,14 @@
 """Train"""
 from megatron.neox_arguments import NeoXArgs
 from megatron.training_new import pretrain
+import os
 
 
 def main(input_args=None, overwrite_values=None):
     neox_args = NeoXArgs.consume_neox_args(
         input_args=input_args, overwrite_values=overwrite_values
     )
+    os.environ['NCCL_BLOCKING_WAIT'] = '0'
     neox_args.configure_distributed_args()
     neox_args.build_tokenizer()  # tokenizer needs to be build in training in order to set the padding vocab
     neox_args.initialize_tensorboard_writer()  # is initialized if tensorboard directory is defined

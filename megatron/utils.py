@@ -156,6 +156,8 @@ def get_wandb_api_key(neox_args):
 
 def init_wandb(neox_args):
     # Wandb. (one worker per machine)
+    import os
+    os.environ['WANDB_MODE'] = 'offline'
     if neox_args.use_wandb == False:
         return
 

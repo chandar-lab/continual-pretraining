@@ -26,6 +26,7 @@ import torch
 from megatron import fused_kernels
 from megatron import mpu
 from megatron.mpu import set_model_parallel_rank, set_model_parallel_world_size
+from datetime import timedelta
 
 import deepspeed
 import inspect
@@ -147,6 +148,8 @@ def _initialize_distributed(neox_args):
             device = neox_args.rank % device_count
             if neox_args.local_rank is not None:
                 print("neox_args.rank:",neox_args.rank,"neox_args.local_rank:", neox_args.local_rank, "device:", device, "device_count",device_count)
+                print("assertion : neox_args.local_rank",neox_args.local_rank)
+                print("assertion : device",device)
 
                 assert (
                     neox_args.local_rank == device
@@ -160,6 +163,8 @@ def _initialize_distributed(neox_args):
             auto_mpi_discovery=True,
             distributed_port=os.getenv("MASTER_PORT", "6000"),
             verbose=True,
+            timeout=timedelta(seconds=17280000),
+
         )
 
     # Setup 3D topology.

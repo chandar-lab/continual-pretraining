@@ -498,7 +498,7 @@ def build_train_valid_test_data_iterators(neox_args, data_path, iteration=0, tas
             test_iters * neox_args.train_batch_size,
         ]
 
-        # if (neox_args.train_data_paths) or (neox_args.pos_train_data_paths):
+        # if (neox_args.valid_data_paths) :
         #     # when individual train / valid / test data paths are provided
         #     # normalize weight values and get num samples for each dataset
         #     train_weights, train_num_samples = get_normalized_weights_and_num_samples(
@@ -573,9 +573,9 @@ def build_train_valid_test_data_iterators(neox_args, data_path, iteration=0, tas
         #     if train_datasets:
         #         train_ds = BlendableDataset(train_datasets, train_weights)
         #     if valid_datasets:
-        #         valid_ds = BlendableDataset(valid_datasets, valid_weights)
+        #         valid_dataset = BlendableDataset(valid_datasets, valid_weights)
         #     if test_datasets:
-        #         test_ds = BlendableDataset(test_datasets, test_weights)
+        #         test_dataset = BlendableDataset(test_datasets, test_weights)
         # else:
             # when just data_path is provided
             # split dataset into train, valid and test from data_path

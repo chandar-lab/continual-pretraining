@@ -121,7 +121,10 @@ def get_flops(neox_args, iter_time_s) -> float:
             )
         )
     # return flops_per_iteration / (iter_time_s * world_size)
-    return flops_per_iteration / (iter_time_s * world_size)
+    try:
+        return flops_per_iteration / (iter_time_s * world_size)
+    except:
+        return 0
 
 
 

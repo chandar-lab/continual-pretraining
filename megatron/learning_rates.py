@@ -135,11 +135,11 @@ class AnnealingLR(object):
             print_rank_0(" > overriding {} value to {}".format(name, cls_value))
             return cls_value
 
-        if not self.use_checkpoint_lr_scheduler:
-            assert cls_value == sd_value, (
-                "AnnealingLR: class input value"
-                "and checkpoint values for {} do not match".format(name)
-            )
+        # if not self.use_checkpoint_lr_scheduler:
+            # assert cls_value == sd_value, (
+            #     "AnnealingLR: class input value"
+            #     "and checkpoint values for {} do not match".format(name)
+            # )
         print_rank_0(" > using checkpoint value {} for {}".format(sd_value, name))
         return sd_value
 
