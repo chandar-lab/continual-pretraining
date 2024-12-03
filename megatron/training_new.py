@@ -244,7 +244,7 @@ def pretrain(neox_args):
     
     iters_task = np.cumsum(task_iters)
     neox_args.iters_task = iters_task
-    valid_data_iterator, test_data_iterator, _ = build_train_valid_test_data_iterators(
+    _,valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
     neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=task_iters, task_id=0)
     
     # Data stuff.
@@ -294,9 +294,9 @@ def pretrain(neox_args):
         neox_args.data_path = train_data_path
 
         # Rebuild the training data iterator for the current dataset.
-        train_data_iterator = build_train_valid_test_data_iterators(
+        train_data_iterator,valid_on_task,_ = build_train_valid_test_data_iterators(
             neox_args=neox_args, data_path=train_data_path, iteration = iteration, task_iters=task_iters
-        )[0]
+        )
         
         torch.distributed.barrier()
         
@@ -312,6 +312,7 @@ def pretrain(neox_args):
             lr_scheduler=lr_scheduler,
             train_data_iterator=train_data_iterator,
             valid_data_iterator=valid_data_iterator,
+            valid_on_task=valid_on_task,
             buffer=replay_buffer,
             task_id=i,
             iteration=iteration,
@@ -393,7 +394,8 @@ def pretrain(neox_args):
         # Validation after training on the current dataset using the combined validation dataset.
         if neox_args.do_valid:
             # prefix = f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data"   
-            prefix = f"{neox_args.train_data_paths[i]}"   
+            prefix = "iteration {}".format(iteration)
+            chart_name= f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data" 
 
             evaluate_and_print_results(
                 neox_args=neox_args,
@@ -403,11 +405,13 @@ def pretrain(neox_args):
                 model=model,
                 iteration=iteration,
                 verbose=False,
+                chart_name=chart_name,
                 timers=timers,
             )
     # Final test evaluation after training on all datasets using the combined test dataset.
     if neox_args.do_test:
-        prefix = "The end of pretraining on all datasets for test data"       
+        prefix="iteration {}".format(iteration)
+        chart_name = "eval after training on all"       
         evaluate_and_print_results(
             neox_args=neox_args,
             prefix=prefix,
@@ -417,7 +421,7 @@ def pretrain(neox_args):
             iteration=iteration,
             verbose=True,
             timers=timers,
-            chart_name="test",
+            chart_name=chart_name,
         )
     
 
@@ -1254,7 +1258,7 @@ def train_step(
     else:
         skipped_iter = 0
 
-    collect_loss_for_unit_test(reduce_metrics["lm_loss"])
+    # collect_loss_for_unit_test(reduce_metrics["lm_loss"])
     return reduce_metrics, skipped_iter, fill_buffer_iter
 
 
@@ -1364,6 +1368,7 @@ def train(
     lr_scheduler,
     train_data_iterator,
     valid_data_iterator,
+    valid_on_task,
     buffer,
     task_id,
     iteration=0,
@@ -1510,7 +1515,7 @@ def train(
 
             for idx, forgetting_value in enumerate(forgetting):
                 tb_wandb_log(
-                    f"forgetting/checkpoint_{iteration}/dataset_{idx+1}",
+                    f"forgetting_dataset_{idx+1}",
                     forgetting_value,
                     iteration,
                     use_wandb=neox_args.use_wandb,
@@ -1529,7 +1534,7 @@ def train(
 
             # Log the average forgetting
             tb_wandb_log(
-                f"forgetting/checkpoint_{iteration}/average_forgetting",
+                f"average_forgetting",
                 average_forgetting,
                 iteration,
                 use_wandb=neox_args.use_wandb,
@@ -1568,6 +1573,7 @@ def train(
 
                 torch.distributed.barrier()
 
+        #Evaluate on current task only
         try:    
             # Evaluation
             if (
@@ -1575,7 +1581,53 @@ def train(
                 and iteration % neox_args.eval_interval == 0
                 and neox_args.do_valid
             ):
+                chart_name = f"on task {task_id} only"
+                prefix="iteration {}".format(iteration)
+                evaluate_and_print_results(
+                    neox_args=neox_args,
+                    prefix=prefix,
+                    forward_step_func=forward_step,
+                    data_iterator=valid_on_task,
+                    model=model,
+                    iteration=iteration,
+                    verbose=False,
+                    timers=timers,
+                    chart_name=chart_name,
+                    reference_model=reference_model,
+                )
+        except:
+                _,valid_on_task, _ = build_train_valid_test_data_iterators(
+                neox_args=neox_args, data_path=neox_args.train_data_paths[task_id],iteration=0, task_iters=iteration_task, task_id=0)
+
+                if (
+                    neox_args.eval_interval
+                    and iteration % neox_args.eval_interval == 0
+                    and neox_args.do_valid ):
+                    chart_name = f"on task {task_id} only"
+                    prefix="iteration {}".format(iteration)
+                    evaluate_and_print_results(
+                        neox_args=neox_args,
+                        prefix=prefix,
+                        forward_step_func=forward_step,
+                        data_iterator=valid_on_task,
+                        model=model,
+                        iteration=iteration,
+                        verbose=False,
+                        timers=timers,
+                        chart_name=chart_name,
+                        reference_model=reference_model,
+                    )
+
+
+        try:    
+            # Evaluation on all tasks
+            if (
+                neox_args.eval_interval
+                and iteration % neox_args.eval_interval == 0
+                and neox_args.do_valid
+            ):
                 prefix = "iteration {}".format(iteration)
+                chart_name=f"on all previous tasks to {task_id}"
                 evaluate_and_print_results(
                     neox_args=neox_args,
                     prefix=prefix,
@@ -1585,6 +1637,7 @@ def train(
                     iteration=iteration,
                     verbose=False,
                     timers=timers,
+                    chart_name=chart_name,
                     reference_model=reference_model,
                 )
         except:
@@ -1596,6 +1649,7 @@ def train(
                     and iteration % neox_args.eval_interval == 0
                     and neox_args.do_valid ):
                     prefix = "iteration {}".format(iteration)
+                    chart_name=f"on all previous tasks to {task_id}"
                     evaluate_and_print_results(
                         neox_args=neox_args,
                         prefix=prefix,
@@ -1605,6 +1659,8 @@ def train(
                         iteration=iteration,
                         verbose=False,
                         timers=timers,
+                        chart_name=chart_name,
+
                         reference_model=reference_model,
                     )
     

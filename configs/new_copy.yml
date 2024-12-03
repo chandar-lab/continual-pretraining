@@ -39,8 +39,8 @@
     "contiguous_gradients": true,
     "cpu_offload": false
   },
-   "train_micro_batch_size_per_gpu": 16,
-   "gradient_accumulation_steps": 2,
+   "train_micro_batch_size_per_gpu": 8,
+   "gradient_accumulation_steps": 1,
    "data_impl": "mmap",
    "checkpoint_activations": true,
    "checkpoint_num_layers": 1,
@@ -58,8 +58,8 @@
   "data_types": {
     "grad_accum_dtype": "fp32"
   },
-   "train_iters": 72231,
-   "lr_decay_iters": 72231,
+   "train_iters": 143000,
+   "lr_decay_iters": 143000,
    "distributed_backend": "nccl",
    "checkpoint_factor": 1000,
    "eval_interval": 10,
@@ -131,10 +131,12 @@
 
   #  "buffer_dir": "data/buffer_save/pythia_410M_with_buffer/",
   "deepspeed_mpi": true,
-  "save": "checkpoints/pythia_410M_no_buffer_final",
+  "save": "checkpoints/pythia_410M_no_buffer_final-1024",
   "log_dir": "logs",
-  "load": "checkpoints/pythia_410M_no_buffer_final",
+  # "load": "checkpoints/pythia_410M_no_buffer_final-1024",
   # "tensorboard_dir": "tensorboard_important/pythia_410M_no_buffer_final",
-  "wandb_project":"pretraining",
-  "wandb_team":"istabrak-abbes"
+  "wandb_project":"pretraining-410M-1024",
+  "wandb_team":"pretraining"
 }
+
+
