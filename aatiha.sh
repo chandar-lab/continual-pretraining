@@ -8,8 +8,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=istabrak.abbes@mila.quebec
 #SBATCH --mail-type=all
-#SBATCH --output=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/nikomha/train_%A.out
-#SBATCH --error=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/nikomha/train_%A.err
+#SBATCH --output=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/1B_jdid/train_%A.out
+#SBATCH --error=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/1B_jdid/train_%A.err
 
 
 srun pkill python
@@ -29,4 +29,4 @@ rm -rf ./megatron/fused_kernels/build/lock
 rm -rf /autofs/nccs-svm1_home2/istabrak/.cache/torch_extensions/py312_cpu/fused_adam/lock
 
 
-python ./deepy.py train_new.py ./configs/aatiha.yml
+python ./deepy.py train_new.py ./configs/new_local_setup.yml

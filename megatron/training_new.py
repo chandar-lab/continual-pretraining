@@ -66,6 +66,7 @@ from pickle import dump
 from continual_utils.replay_buffer import ReplayBuffer
 import os
 import numpy as np
+import torch
 
 
 def mup_weights_reinit(neox_args, model):
@@ -244,7 +245,7 @@ def pretrain(neox_args):
     
     iters_task = np.cumsum(task_iters)
     neox_args.iters_task = iters_task
-    _,valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
+    valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators(
     neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=task_iters, task_id=0)
     
     # Data stuff.
@@ -1415,53 +1416,60 @@ def train(
         )
         prof.start()
     while iteration < iteration_task[task_id]:
-        if neox_args.profile:
-            prof.step()
-        if neox_args.profile and iteration == neox_args.profile_step_start:
-            torch.cuda.cudart().cudaProfilerStart()
-        loss_dict, skipped_iter, fill_buffer_iter = train_step(
-            neox_args=neox_args,
-            timers=timers,
-            data_iterator=train_data_iterator,
-            model=model,
-            optimizer=optimizer,
-            replay_buffer=buffer,
-            lr_scheduler=lr_scheduler,
-            reference_model=reference_model,
-            fill_buffer_iter =0,
-        )
-        if neox_args.profile and iteration == neox_args.profile_step_stop:
-            torch.cuda.cudart().cudaProfilerStop()
-            prof.stop()
-        iteration += 1
-        neox_args.iteration = iteration
-        if neox_args.precision == "fp16":
-            overflow_monitor.check(skipped_iter)  # check for repeated overflow
-        if neox_args.log_gradient_noise_scale:  # log noise scale if applicable
-            noise_scale_logger.update()
+        try:
+            if neox_args.profile:
+                prof.step()
+            if neox_args.profile and iteration == neox_args.profile_step_start:
+                torch.cuda.cudart().cudaProfilerStart()
+            loss_dict, skipped_iter, fill_buffer_iter = train_step(
+                neox_args=neox_args,
+                timers=timers,
+                data_iterator=train_data_iterator,
+                model=model,
+                optimizer=optimizer,
+                replay_buffer=buffer,
+                lr_scheduler=lr_scheduler,
+                reference_model=reference_model,
+                fill_buffer_iter =0,
+            )
+            if neox_args.profile and iteration == neox_args.profile_step_stop:
+                torch.cuda.cudart().cudaProfilerStop()
+                prof.stop()
+            iteration += 1
+            neox_args.iteration = iteration
+            if neox_args.precision == "fp16":
+                overflow_monitor.check(skipped_iter)  # check for repeated overflow
+            if neox_args.log_gradient_noise_scale:  # log noise scale if applicable
+                noise_scale_logger.update()
 
-        # get learning rate (if present) - if doing soft prompt tuning + pipe parallel, you
-        # may have no tunable parameters on a specific rank
-        if optimizer.param_groups:
-            lr = optimizer.param_groups[0].get("lr", 0)
-        else:
-            lr = 0
+            # get learning rate (if present) - if doing soft prompt tuning + pipe parallel, you
+            # may have no tunable parameters on a specific rank
+            if optimizer.param_groups:
+                lr = optimizer.param_groups[0].get("lr", 0)
+            else:
+                lr = 0
 
-        # Logging.
-        report_memory_flag = training_log(
-            neox_args=neox_args,
-            timers=timers,
-            loss_dict=loss_dict,
-            total_loss_dict=total_loss_dict,
-            learning_rate=lr,
-            iteration=iteration,
-            loss_scale=optimizer.cur_scale if neox_args.precision == "fp16" else None,
-            report_memory_flag=report_memory_flag,
-            skipped_iter=skipped_iter,
-            model=model,
-            optimizer=optimizer,
-            noise_scale_logger=noise_scale_logger,
-        )
+            # Logging.
+            report_memory_flag = training_log(
+                neox_args=neox_args,
+                timers=timers,
+                loss_dict=loss_dict,
+                total_loss_dict=total_loss_dict,
+                learning_rate=lr,
+                iteration=iteration,
+                loss_scale=optimizer.cur_scale if neox_args.precision == "fp16" else None,
+                report_memory_flag=report_memory_flag,
+                skipped_iter=skipped_iter,
+                model=model,
+                optimizer=optimizer,
+                noise_scale_logger=noise_scale_logger,
+            )
+        except:
+            print_rank_0("tehshe tehshe tehshe tehshe: StopIter Train: change the task")
+            iteration_task[task_id]=iteration
+            print_rank_0("taada baba taada",iteration)
+            continue
+
         # if neox_args.save and iteration in neox_args.save_iters:
         #     save_checkpoint(
         #         neox_args=neox_args,
@@ -1569,40 +1577,16 @@ def train(
                 )
 
 
-                import torch
+                
 
                 torch.distributed.barrier()
-
-        #Evaluate on current task only
-        try:    
-            # Evaluation
+        try:
+            #Evaluate on current task only
             if (
-                neox_args.eval_interval
-                and iteration % neox_args.eval_interval == 0
-                and neox_args.do_valid
-            ):
-                chart_name = f"on task {task_id} only"
-                prefix="iteration {}".format(iteration)
-                evaluate_and_print_results(
-                    neox_args=neox_args,
-                    prefix=prefix,
-                    forward_step_func=forward_step,
-                    data_iterator=valid_on_task,
-                    model=model,
-                    iteration=iteration,
-                    verbose=False,
-                    timers=timers,
-                    chart_name=chart_name,
-                    reference_model=reference_model,
-                )
-        except:
-                _,valid_on_task, _ = build_train_valid_test_data_iterators(
-                neox_args=neox_args, data_path=neox_args.train_data_paths[task_id],iteration=0, task_iters=iteration_task, task_id=0)
-
-                if (
                     neox_args.eval_interval
                     and iteration % neox_args.eval_interval == 0
-                    and neox_args.do_valid ):
+                    and neox_args.do_valid
+                ):
                     chart_name = f"on task {task_id} only"
                     prefix="iteration {}".format(iteration)
                     evaluate_and_print_results(
@@ -1617,6 +1601,12 @@ def train(
                         chart_name=chart_name,
                         reference_model=reference_model,
                     )
+        except StopIteration:
+            print_rank_0(f"StopIteration encountered during evaluation on current task at iteration {iteration}")
+
+            _,valid_on_task,_ = build_train_valid_test_data_iterators(
+            neox_args=neox_args, data_path=neox_args.train_data_paths[task_id], iteration = iteration, task_iters=iteration_task)
+            pass
 
 
         try:    
@@ -1627,7 +1617,6 @@ def train(
                 and neox_args.do_valid
             ):
                 prefix = "iteration {}".format(iteration)
-                chart_name=f"on all previous tasks to {task_id}"
                 evaluate_and_print_results(
                     neox_args=neox_args,
                     prefix=prefix,
@@ -1637,19 +1626,18 @@ def train(
                     iteration=iteration,
                     verbose=False,
                     timers=timers,
-                    chart_name=chart_name,
                     reference_model=reference_model,
                 )
         except:
-                _,valid_data_iterator, test_data_iterator = build_train_valid_test_data_iterators(
-                neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=iteration_task, task_id=0)
+                print("hne!!!!!!!!!!!!!!!!")
+                valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators(
+                neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=iteration, task_iters=iteration_task, task_id=0)
 
                 if (
                     neox_args.eval_interval
                     and iteration % neox_args.eval_interval == 0
                     and neox_args.do_valid ):
                     prefix = "iteration {}".format(iteration)
-                    chart_name=f"on all previous tasks to {task_id}"
                     evaluate_and_print_results(
                         neox_args=neox_args,
                         prefix=prefix,
@@ -1659,8 +1647,6 @@ def train(
                         iteration=iteration,
                         verbose=False,
                         timers=timers,
-                        chart_name=chart_name,
-
                         reference_model=reference_model,
                     )
     
