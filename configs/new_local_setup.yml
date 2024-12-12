@@ -1,9 +1,9 @@
 {
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
-  "num_layers": 16,
-  "hidden_size": 2048,
-  "num_attention_heads": 8,
+  "num_layers": 24,
+  "hidden_size": 1024,
+  "num_attention_heads": 16,
   "seq_length": 2048,
   "max_position_embeddings": 2048,
   "pos_emb": "rotary",
@@ -58,12 +58,12 @@
   "data_types": {
     "grad_accum_dtype": "fp32"
   },
-   "train_iters": 143000,
-   "lr_decay_iters": 143000,
+   "train_iters": 62610,
+   "lr_decay_iters": 62610,
    "distributed_backend": "nccl",
    "checkpoint_factor": 1000,
-   "eval_interval": 10,
-   "eval_iters": 10,
+   "eval_interval": 100,
+   "eval_iters": 100,
    "log_interval": 10,
    "steps_per_print": 10,
    "keep_last_n_checkpoints": 4,
@@ -77,38 +77,56 @@
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/C4/C4",
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-400B/C4/C4",
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Github/Github",
-    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-400B/Github/Github",
+    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github",
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Book/Book",
-    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-400B/Book/Book",
+        "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book",
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/ArXiv/ArXiv",
+      "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv",
+
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Wikipedia/Wikipedia",
-    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/StackExchange/StackExchange",],   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test",],
+    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia",
+
+    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/StackExchange/StackExchange",
+    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/StackExchange/StackExchange",
+    ],
+    
+   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test",],
    "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test",],
   "train_data_weights": [
+    2.3135984956768517, #CC
     2.3135984956768517,
-    2.3135984956768517,
+    1.0029210688085275, #C4
     1.0029210688085275,
-    1.0029210688085275,
-    10.09463376920134,
-    10.09463376920134, #Github2
-    2.5361521690611304,
-    2.5361521690611304, # Book2
-    3.3329762632854697,
-    2.121055878176133,
-    15.33199568912388,],
-  "train_proportion": [
-    0.138,
-    0.03,
-    0.0575,
-    0.0284,
-    0.024, #don't cross
-    0.024, #don't cross github 2
-    0.07, # don't cross this value ! hne
-    0.14, # Book 2
+    10.09463376920134, #Github
+    10.09463376920134, #Github
 
-    0.13, #don't cross
-    0.11585539362,
-    0.017362557217,],
+    2.5361521690611304, #Book
+    2.5361521690611304,
+
+    3.3329762632854697, #Arxiv
+    3.3329762632854697, #Arxiv
+
+    2.121055878176133, #WIKI
+    2.121055878176133,
+
+    15.33199568912388,
+    15.33199568912388,
+    ],
+  "train_proportion": [
+    19810,
+    19740,
+    10150,
+    1260,
+    1980, #Github
+    960, #Github2
+    1570, # Book barra nchoufou
+    800, # Book 2
+    1490, #don't cross
+    690, #don't cross
+    1500,
+    750,
+    1270,
+    640,],
     
   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test",],
   # "valid_data_paths": [    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/CommonCrawl/CommonCrawl",
@@ -143,12 +161,12 @@
 
   #  "buffer_dir": "data/buffer_save/pythia_410M_with_buffer/",
   "deepspeed_mpi": true,
-  "save": "checkpoints/pretraining-1B-official",
+  "save": "checkpoints/pretraining-1B-kemel",
   "log_dir": "logs",
-  # "load": "checkpoints/pretraining-1B-official",
-  # "tensorboard_dir": "tensorboard_important/pythia_410M_no_buffer_final",
-  "wandb_project":"pretraining-1B-jdid-official",
-  "wandb_team":"istabrak"
+  # "load": "checkpoints/pretraining-410M-kemel",
+  "tensorboard_dir": "tensorboard_important/pythia_1B_kemel",
+  "wandb_project":"pretraining-1B-kemel",
+  "wandb_team":"istabrak",
   # "use_wandb": false,
 }
 

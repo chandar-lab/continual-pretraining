@@ -16,6 +16,7 @@ class ReplayBuffer:
         self.data_dir = neox_args.buffer_dir       # Directory to store buffer files
         self.device = device
         self.prefetch_size = prefetch_size
+        self.num_files = self.buffer_size // self.file_size
         self.files = [f"{self.data_dir}/buffer_{i}.pt" for i in range(self.buffer_size // self.file_size)]
         self.file_sizes = [0] * len(self.files)  
         self.prefetch_queue = deque(maxlen=prefetch_size)
@@ -24,7 +25,8 @@ class ReplayBuffer:
         self.create_files()
         self.prefetch_thread = Thread(target=self._prefetch_files, daemon=True)
         self.prefetch_thread.start()
-
+        self.current_file_idx = 0
+        self.total_samples_seen = 0
 
     def create_files(self):
         os.makedirs(self.data_dir, exist_ok=True)
@@ -52,18 +54,18 @@ class ReplayBuffer:
                 else:
                     file_idx = available_files[0]
                     self.current_file_idx = file_idx
-                    self.current_size = self.file_sizes[file_idx]
-                
+                    
+                current_size = self.file_sizes[file_idx]
                 current_file = self.files[self.current_file_idx]
                 
                 # Write tensor_data to file
                 with open(current_file, 'r+b') as f:
                     bytes_per_sample = tensor_data.shape[1] * self.dtype_size
-                    f.seek(self.current_size * bytes_per_sample)
+                    f.seek(current_size * bytes_per_sample)
                     f.write(tensor_data.cpu().numpy().tobytes())
                 
-                self.current_size += num_samples
-                self.file_sizes[self.current_file_idx] = self.current_size
+                current_size += num_samples
+                self.file_sizes[self.current_file_idx] = current_size
             
             else:
                 # All files are full, implement reservoir sampling using buffer size

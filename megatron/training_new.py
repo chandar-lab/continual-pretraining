@@ -230,10 +230,11 @@ def pretrain(neox_args):
     task_iters = []
     cumulative = 0
     if neox_args.train_proportion is None:
-        neox_args.train_proportion = [1,]
+        neox_args.train_proportion = [neox_args.train_iters]
+
         
     for prop in neox_args.train_proportion[:-1]:  # Process all but the last proportion
-        number = round(prop * neox_args.train_iters)
+        number = prop
         task_iters.append(number)
         cumulative += number
     
@@ -367,7 +368,7 @@ def pretrain(neox_args):
 
             for idx, forgetting_value in enumerate(forgetting):
                 tb_wandb_log(
-                    f"forgetting/dataset_{idx+1}",
+                    f"forgetting/dataset_{idx+1} for task {i}",
                     forgetting_value,
                     iteration,
                     use_wandb=neox_args.use_wandb,
@@ -377,7 +378,7 @@ def pretrain(neox_args):
 
             # Log the average forgetting
             tb_wandb_log(
-                "forgetting/average_forgetting",
+                "forgetting/average_forgetting for task {i}",
                 average_forgetting,
                 iteration,
                 use_wandb=neox_args.use_wandb,
@@ -396,7 +397,7 @@ def pretrain(neox_args):
         if neox_args.do_valid:
             # prefix = f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data"   
             prefix = "iteration {}".format(iteration)
-            chart_name= f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data" 
+            chart_name= f"val data" 
 
             evaluate_and_print_results(
                 neox_args=neox_args,
@@ -1468,6 +1469,7 @@ def train(
             print_rank_0("tehshe tehshe tehshe tehshe: StopIter Train: change the task")
             iteration_task[task_id]=iteration
             print_rank_0("taada baba taada",iteration)
+            neox_args.iters_task[task_id]= iteration
             continue
 
         # if neox_args.save and iteration in neox_args.save_iters:
@@ -1521,15 +1523,15 @@ def train(
 
             print_rank_0(f"Average forgetting after checkpoint {iteration}: {average_forgetting:.6f}")
 
-            for idx, forgetting_value in enumerate(forgetting):
-                tb_wandb_log(
-                    f"forgetting_dataset_{idx+1}",
-                    forgetting_value,
-                    iteration,
-                    use_wandb=neox_args.use_wandb,
-                    tensorboard_writer=neox_args.tensorboard_writer,
-                    comet_experiment=neox_args.comet_experiment,
-                )
+            # for idx, forgetting_value in enumerate(forgetting):
+            #     tb_wandb_log(
+            #         f"forgetting_dataset_{idx+1}",
+            #         forgetting_value,
+            #         iteration,
+            #         use_wandb=neox_args.use_wandb,
+            #         tensorboard_writer=neox_args.tensorboard_writer,
+            #         comet_experiment=neox_args.comet_experiment,
+            #     )
 
             print_rank_0("----------------------------------------------------------------------------------------")
             print_rank_0(f"the forgetting after checkpoint {iteration} on dataset previous datasets: ",forgetting)
@@ -1542,7 +1544,7 @@ def train(
 
             # Log the average forgetting
             tb_wandb_log(
-                f"average_forgetting",
+                f"average_forgetting_chekpoint",
                 average_forgetting,
                 iteration,
                 use_wandb=neox_args.use_wandb,
@@ -1587,7 +1589,7 @@ def train(
                     and iteration % neox_args.eval_interval == 0
                     and neox_args.do_valid
                 ):
-                    chart_name = f"on task {task_id} only"
+                    chart_name = f"Evaluate on current task only"
                     prefix="iteration {}".format(iteration)
                     evaluate_and_print_results(
                         neox_args=neox_args,

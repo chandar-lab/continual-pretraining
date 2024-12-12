@@ -872,12 +872,12 @@ class NeoXArgsOther(NeoXArgsTemplate):
     Use a replay buffer or not
     """
     
-    buffer_size: int = 3000000
+    buffer_size: int = 3000000000
     """
     Replay buffer size
     """
     
-    file_size: int = 1000
+    file_size: int = 1000000
     """
     replay buffer file size
     """
@@ -887,9 +887,14 @@ class NeoXArgsOther(NeoXArgsTemplate):
     replay buffer save directory
     """
     
-    fill_buffer_size: int = 100
+    fill_buffer_size: int = 1000
     """
     replay buffer save directory
+    """
+    
+    forget_path: str = None
+    """
+    forgetting metric save directory
     """
 
 
