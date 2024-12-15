@@ -49,7 +49,7 @@ from megatron.model import (
 )
 from megatron.mpu.mappings import gather_from_model_parallel_region
 from megatron.checkpointing import load_checkpoint, save_checkpoint, save_checkpoint_after_task
-from megatron.data.data_utils_new import build_train_valid_test_data_iterators
+from megatron.data.data_utils_new import build_train_valid_test_data_iterators,build_train_valid_test_data_iterators_blunded
 from megatron.initialize import initialize_megatron
 from megatron.learning_rates import AnnealingLR
 from megatron.logging import tb_wandb_log, training_log
@@ -214,25 +214,33 @@ def pretrain(neox_args):
     timers("model and optimizer").stop()
     task_id=0
     iteration = 0
-    if neox_args.load is not None:
-        iteration, task_id = load_checkpoint(
-            neox_args=neox_args,
-            model=model,
-            optimizer=optimizer,
-            lr_scheduler=lr_scheduler,
-            buffer=replay_buffer,
-        )
+    if neox_args.load is not None and os.path.exists(neox_args.load):
+        try:
+            iteration, task_id = load_checkpoint(
+                neox_args=neox_args,
+                model=model,
+                optimizer=optimizer,
+                lr_scheduler=lr_scheduler,
+                buffer=replay_buffer,
+            )
+            print_rank_0(f"Checkpoint loaded successfully. Resuming from iteration {iteration}, task ID {task_id}.")
+        except Exception as e:
+            print_rank_0(f"An error occurred while loading the checkpoint: {e}")
+    else:
+        print_rank_0("Checkpoint directory does not exist. Starting from scratch.")
     
     
     neox_args.iteration = iteration
 
+
     task_iters = []
     cumulative = 0
     if neox_args.train_proportion is None:
-        neox_args.train_proportion = [1,]
+        neox_args.train_proportion = [neox_args.train_iters]
+
         
     for prop in neox_args.train_proportion[:-1]:  # Process all but the last proportion
-        number = round(prop * neox_args.train_iters)
+        number = prop
         task_iters.append(number)
         cumulative += number
     
@@ -243,8 +251,8 @@ def pretrain(neox_args):
     
     iters_task = np.cumsum(task_iters)
     neox_args.iters_task = iters_task
-    valid_data_iterator, test_data_iterator, _ = build_train_valid_test_data_iterators(
-    neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=task_iters, task_id=0)
+    valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators_blunded(
+    neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=task_iters, task_id=0)
     
     # Data stuff.
     # timers("train/valid/test data iterators").start()
@@ -295,6 +303,7 @@ def pretrain(neox_args):
         train_data_iterator, valid_on_task,_ = build_train_valid_test_data_iterators(
             neox_args=neox_args, data_path=train_data_path, iteration = iteration, task_iters=task_iters
         )
+
         
         if i==0:
             timers("interval time").start()
@@ -380,39 +389,45 @@ def pretrain(neox_args):
         print_rank_0(f"the best_performances after task {i} : ",best_performances)
         print_rank_0("----------------------------------------------------------------------------------------")
         
-        # Validation after training on the current dataset using the combined validation dataset.
-        if neox_args.do_valid:
-            # prefix = f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data"   
-            prefix = "iteration {}".format(iteration)
-            chart_name= f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data" 
+        # # Validation after training on the current dataset using the combined validation dataset.
+        # if neox_args.do_valid:
+        #     # prefix = f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data"   
+        #     prefix = "iteration {}".format(iteration)
 
-            evaluate_and_print_results(
-                neox_args=neox_args,
-                prefix=prefix,
-                forward_step_func=forward_step,
-                data_iterator=valid_data_iterator,
-                model=model,
-                iteration=iteration,
-                verbose=False,
-                chart_name=chart_name,
-                timers=timers,
-            )
-    # Final test evaluation after training on all datasets using the combined test dataset.
-    if neox_args.do_test:
-        prefix="iteration {}".format(iteration)
-        chart_name = "eval after training on all"   
-        evaluate_and_print_results(
-            neox_args=neox_args,
-            prefix=prefix,
-            forward_step_func=forward_step,
-            data_iterator=test_data_iterator,
-            model=model,
-            iteration=iteration,
-            verbose=True,
-            timers=timers,
-            chart_name=chart_name,
+        #     evaluate_and_print_results(
+        #         neox_args=neox_args,
+        #         prefix=prefix,
+        #         forward_step_func=forward_step,
+        #         data_iterator=valid_data_iterator,
+        #         model=model,
+        #         iteration=iteration,
+        #         verbose=False,
+        #         chart_name="validation",
+        #         timers=timers,
+        #     )
 
-        )
+    # PARTIE HEDHI TAAMEL FI ERROR JE NE SAIS PAS POURQUOI
+    # try:
+    #     # Final test evaluation after training on all datasets using the combined test dataset.
+    #     if neox_args.do_test:
+    #         prefix="iteration {}".format(iteration)
+    #         chart_name = "eval after training on all"   
+    #         evaluate_and_print_results(
+    #             neox_args=neox_args,
+    #             prefix=prefix,
+    #             forward_step_func=forward_step,
+    #             data_iterator=test_data_iterator,
+    #             model=model,
+    #             iteration=iteration,
+    #             verbose=True,
+    #             timers=timers,
+    #             chart_name=chart_name,
+
+    #         )
+    # except:
+    #     print("ched combined hrab")
+    #     pass
+
     # if neox_args.do_train and neox_args.train_iters > 0:
     #     iteration = train(
     #         neox_args=neox_args,
@@ -1520,7 +1535,7 @@ def train(
         #     )
         
         # Checkpointing
-        if neox_args.save and iteration in neox_args.save_iters or iteration in range(10, 45000, 500) or iteration in neox_args.iters_task:
+        if neox_args.save and iteration in neox_args.save_iters or iteration in neox_args.iters_task:
         # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
             forgetting = []
             for j in range(task_id + 1):
@@ -1613,7 +1628,7 @@ def train(
                         and iteration % neox_args.eval_interval == 0
                         and neox_args.do_valid
                     ):
-                        chart_name = f"on task {task_id} only"
+                        chart_name = f"validation/on task only"
                         prefix="iteration {}".format(iteration)
                         evaluate_and_print_results(
                             neox_args=neox_args,
@@ -1655,8 +1670,8 @@ def train(
                 )
         except:
                 print("here!!!!!!!!!!!!!!!!")
-                valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators(
-                neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=iteration, task_iters=iteration_task, task_id=0)
+                valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators_blunded(
+                neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=0, task_id=0)
                 if (
                     neox_args.eval_interval
                     and iteration % neox_args.eval_interval == 0

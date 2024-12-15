@@ -1,15 +1,13 @@
 {
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
-  "num_layers": 24,
-  "hidden_size": 1024,
-  "num_attention_heads": 16,
+  "num_layers": 16,
+  "hidden_size": 2048,
+  "num_attention_heads": 8,
   "seq_length": 2048,
   "max_position_embeddings": 2048,
   "pos_emb": "rotary",
   "rotary_pct": 0.25,
-  # "mlp_type": "llama",
-  "activation": "silu",
   "no_weight_tying": true,
   "gpt_j_residual": true,
   "output_layer_parallelism": "column",
@@ -39,7 +37,7 @@
     "contiguous_gradients": true,
     "cpu_offload": false
   },
-   "train_micro_batch_size_per_gpu": 1,
+   "train_micro_batch_size_per_gpu": 4,
    "gradient_accumulation_steps": 1,
    "data_impl": "mmap",
    "checkpoint_activations": true,
@@ -58,8 +56,8 @@
   "data_types": {
     "grad_accum_dtype": "fp32"
   },
-   "train_iters": 62610,
-   "lr_decay_iters": 62610,
+   "train_iters": 47440,
+   "lr_decay_iters": 47440,
    "distributed_backend": "nccl",
    "checkpoint_factor": 1000,
    "eval_interval": 100,
@@ -79,9 +77,9 @@
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Github/Github",
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Github/Github",
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Book/Book",
-        "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book",
+    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Book/Book",
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/ArXiv/ArXiv",
-      "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv",
+    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/ArXiv/ArXiv",
 
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/Wikipedia/Wikipedia",
     "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_200B-300B/Wikipedia/Wikipedia",
@@ -114,12 +112,12 @@
     ],
   "train_proportion": [
     19810,
-    19740,
-    10150,
+    9840,
+    5420,
     1260,
-    1980, #Github
+    1720, #Github
     960, #Github2
-    1570, # Book barra nchoufou
+    1290, # Book barra nchoufou
     800, # Book 2
     1490, #don't cross
     690, #don't cross
@@ -127,6 +125,9 @@
     750,
     1270,
     640,],
+
+
+  "forget_path":"forgetting/forgetting_1B.pth",
     
   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data/slim_pajama/test/all/sp_test",],
   # "valid_data_paths": [    "/lustre/orion/bif151/proj-shared/data/slim_pajama/tokenized_train_0-200B/CommonCrawl/CommonCrawl",

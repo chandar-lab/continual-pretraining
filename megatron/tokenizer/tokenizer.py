@@ -1,3 +1,4 @@
+
 # Copyright (c) 2024, EleutherAI
 # This file is based on code by the authors denoted below and has been modified from its original version.
 #
@@ -31,6 +32,8 @@ def build_tokenizer(args):
     """Initialize tokenizer."""
     if args.rank == 0:
         print("> building {} tokenizer ...".format(args.tokenizer_type), flush=True)
+    
+    assert args.tokenizer_type is not None, "tokenizer_type must be specified in the .yml config"
 
     # Select and instantiate the tokenizer.
     if args.tokenizer_type.lower() == "GPT2BPETokenizer".lower():
@@ -413,8 +416,6 @@ class Llama3HFTokenizer(AbstractTokenizer):
 
         self.tokenizer = Tokenizer.from_file(vocab_file)
         self.eod_id = self.tokenizer.token_to_id("<|end_of_text|>")
-        self.pad_id = self.tokenizer.token_to_id("<|padding|>")
-
 
     @property
     def vocab_size(self):

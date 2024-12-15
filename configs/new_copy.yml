@@ -58,8 +58,8 @@
   "data_types": {
     "grad_accum_dtype": "fp32"
   },
-   "train_iters": 62610,
-   "lr_decay_iters": 62610,
+   "train_iters": 47440,
+   "lr_decay_iters": 47440,
    "distributed_backend": "nccl",
    "checkpoint_factor": 1000,
    "eval_interval": 100,
@@ -114,12 +114,12 @@
     ],
   "train_proportion": [
     19810,
-    19740,
-    10150,
+    9840,
+    5420,
     1260,
-    1980, #Github
+    1720, #Github
     960, #Github2
-    1570, # Book barra nchoufou
+    1290, # Book barra nchoufou
     800, # Book 2
     1490, #don't cross
     690, #don't cross
@@ -163,7 +163,7 @@
   "deepspeed_mpi": true,
   "save": "checkpoints/pretraining-410M-kemel",
   "log_dir": "logs",
-  # "load": "checkpoints/pretraining-410M-kemel",
+  "load": "checkpoints/pretraining-410M-kemel",
   "tensorboard_dir": "tensorboard_important/pythia_410M_kemel",
   "wandb_project":"pretraining-410M-kemel",
   "wandb_team":"istabrak",

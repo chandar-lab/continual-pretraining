@@ -49,7 +49,7 @@ from megatron.model import (
 )
 from megatron.mpu.mappings import gather_from_model_parallel_region
 from megatron.checkpointing import load_checkpoint, save_checkpoint, save_checkpoint_after_task
-from megatron.data.data_utils_new import build_train_valid_test_data_iterators
+from megatron.data.data_utils_new import build_train_valid_test_data_iterators,build_train_valid_test_data_iterators_blunded
 from megatron.initialize import initialize_megatron
 from megatron.learning_rates import AnnealingLR
 from megatron.logging import tb_wandb_log, training_log
@@ -246,8 +246,8 @@ def pretrain(neox_args):
     
     iters_task = np.cumsum(task_iters)
     neox_args.iters_task = iters_task
-    valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators(
-    neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=task_iters, task_id=0)
+    valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators_blunded(
+    neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=task_iters, task_id=0)
     
     # Data stuff.
     # timers("train/valid/test data iterators").start()
@@ -338,16 +338,29 @@ def pretrain(neox_args):
                 iteration=0, 
                 task_iters=task_iters,
             )
-        
+            try:
             
-            eval_results = evaluate(
-                neox_args=neox_args,
-                forward_step_fn=forward_step,
-                data_iterator=test_data_iterator_j,
-                model=model,
-                verbose=False,
-                timers=timers,
-            )
+                eval_results = evaluate(
+                    neox_args=neox_args,
+                    forward_step_fn=forward_step,
+                    data_iterator=test_data_iterator_j,
+                    model=model,
+                    verbose=False,
+                    timers=timers,
+                )
+            except:
+                    for t in [
+                        "batch generator",
+                    ]:
+                        timers(t).reset()
+                    eval_results = evaluate(
+                        neox_args=neox_args,
+                        forward_step_fn=forward_step,
+                        data_iterator=test_data_iterator_j,
+                        model=model,
+                        verbose=False,
+                        timers=timers,
+                    )
             current_performance = eval_results['lm_loss']
 
             if j not in best_performances:
@@ -1466,6 +1479,18 @@ def train(
                 noise_scale_logger=noise_scale_logger,
             )
         except:
+            for t in [
+                "forward",
+                "backward",
+                "allreduce",
+                "optimizer",
+                "batch generator",
+                "data loader",
+            ]:
+                try:
+                    timers(t).reset()
+                except Exception as e:
+                    print(f"Failed to reset timer {t}: {e}")
             print_rank_0("tehshe tehshe tehshe tehshe: StopIter Train: change the task")
             iteration_task[task_id]=iteration
             print_rank_0("taada baba taada",iteration)
@@ -1482,7 +1507,7 @@ def train(
         #     )
         
         # Checkpointing
-        if neox_args.save and iteration in neox_args.save_iters or iteration in range(10, 45000, 500) or iteration in neox_args.iters_task:
+        if neox_args.save and iteration in neox_args.save_iters or iteration in range(0, 45000, 500) or iteration in neox_args.iters_task:
         # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
 
             forgetting = []
@@ -1494,16 +1519,30 @@ def train(
                     task_iters=iteration_task,
                     task_id=j
                 )
-
-                # Evaluate the model on the test data of dataset j
-                eval_results = evaluate(
-                    neox_args=neox_args,
-                    forward_step_fn=forward_step,
-                    data_iterator=test_data_iterator_j,
-                    model=model,
-                    verbose=False,
-                    timers=timers,
-                )
+                try:
+                    # Evaluate the model on the test data of dataset j
+                    eval_results = evaluate(
+                        neox_args=neox_args,
+                        forward_step_fn=forward_step,
+                        data_iterator=test_data_iterator_j,
+                        model=model,
+                        verbose=False,
+                        timers=timers,
+                    )
+                except:
+                        for t in [
+                                "batch generator",
+                                "data loader",
+                            ]:
+                                timers(t).reset()
+                        eval_results = evaluate(
+                            neox_args=neox_args,
+                            forward_step_fn=forward_step,
+                            data_iterator=test_data_iterator_j,
+                            model=model,
+                            verbose=False,
+                            timers=timers,
+                        )
 
                 current_performance = eval_results['lm_loss']
 
@@ -1605,6 +1644,13 @@ def train(
                     )
         except StopIteration:
             print_rank_0(f"StopIteration encountered during evaluation on current task at iteration {iteration}")
+            for t in [
+                    "batch generator",
+                ]:
+                try:
+                    timers(t).reset()
+                except Exception as e:
+                    print(f"Failed to reset timer {t}: {e}")
 
             _,valid_on_task,_ = build_train_valid_test_data_iterators(
             neox_args=neox_args, data_path=neox_args.train_data_paths[task_id], iteration = iteration, task_iters=iteration_task)
@@ -1631,9 +1677,21 @@ def train(
                     reference_model=reference_model,
                 )
         except:
-                print("hne!!!!!!!!!!!!!!!!")
-                valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators(
-                neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=iteration, task_iters=iteration_task, task_id=0)
+                print_rank_0("hne!!!!!!!!!!!!!!!!")
+                for t in [
+                    "forward",
+                    "backward",
+                    "allreduce",
+                    "optimizer",
+                    "batch generator",
+                    "data loader",
+                ]:
+                    try:
+                        timers(t).reset()
+                    except Exception as e:
+                        print(f"Failed to reset timer {t}: {e}")
+                valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators_blunded(
+                neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=0, task_id=0)
 
                 if (
                     neox_args.eval_interval
@@ -1689,6 +1747,21 @@ def evaluate(
                     (`get_batch` transforms it into inputs / labels)
     """
     # Turn on evaluation mode which disables dropout.
+
+    if timers is not None:
+        for timer_name in [
+            "batch generator",
+            "forward",
+            "backward",
+            "allreduce",
+            "optimizer",
+            "data loader",
+            "batch_input",
+        ]:
+            try:
+                timers(timer_name).reset()
+            except Exception as e:
+                print_rank_0(f"Failed to reset timer {timer_name}: {e}")
     model.eval()
     losses = []
     metric_dicts = defaultdict(list)
