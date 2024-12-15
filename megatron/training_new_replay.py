@@ -251,8 +251,7 @@ def pretrain(neox_args):
     
     iters_task = np.cumsum(task_iters)
     neox_args.iters_task = iters_task
-    valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators_blunded(
-    neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=task_iters, task_id=0)
+
     
     # Data stuff.
     # timers("train/valid/test data iterators").start()
@@ -293,6 +292,9 @@ def pretrain(neox_args):
         best_performances_checkpoint = {}
         
     for i in range(task_id, len(neox_args.train_data_paths)):
+
+        valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators_blunded(
+        neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=task_iters, task_id=task_id)
         train_data_path = neox_args.train_data_paths[i]
         print_rank_0(f"Starting pretraining on dataset {i+1}/{len(neox_args.train_data_paths)}: {train_data_path}")
 
@@ -1688,6 +1690,7 @@ def train(
                         timers=timers,
                         reference_model=reference_model,
                     )
+                pass
 
         if neox_args.exit_interval and iteration % neox_args.exit_interval == 0:
             torch.distributed.barrier()
