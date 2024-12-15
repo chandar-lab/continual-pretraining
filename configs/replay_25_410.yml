@@ -1,8 +1,8 @@
 {
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
-  "num_layers": 12,
-  "hidden_size": 512,
+  "num_layers": 16,
+  "hidden_size": 2048,
   "num_attention_heads": 8,
   "seq_length": 2048,
   "max_position_embeddings": 2048,
