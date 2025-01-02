@@ -490,7 +490,7 @@ def build_train_valid_test_data_iterators_blunded(neox_args, data_path=None, ite
     # Data loader only on rank 0 of each model parallel group.
     if mpu.get_model_parallel_rank() == 0 and pipe_load:
         # Number of train/valid/test samples.
-        train_iters = task_iters[task_id]
+        train_iters = neox_args.train_iters
         eval_iters = (train_iters // neox_args.eval_interval + 1) * neox_args.eval_iters
         test_iters = neox_args.eval_iters
         train_val_test_num_samples = [
@@ -671,7 +671,7 @@ def build_train_valid_test_data_iterators(neox_args, data_path, iteration=0, tas
     # Data loader only on rank 0 of each model parallel group.
     if mpu.get_model_parallel_rank() == 0 and pipe_load:
         # Number of train/valid/test samples.
-        train_iters = task_iters[task_id]
+        train_iters = neox_args.train_iters
         eval_iters = (train_iters // neox_args.eval_interval + 1) * neox_args.eval_iters
         test_iters = neox_args.eval_iters
         train_val_test_num_samples = [

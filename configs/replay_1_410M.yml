@@ -70,7 +70,7 @@
    "wall_clock_breakdown": true,
    "launcher": "slurm",
    "deepspeed_slurm": true,
-   "num_workers": 4,
+   "num_workers": 8,
 
 
   #  ########OSCAR Deutsch ######################

@@ -943,7 +943,7 @@ def load_checkpoint(
     else:
         print_rank_0(" > could not find arguments in the checkpoint for validation...")
 
-    # Return the correctly loaded iteration and task_id
-    if buffer is not None:
-        buffer.load("/lustre/orion/bif151/scratch/istabrak/gpt-neox/data/saved_buffer_continual")
+    # # Return the correctly loaded iteration and task_id
+    # if buffer is not None:
+    #     buffer.load("/lustre/orion/bif151/scratch/istabrak/gpt-neox/data/saved_buffer_continual")
     return iteration, task_id

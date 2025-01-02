@@ -518,9 +518,10 @@ class NeoXArgsOptimizer(NeoXArgsTemplate):
         "madgrad_wd",
         "sgd",
         "lion",
+        "SOAP",
     ] = "adam"
     """
-    Type of optimizer to use. Choose from ['adam', 'onebitadam', 'cpu_adam', 'cpu_torch_adam', 'sm3', 'madgrad_wd', 'sgd', 'lion']
+    Type of optimizer to use. Choose from ['adam', 'onebitadam', 'cpu_adam', 'cpu_torch_adam', 'sm3', 'madgrad_wd', 'sgd', 'lion','soap']
     NOTE: sgd will use MuSGD from Mup. Mup must be enabled for this optimizer.
     """
 
@@ -862,6 +863,11 @@ class NeoXArgsOther(NeoXArgsTemplate):
     Set during training
     """
 
+    load_buffer: bool = False
+    """
+    Load state of saved replay buffer or not
+    """
+
     global_num_gpus: int = None
     """
     Set during launching
@@ -872,7 +878,7 @@ class NeoXArgsOther(NeoXArgsTemplate):
     Use a replay buffer or not
     """
     
-    buffer_size: int = 3000000000
+    buffer_size: int = 1463414
     """
     Replay buffer size
     """

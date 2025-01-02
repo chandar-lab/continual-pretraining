@@ -1,14 +1,19 @@
 {
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
-   "num_layers": 12,
-   "hidden_size": 768,
-   "num_attention_heads": 12,
+   "num_layers": 24,
+   "hidden_size": 1792,
+   "num_attention_heads": 28,
    "seq_length": 2048,
    "max_position_embeddings": 2048,
   "pos_emb": "rotary",
   "rotary_pct": 0.25,
-  # "mlp_type": "llama",
+
+
+  "intermediate_size": 5120,
+  "norm": "rmsnorm",
+  "rms_norm_epsilon": 1.0e-5,
+  #  "mlp_type": "llama",
   "activation": "silu",
   "no_weight_tying": true,
   "gpt_j_residual": true,
@@ -21,7 +26,7 @@
   "optimizer": {
     "type": "Adam",
     "params": {
-      "lr": 5.0e-4,
+      "lr": 2.2e-4,
       "betas": [0.9, 0.95],
       "eps": 1.0e-8,
     }
@@ -39,7 +44,7 @@
     "contiguous_gradients": true,
     "cpu_offload": false
   },
-   "train_micro_batch_size_per_gpu": 4,
+   "train_micro_batch_size_per_gpu": 16,
    "gradient_accumulation_steps": 1,
    "data_impl": "mmap",
    "checkpoint_activations": true,
@@ -58,8 +63,8 @@
   "data_types": {
     "grad_accum_dtype": "fp32"
   },
-   "train_iters": 143052,
-   "lr_decay_iters": 143052,
+   "train_iters": 35763,
+   "lr_decay_iters": 35763,
    "distributed_backend": "nccl",
    "checkpoint_factor": 1000,
    "eval_interval": 100,
@@ -70,7 +75,7 @@
    "wall_clock_breakdown": true,
    "launcher": "slurm",
    "deepspeed_slurm": true,
-   "num_workers": 4,
+   "num_workers": 8,
 
 
   #  ########OSCAR Deutsch ######################
@@ -94,23 +99,23 @@
 
 
   "train_proportion": [
-    47684,47684,47684,
+    11921,11921,11921,
   ],
     
-  "forget_path":"gpt_gopeshh_multilang/forgetting.pth",
+  "forget_path":"spectra_1B/forgetting.pth",
 
   "weight_by_num_documents": true,
-   "split" : "80,10,10",
+   "split" : "70,15,15",
 
    "vocab-file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
-   "split" : "80,10,10",
+  #  "split" : "80,10,10",
    "tokenizer_type": "Llama3HFTokenizer",
   "deepspeed_mpi": true,
-  "save": "checkpoints/gpt_gopeshh_multilang",
+  "save": "checkpoints/spectra_1B",
   "log_dir": "logs",
-  #  "load": "checkpoints/gpt_gopeshh_multilang",
+  "load": "checkpoints/spectra_1B",
   # "tensorboard_dir": "tensorboard_important/pythia_410M_kemel",
-  "wandb_project":"gpt_gopeshh_multilang",
+  "wandb_project":"spectra_1B",
   "wandb_team":"istabrak",
   # "use_wandb": false,
   "extra_save_iters": [2000],

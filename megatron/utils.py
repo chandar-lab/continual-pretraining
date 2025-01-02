@@ -256,6 +256,10 @@ class Timer:
         """Reset timer."""
         self.elapsed_ = 0.0
         self.started_ = False
+    
+    def is_started(self):
+        """Check if the timer is started."""
+        return self.started_
 
     def elapsed(self, reset=True):
         """Calculate the elapsed time."""

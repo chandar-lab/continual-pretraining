@@ -1,15 +1,13 @@
 {
   "pipe_parallel_size": 1,
   "model_parallel_size": 1,
-   "num_layers": 12,
-   "hidden_size": 768,
-   "num_attention_heads": 12,
-   "seq_length": 2048,
-   "max_position_embeddings": 2048,
+  "num_layers": 24,
+  "hidden_size": 1024,
+  "num_attention_heads": 16,
+  "seq_length": 2048,
+  "max_position_embeddings": 2048,
   "pos_emb": "rotary",
   "rotary_pct": 0.25,
-  # "mlp_type": "llama",
-  "activation": "silu",
   "no_weight_tying": true,
   "gpt_j_residual": true,
   "output_layer_parallelism": "column",
@@ -19,18 +17,18 @@
    "rope_fusion": false,
    "layernorm_fusion": true,
   "optimizer": {
-    "type": "Adam",
+    "type": "SOAP",
     "params": {
       "lr": 5.0e-4,
       "betas": [0.9, 0.95],
       "eps": 1.0e-8,
     }
   },
-  "min_lr": 5.0e-5,
+  # "min_lr": 5.0e-5,
   "lr_decay_style": "cosine",
   "warmup": 0.01,
    "zero_optimization": {
-    "stage": 1,
+    "stage": 0,
     "allgather_partitions": true,
     "allgather_bucket_size": 200000000,
     "overlap_comm": true,
@@ -70,7 +68,7 @@
    "wall_clock_breakdown": true,
    "launcher": "slurm",
    "deepspeed_slurm": true,
-   "num_workers": 4,
+   "num_workers": 8,
 
 
   #  ########OSCAR Deutsch ######################
@@ -93,32 +91,62 @@
    ],
 
 
+
+  # #  ########OSCAR FR ######################
+  #   "train_data_paths": [
+  #   "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/train/fr/merged_train",
+
+  #   ],
+  #   "forget_path":"forgetting_test/forgetting.pth",
+    
+  #  "test_data_paths": ["/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/test/fr/merged_test",],
+  #  "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/val/fr/merged_val",],
+
+  #  ########DCLM######################
+  #   "train_data_paths": [
+  #   "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/train_400B/dclm-baseline/merged_train",
+
+  #   ],
+  #   "forget_path":"forgetting_test/forgetting.pth",
+    
+  #  "test_data_paths": ["/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/test/dclm-baseline/merged_test",],
+  #  "valid_data_paths": ["/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/val/dclm-baseline/merged_val",],
+  # "train_data_weights": [
+  #   2.3135984956768517, #CC
+  #   ],
+
+
   "train_proportion": [
-    47684,47684,47684,
+    47684,47684,47684, # hatit bel id fl blundable ya ista
   ],
     
-  "forget_path":"gpt_gopeshh_multilang/forgetting.pth",
+  "forget_path":"llama3_multilang_1B/forgetting.pth",
 
   "weight_by_num_documents": true,
    "split" : "80,10,10",
-
+  #  "tokenizer_type": "HFTokenizer",
+  #  "vocab_file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
    "vocab-file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
+  #  "use_replay": true,
+  #  "buffer_size": 3200000000,
+  #  "file_size": 3200000,
+  #  "replay_buffer_proportion" : 0.5,
+  #  "fill_buffer_size": 2000,
    "split" : "80,10,10",
    "tokenizer_type": "Llama3HFTokenizer",
-  "deepspeed_mpi": true,
-  "save": "checkpoints/gpt_gopeshh_multilang",
+  #  "vocab_file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
+  "extra_save_iters": [2500],
+
+  #  "buffer_dir": "data/buffer_save/pythia_410M_with_buffer/",
+  # "deepspeed_mpi": true,
+  "save": "checkpoints/410_soap",
   "log_dir": "logs",
-  #  "load": "checkpoints/gpt_gopeshh_multilang",
-  # "tensorboard_dir": "tensorboard_important/pythia_410M_kemel",
-  "wandb_project":"gpt_gopeshh_multilang",
+  # "load": "checkpoints/410_soap",
+
+  "tensorboard_dir": "410_soap",
+  "wandb_project":"410_soap",
   "wandb_team":"istabrak",
   # "use_wandb": false,
-  "extra_save_iters": [2000],
-  # "load_buffer": false,
-  #  "use_replay": true,
-  #  "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/replay_multilang_10/",
-  #  "replay_buffer_proportion": 0.1,
 }
-
 
 

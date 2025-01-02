@@ -158,3 +158,8 @@ src/
 # test data files
 tests/data/*.bin
 tests/data/*.idx
+
+
+forgettings/*
+tkhoubith.sh
+jobs/*

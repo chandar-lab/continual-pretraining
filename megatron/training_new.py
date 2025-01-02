@@ -66,7 +66,6 @@ from pickle import dump
 from continual_utils.replay_buffer import ReplayBuffer
 import os
 import numpy as np
-import torch
 
 
 def mup_weights_reinit(neox_args, model):
@@ -190,9 +189,13 @@ def pretrain(neox_args):
 
     """
     if neox_args.use_replay:
-        replay_buffer = ReplayBuffer(neox_args=neox_args)
+        if neox_args.load_buffer:
+            replay_buffer = ReplayBuffer(neox_args=neox_args, load_previous = neox_args.load_buffer)
+        else:
+            replay_buffer = ReplayBuffer(neox_args=neox_args)
     else:
         replay_buffer = None
+        
     # setup logging and timers
     init_wandb(neox_args=neox_args)
     timers = Timers(
@@ -240,14 +243,13 @@ def pretrain(neox_args):
     
     # The last split gets the remainder to ensure the total is correct
     task_iters.append(neox_args.train_iters - cumulative) 
-
-
+    
     print_rank_0("task_iters:", task_iters)
     
     iters_task = np.cumsum(task_iters)
     neox_args.iters_task = iters_task
-    valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators_blunded(
-    neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=task_iters, task_id=0)
+    # valid_data_iterator, test_data_iterator, _ = build_train_valid_test_data_iterators(
+    # neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=0, task_iters=task_iters, task_id=0)
     
     # Data stuff.
     # timers("train/valid/test data iterators").start()
@@ -279,28 +281,28 @@ def pretrain(neox_args):
     fill_buffer_iter = 0
 
     try:
-        best_performances, best_performances_checkpoint=load_best_performances()
+        best_performances, best_performances_checkpoint=load_best_performances(neox_args.forget_path)
     except:
         #Both of them need to be loaded from disk if exist else initialize as follow
         # The best_performances list has the best performance of the model_evaluation across all tasks
         best_performances = {}
-        # The best_performances_checkpoint list has the best performance of the model_evaluation seen even 
+        # The best_performances_checkpoint list has the best performance of the model_evaluation seen even
         best_performances_checkpoint = {}
-
-
+        
     for i in range(task_id, len(neox_args.train_data_paths)):
+        _,valid_data_iterator, test_data_iterator= build_train_valid_test_data_iterators_blunded(
+        neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=task_iters, task_id=task_id)
+
         train_data_path = neox_args.train_data_paths[i]
         print_rank_0(f"Starting pretraining on dataset {i+1}/{len(neox_args.train_data_paths)}: {train_data_path}")
 
         # Update the neox_args for the current dataset.
-        neox_args.data_path = train_data_path
+        # neox_args.data_path = train_data_path
 
         # Rebuild the training data iterator for the current dataset.
-        train_data_iterator,valid_on_task,_ = build_train_valid_test_data_iterators(
+        train_data_iterator, valid_on_task,_ = build_train_valid_test_data_iterators(
             neox_args=neox_args, data_path=train_data_path, iteration = iteration, task_iters=task_iters
         )
-        
-        torch.distributed.barrier()
         
         if i==0:
             timers("interval time").start()
@@ -323,7 +325,6 @@ def pretrain(neox_args):
             best_performances=best_performances_checkpoint,
         )
         print_rank_0(f"Calculating the forgetting ..")
-
         #Forgetting is a local variable to store the forgetting over tasks in this checkpoint: this serves to create the matrix of forgetting
         # should be stored in disk
         forgetting = []
@@ -335,63 +336,45 @@ def pretrain(neox_args):
             _, _, test_data_iterator_j = build_train_valid_test_data_iterators(
                 neox_args=neox_args,
                 data_path=neox_args.train_data_paths[j],
-                iteration=0, 
+                iteration=0,
                 task_iters=task_iters,
             )
-            try:
+        
+        
             
-                eval_results = evaluate(
-                    neox_args=neox_args,
-                    forward_step_fn=forward_step,
-                    data_iterator=test_data_iterator_j,
-                    model=model,
-                    verbose=False,
-                    timers=timers,
-                )
-            except:
-                    for t in [
-                        "batch generator",
-                    ]:
-                        timers(t).reset()
-                    eval_results = evaluate(
-                        neox_args=neox_args,
-                        forward_step_fn=forward_step,
-                        data_iterator=test_data_iterator_j,
-                        model=model,
-                        verbose=False,
-                        timers=timers,
-                    )
+            eval_results = evaluate(
+                neox_args=neox_args,
+                forward_step_fn=forward_step,
+                data_iterator=test_data_iterator_j,
+                model=model,
+                verbose=False,
+                timers=timers,
+            )
             current_performance = eval_results['lm_loss']
-
             if j not in best_performances:
                 best_performances[j] = current_performance
-                forgetting_value = 0 
+                forgetting_value = 0
             else:
                 forgetting_value = best_performances[j] - current_performance
-
             if current_performance < best_performances.get(j, float('inf')):
                 best_performances[j] = current_performance
-
             forgetting.append(forgetting_value)
             print_rank_0(f"Dataset {j+1}: Forgetting = {forgetting_value:.6f}")
             average_forgetting = sum(forgetting) / len(forgetting)
             print_rank_0(f"Average forgetting after task {i+1}: {average_forgetting:.6f}")
             print_rank_0()
-
-
             for idx, forgetting_value in enumerate(forgetting):
                 tb_wandb_log(
-                    f"forgetting/dataset_{idx+1} for task {i}",
+                    f"forgetting/dataset_{idx+1}",
                     forgetting_value,
                     iteration,
                     use_wandb=neox_args.use_wandb,
                     tensorboard_writer=neox_args.tensorboard_writer,
                     comet_experiment=neox_args.comet_experiment,
                 )
-
             # Log the average forgetting
             tb_wandb_log(
-                "forgetting/average_forgetting for task {i}",
+                "forgetting/average_forgetting",
                 average_forgetting,
                 iteration,
                 use_wandb=neox_args.use_wandb,
@@ -401,16 +384,15 @@ def pretrain(neox_args):
         print_rank_0("----------------------------------------------------------------------------------------")
         print_rank_0(f"the forgetting after task {i} on dataset previous datasets: ",forgetting)
         print_rank_0("----------------------------------------------------------------------------------------")
-
-
         print_rank_0("----------------------------------------------------------------------------------------")
         print_rank_0(f"the best_performances after task {i} : ",best_performances)
         print_rank_0("----------------------------------------------------------------------------------------")
+        
         # Validation after training on the current dataset using the combined validation dataset.
         if neox_args.do_valid:
             # prefix = f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data"   
             prefix = "iteration {}".format(iteration)
-            chart_name= f"val data" 
+            chart_name= f"End of training on dataset {i+1}/{len(neox_args.train_data_paths)} for val data" 
 
             evaluate_and_print_results(
                 neox_args=neox_args,
@@ -426,7 +408,7 @@ def pretrain(neox_args):
     # Final test evaluation after training on all datasets using the combined test dataset.
     if neox_args.do_test:
         prefix="iteration {}".format(iteration)
-        chart_name = "eval after training on all"       
+        chart_name = "eval after training on all"   
         evaluate_and_print_results(
             neox_args=neox_args,
             prefix=prefix,
@@ -437,8 +419,58 @@ def pretrain(neox_args):
             verbose=True,
             timers=timers,
             chart_name=chart_name,
+
         )
-    
+    # if neox_args.do_train and neox_args.train_iters > 0:
+    #     iteration = train(
+    #         neox_args=neox_args,
+    #         timers=timers,
+    #         model=model,
+    #         reference_model=reference_model,
+    #         optimizer=optimizer,
+    #         lr_scheduler=lr_scheduler,
+    #         train_data_iterator=train_data_iterator,
+    #         valid_data_iterator=valid_data_iterator,
+    #     )
+
+    # if neox_args.do_valid:
+    #     prefix = "the end of training for val data"
+    #     evaluate_and_print_results(
+    #         neox_args=neox_args,
+    #         prefix=prefix,
+    #         forward_step_func=forward_step,
+    #         data_iterator=valid_data_iterator,
+    #         model=model,
+    #         iteration=iteration,
+    #         verbose=False,
+    #         timers=timers,
+    #         reference_model=reference_model,
+    #     )
+
+    # if neox_args.save and iteration != 0:
+    #     save_checkpoint(
+    #         neox_args=neox_args,
+    #         iteration=iteration,
+    #         model=model,
+    #         optimizer=optimizer,
+    #         lr_scheduler=lr_scheduler,
+    #     )
+
+    # if neox_args.do_test:
+    #     # Run on test data.
+    #     prefix = "the end of training for test data"
+    #     evaluate_and_print_results(
+    #         neox_args=neox_args,
+    #         prefix=prefix,
+    #         forward_step_func=forward_step,
+    #         data_iterator=test_data_iterator,
+    #         model=model,
+    #         iteration=iteration,
+    #         verbose=True,
+    #         timers=timers,
+    #         chart_name="test",
+    #         reference_model=reference_model,
+    #     )
 
 
 def _get_batch(neox_args, tokenizer, keys, data, datatype, label_mask_zero=False):
@@ -692,6 +724,7 @@ def forward_step(
             timers("batch generator").stop()
         except:
             pass
+        
     if neox_args.memory_profiling:
         torch.cuda.nvtx.range_pop()
 
@@ -1186,7 +1219,8 @@ def train_step(
             try:
                 timers("forward").start()
             except:
-                pass
+                pass            
+            
             loss = forward_step(
                 neox_args=neox_args,
                 timers=timers,
@@ -1198,7 +1232,8 @@ def train_step(
             try:
                 timers("forward").stop()
             except:
-                pass
+                pass            
+            
             losses.append(loss)
             # for key in metric_dict.keys():
             #     metric_dicts[key].append(metric_dict[key])
@@ -1212,7 +1247,8 @@ def train_step(
             try:
                 timers("backward").start()
             except:
-                pass
+                pass            
+            
             backward_step(
                 neox_args=neox_args,
                 timers=timers,
@@ -1223,7 +1259,8 @@ def train_step(
             try:
                 timers("backward").stop()
             except:
-                pass
+                pass            
+            
             if (
                 neox_args.profile
                 and neox_args.iteration >= neox_args.profile_step_start
@@ -1237,10 +1274,12 @@ def train_step(
                 and neox_args.iteration <= neox_args.profile_step_stop
             ):
                 torch.cuda.nvtx.range_push(f"Optimizer step")
+
             try:
                 timers("optimizer").start()
             except:
-                pass
+                pass            
+            
             if neox_args.deepspeed:
                 model.step()
             else:
@@ -1248,7 +1287,8 @@ def train_step(
             try:
                 timers("optimizer").stop()
             except:
-                pass
+                pass            
+            
             if (
                 neox_args.profile
                 and neox_args.iteration >= neox_args.profile_step_start
@@ -1277,13 +1317,12 @@ def train_step(
     return reduce_metrics, skipped_iter, fill_buffer_iter
 
 
-
-def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None, fill_buffer_iter=0):
+def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None, fill_buffer_iter =0):
     """Single training step with DeepSpeed's pipeline parallel engine."""
 
     assert neox_args.deepspeed
-
-    # Check if data_iterator is not None before calling next()
+    # inputs = next(data_iterator)
+        # Check if data_iterator is not None before calling next()
     if data_iterator is not None:
         try:
             inputs = next(data_iterator)
@@ -1293,10 +1332,11 @@ def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None,
             inputs = None
     else:
         inputs = None
-
+          
     if neox_args.use_replay:
+
         if fill_buffer_iter > neox_args.fill_buffer_size:
-            if inputs is not None:
+            if inputs is not None:      
                 replay_buffer.add(inputs['text'])
             # Get the current batch if data_iterator is available
             if data_iterator is not None:
@@ -1306,36 +1346,34 @@ def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None,
                     current_batch = None
             else:
                 current_batch = None
-
+                
+            # replay_buffer.add(inputs['text'])
+            # current_batch = next(data_iterator)
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             buffer_batch = replay_buffer.get_batch(neox_args.replay_buffer_proportion)
-
             if current_batch is not None:
                 batch = torch.cat([current_batch['text'].to(device), buffer_batch], dim=0)
             else:
-                batch = buffer_batch  # Only buffer_batch is available
-
+                batch = buffer_batch
             combined_batch = {'text': batch}
-
-            # Add current batch to replay buffer if it exists
+            # Add current batch to replay buffer
             if current_batch is not None:
-                replay_buffer.add(current_batch['text'])
-
-            # Pass the combined batch to the model
+                for sample in current_batch['text']:
+                    replay_buffer.add(sample)
+                
             loss = model.train_batch(data_iter=iter([combined_batch]))
         else:
             if inputs is not None:
                 replay_buffer.add(inputs['text'])
-            # If data_iterator is None, pass None to model.train_batch
             loss = model.train_batch(data_iter=data_iterator)
             fill_buffer_iter += 1
+
     else:
-        # If data_iterator is None, pass None to model.train_batch
-        loss = model.train_batch(data_iter=data_iterator)
+            loss = model.train_batch(data_iter=data_iterator)
+        
 
     loss_dict = {"lm_loss": loss}
-
-    # Reset timers to avoid breaking Megatron's timers
+    # Don't break Megatron's timers because we changed code paths.
     for t in [
         "forward",
         "backward",
@@ -1345,9 +1383,7 @@ def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None,
         "data loader",
     ]:
         timers(t).reset()
-
     return loss_dict, fill_buffer_iter
-
 
 def save_best_performances(best_performances, best_performances_checkpoint, checkpoint_path="forgetting/forgetting.pth"):
     """Save best performances and checkpoints to disk."""
@@ -1364,8 +1400,6 @@ def save_best_performances(best_performances, best_performances_checkpoint, chec
     
     # Save the dictionary to a checkpoint file
     torch.save(checkpoint, checkpoint_path)
-
-
 def load_best_performances(checkpoint_path="forgetting/forgetting.pth"):
     """Load best performances and checkpoints from disk."""
     checkpoint = torch.load(checkpoint_path)
@@ -1373,6 +1407,7 @@ def load_best_performances(checkpoint_path="forgetting/forgetting.pth"):
     best_performances_checkpoint = checkpoint.get('best_performances_checkpoint', {})
     print_rank_0(f"Best performances and checkpoints loaded from {checkpoint_path}")
     return best_performances, best_performances_checkpoint
+
 
 def train(
     neox_args,
@@ -1430,12 +1465,11 @@ def train(
         )
         prof.start()
     while iteration < iteration_task[task_id]:
-        try:
-            if neox_args.profile:
+        if neox_args.profile:
                 prof.step()
-            if neox_args.profile and iteration == neox_args.profile_step_start:
+        if neox_args.profile and iteration == neox_args.profile_step_start:
                 torch.cuda.cudart().cudaProfilerStart()
-            loss_dict, skipped_iter, fill_buffer_iter = train_step(
+        loss_dict, skipped_iter, fill_buffer_iter = train_step(
                 neox_args=neox_args,
                 timers=timers,
                 data_iterator=train_data_iterator,
@@ -1445,26 +1479,26 @@ def train(
                 lr_scheduler=lr_scheduler,
                 reference_model=reference_model,
                 fill_buffer_iter =0,
-            )
-            if neox_args.profile and iteration == neox_args.profile_step_stop:
+        )
+        if neox_args.profile and iteration == neox_args.profile_step_stop:
                 torch.cuda.cudart().cudaProfilerStop()
                 prof.stop()
-            iteration += 1
-            neox_args.iteration = iteration
-            if neox_args.precision == "fp16":
+        iteration += 1
+        neox_args.iteration = iteration
+        if neox_args.precision == "fp16":
                 overflow_monitor.check(skipped_iter)  # check for repeated overflow
-            if neox_args.log_gradient_noise_scale:  # log noise scale if applicable
+        if neox_args.log_gradient_noise_scale:  # log noise scale if applicable
                 noise_scale_logger.update()
 
             # get learning rate (if present) - if doing soft prompt tuning + pipe parallel, you
             # may have no tunable parameters on a specific rank
-            if optimizer.param_groups:
+        if optimizer.param_groups:
                 lr = optimizer.param_groups[0].get("lr", 0)
-            else:
+        else:
                 lr = 0
 
-            # Logging.
-            report_memory_flag = training_log(
+        # Logging.
+        report_memory_flag = training_log(
                 neox_args=neox_args,
                 timers=timers,
                 loss_dict=loss_dict,
@@ -1477,25 +1511,7 @@ def train(
                 model=model,
                 optimizer=optimizer,
                 noise_scale_logger=noise_scale_logger,
-            )
-        except:
-            for t in [
-                "forward",
-                "backward",
-                "allreduce",
-                "optimizer",
-                "batch generator",
-                "data loader",
-            ]:
-                try:
-                    timers(t).reset()
-                except Exception as e:
-                    print(f"Failed to reset timer {t}: {e}")
-            print_rank_0("tehshe tehshe tehshe tehshe: StopIter Train: change the task")
-            iteration_task[task_id]=iteration
-            print_rank_0("taada baba taada",iteration)
-            neox_args.iters_task[task_id]= iteration
-            continue
+        )
 
         # if neox_args.save and iteration in neox_args.save_iters:
         #     save_checkpoint(
@@ -1507,9 +1523,8 @@ def train(
         #     )
         
         # Checkpointing
-        if neox_args.save and iteration in neox_args.save_iters or iteration in range(0, 45000, 500) or iteration in neox_args.iters_task:
+        if neox_args.save and iteration in neox_args.save_iters or iteration in range(10, 45000, 500) or iteration in neox_args.iters_task:
         # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
-
             forgetting = []
             for j in range(task_id + 1):
                 _, _, test_data_iterator_j = build_train_valid_test_data_iterators(
@@ -1519,33 +1534,17 @@ def train(
                     task_iters=iteration_task,
                     task_id=j
                 )
-                try:
-                    # Evaluate the model on the test data of dataset j
-                    eval_results = evaluate(
-                        neox_args=neox_args,
-                        forward_step_fn=forward_step,
-                        data_iterator=test_data_iterator_j,
-                        model=model,
-                        verbose=False,
-                        timers=timers,
-                    )
-                except:
-                        for t in [
-                                "batch generator",
-                                "data loader",
-                            ]:
-                                timers(t).reset()
-                        eval_results = evaluate(
-                            neox_args=neox_args,
-                            forward_step_fn=forward_step,
-                            data_iterator=test_data_iterator_j,
-                            model=model,
-                            verbose=False,
-                            timers=timers,
-                        )
-
+        
+                # Evaluate the model on the test data of dataset j
+                eval_results = evaluate(
+                    neox_args=neox_args,
+                    forward_step_fn=forward_step,
+                    data_iterator=test_data_iterator_j,
+                    model=model,
+                    verbose=False,
+                    timers=timers,
+                )
                 current_performance = eval_results['lm_loss']
-
                 if best_performances_checkpoint.get(j) is None:
                     best_performances_checkpoint[j] = current_performance
                     forgetting_value = 0  
@@ -1553,48 +1552,38 @@ def train(
                     forgetting_value = best_performances_checkpoint[j] - current_performance
                 if current_performance < best_performances_checkpoint[j]:
                     best_performances_checkpoint[j] = current_performance
-
                 forgetting.append(forgetting_value)
-
                 print_rank_0(f"Checkpoint {iteration} - Dataset {j+1}: Forgetting = {forgetting_value:.6f}")
-
             average_forgetting = sum(forgetting) / len(forgetting)
-
+            
             print_rank_0(f"Average forgetting after checkpoint {iteration}: {average_forgetting:.6f}")
-
-            # for idx, forgetting_value in enumerate(forgetting):
-            #     tb_wandb_log(
-            #         f"forgetting_dataset_{idx+1}",
-            #         forgetting_value,
-            #         iteration,
-            #         use_wandb=neox_args.use_wandb,
-            #         tensorboard_writer=neox_args.tensorboard_writer,
-            #         comet_experiment=neox_args.comet_experiment,
-            #     )
-
+            
+            for idx, forgetting_value in enumerate(forgetting):
+                tb_wandb_log(
+                    f"forgetting_dataset_{idx+1}",
+                    forgetting_value,
+                    iteration,
+                    use_wandb=neox_args.use_wandb,
+                    tensorboard_writer=neox_args.tensorboard_writer,
+                    comet_experiment=neox_args.comet_experiment,
+                )
             print_rank_0("----------------------------------------------------------------------------------------")
             print_rank_0(f"the forgetting after checkpoint {iteration} on dataset previous datasets: ",forgetting)
             print_rank_0("----------------------------------------------------------------------------------------")
-
-
             print_rank_0("----------------------------------------------------------------------------------------")
             print_rank_0(f"the best_performances after checkpoint {iteration} : ",best_performances_checkpoint)
             print_rank_0("----------------------------------------------------------------------------------------")
-
             # Log the average forgetting
             tb_wandb_log(
-                f"average_forgetting_chekpoint",
+                f"average_forgetting",
                 average_forgetting,
                 iteration,
                 use_wandb=neox_args.use_wandb,
                 tensorboard_writer=neox_args.tensorboard_writer,
                 comet_experiment=neox_args.comet_experiment,
-            )     
-
-
-
-            save_best_performances(best_performances,best_performances_checkpoint)
-
+            )    
+            save_best_performances(best_performances,best_performances_checkpoint, neox_args.forget_path)
+            
             if neox_args.use_replay:
                 # buffer.save()
                 save_checkpoint(
@@ -1606,7 +1595,8 @@ def train(
                     task_id=task_id,
 
                 )
-                torch.distributed.barrier()                 
+                torch.distributed.barrier()                
+                 
             else:
                 save_checkpoint(
                     neox_args=neox_args,
@@ -1616,54 +1606,53 @@ def train(
                     lr_scheduler=lr_scheduler,
                     task_id=task_id,
                 )
+                torch.distributed.barrier()                
 
-
-                
-
-                torch.distributed.barrier()
+        # Evaluation
         try:
             #Evaluate on current task only
             if (
-                    neox_args.eval_interval
-                    and iteration % neox_args.eval_interval == 0
-                    and neox_args.do_valid
-                ):
-                    chart_name = f"Evaluate on current task only"
-                    prefix="iteration {}".format(iteration)
-                    evaluate_and_print_results(
-                        neox_args=neox_args,
-                        prefix=prefix,
-                        forward_step_func=forward_step,
-                        data_iterator=valid_on_task,
-                        model=model,
-                        iteration=iteration,
-                        verbose=False,
-                        timers=timers,
-                        chart_name=chart_name,
-                        reference_model=reference_model,
+                        neox_args.eval_interval
+                        and iteration % neox_args.eval_interval == 0
+                        and neox_args.do_valid
+                    ):
+                        chart_name = f"on task {task_id} only"
+                        prefix="iteration {}".format(iteration)
+                        evaluate_and_print_results(
+                            neox_args=neox_args,
+                            prefix=prefix,
+                            forward_step_func=forward_step,
+                            data_iterator=valid_on_task,
+                            model=model,
+                            iteration=iteration,
+                            verbose=False,
+                            timers=timers,
+                            chart_name=chart_name,
+                            reference_model=reference_model,
                     )
         except StopIteration:
             print_rank_0(f"StopIteration encountered during evaluation on current task at iteration {iteration}")
-            for t in [
+                for t in [
+                    "forward",
+                    "backward",
+                    "allreduce",
+                    "optimizer",
                     "batch generator",
+                    "data loader",
                 ]:
-                try:
                     timers(t).reset()
-                except Exception as e:
-                    print(f"Failed to reset timer {t}: {e}")
-
             _,valid_on_task,_ = build_train_valid_test_data_iterators(
             neox_args=neox_args, data_path=neox_args.train_data_paths[task_id], iteration = iteration, task_iters=iteration_task)
             pass
-
-
-        try:    
-            # Evaluation on all tasks
+        
+        	
+        try:  
             if (
                 neox_args.eval_interval
                 and iteration % neox_args.eval_interval == 0
                 and neox_args.do_valid
             ):
+	
                 prefix = "iteration {}".format(iteration)
                 evaluate_and_print_results(
                     neox_args=neox_args,
@@ -1677,22 +1666,18 @@ def train(
                     reference_model=reference_model,
                 )
         except:
-                print_rank_0("hne!!!!!!!!!!!!!!!!")
+                print("here!!!!!!!!!!!!!!!!")
                 for t in [
-                    "forward",
-                    "backward",
-                    "allreduce",
-                    "optimizer",
-                    "batch generator",
-                    "data loader",
-                ]:
-                    try:
+                        "forward",
+                        "backward",
+                        "allreduce",
+                        "optimizer",
+                        "batch generator",
+                        "data loader",
+                    ]:
                         timers(t).reset()
-                    except Exception as e:
-                        print(f"Failed to reset timer {t}: {e}")
-                valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators_blunded(
-                neox_args=neox_args, data_path=neox_args.valid_data_paths,iteration=0, task_iters=0, task_id=0)
-
+                valid_data_iterator, test_data_iterator,_ = build_train_valid_test_data_iterators(
+                neox_args=neox_args, data_path=neox_args.valid_data_paths[0],iteration=iteration, task_iters=iteration_task, task_id=0)
                 if (
                     neox_args.eval_interval
                     and iteration % neox_args.eval_interval == 0
@@ -1709,8 +1694,6 @@ def train(
                         timers=timers,
                         reference_model=reference_model,
                     )
-    
-
 
         if neox_args.exit_interval and iteration % neox_args.exit_interval == 0:
             torch.distributed.barrier()
@@ -1722,7 +1705,6 @@ def train(
                 )
             )
             sys.exit()
-
     torch.distributed.barrier()
 
     return iteration, fill_buffer_iter
@@ -1747,21 +1729,6 @@ def evaluate(
                     (`get_batch` transforms it into inputs / labels)
     """
     # Turn on evaluation mode which disables dropout.
-
-    if timers is not None:
-        for timer_name in [
-            "batch generator",
-            "forward",
-            "backward",
-            "allreduce",
-            "optimizer",
-            "data loader",
-            "batch_input",
-        ]:
-            try:
-                timers(timer_name).reset()
-            except Exception as e:
-                print_rank_0(f"Failed to reset timer {timer_name}: {e}")
     model.eval()
     losses = []
     metric_dicts = defaultdict(list)
@@ -1832,7 +1799,6 @@ def evaluate(
     # Move model back to the train mode.
     model.train()
     return eval_results
-
 
 
 def collect_loss_for_unit_test(lm_ss):

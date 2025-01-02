@@ -1,13 +1,12 @@
 #!/bin/bash
 #SBATCH -A bif151
 #SBATCH -t 2:00:00
-#SBATCH --nodes=8
-#SBATCH -p batch
+#SBATCH --nodes=32
 #SBATCH --gpus-per-node=8
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=istabrak.abbes@mila.quebec
-#SBATCH --output=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/10_replay/train_%A.out
-#SBATCH --error=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/10_replay/train_%A.err
+#SBATCH --output=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/50_replay/train_%A.out
+#SBATCH --error=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/50_replay/train_%A.err
 #SBATCH --signal=SIGUSR1@600  # Send SIGUSR1 signal 10 minutes before time limit
 
 # Function to handle SIGUSR1 signal
