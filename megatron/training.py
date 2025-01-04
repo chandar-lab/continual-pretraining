@@ -1478,7 +1478,7 @@ def evaluate(
                 else neox_args.gradient_accumulation_steps
             ):
                 # Forward evaluation
-                loss, metric_dict = forward_step_fn(
+                loss = forward_step_fn(
                     model=model,
                     data_iterator=data_iterator,
                     neox_args=neox_args,
@@ -1486,8 +1486,8 @@ def evaluate(
                     reference_model=reference_model,
                 )
                 losses.append(loss)
-                for key in metric_dict.keys():
-                    metric_dicts[key].append(metric_dict[key])
+                # for key in metric_dict.keys():
+                #     metric_dicts[key].append(metric_dict[key])
             # When contiguous memory optimizations are enabled, the buffers
             # allocated by the optimizations are deallocated during backward pass
             # in the absence of backward pass the buffers should be reset after each
@@ -1497,8 +1497,8 @@ def evaluate(
 
     # reduces losses across processes for logging & run eval harness tasks
     eval_results = {"lm_loss": reduce_losses(losses).mean().item()}
-    for key in metric_dicts.keys():
-        eval_results[key] = reduce_losses(metric_dicts[key]).mean().item()
+    # for key in metric_dicts.keys():
+    #     eval_results[key] = reduce_losses(metric_dicts[key]).mean().item()
     eval_results["lm_loss_ppl"] = math.exp(eval_results["lm_loss"])
 
     if neox_args.char_level_ppl:
