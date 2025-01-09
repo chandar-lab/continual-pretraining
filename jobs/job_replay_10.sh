@@ -25,4 +25,4 @@ export DLTS_HOSTFILE=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gp
 cd /lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox
 
 
-python ./deepy.py train_new_replay.py ./configs/replay_10_99M.yml
+python ./deepy.py train_replay.py ./configs/replay_10_99M.yml

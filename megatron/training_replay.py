@@ -5,7 +5,7 @@
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# You may obtain a copy of the License atx
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -1351,7 +1351,6 @@ def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None,
         return None, fill_buffer_iter
 
     if inputs is None:
-        print("No more data available from iterator.")
         return None, fill_buffer_iter
           
     if neox_args.use_replay:
@@ -1359,30 +1358,16 @@ def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None,
         if fill_buffer_iter > 20 and inputs is not None:
             replay_buffer.add(inputs['text'])
             current_batch = inputs
-            print("current_batch_using_replay",inputs['text'].shape)
 
-                
-            # replay_buffer.add(inputs['text'])
-            # current_batch = next(data_iterator)
-            # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             buffer_batch = replay_buffer.get_batch(neox_args.replay_buffer_proportion)
-            print("buffer_batch",buffer_batch)
+
             if buffer_batch is not None:
                 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
                 batch = torch.cat([current_batch['text'].to(device), buffer_batch], dim=0)
                 combined_batch = {'text': batch}
-                print("batch",batch.shape)
-
                 loss = model.train_batch(data_iter=iter([combined_batch]))
             else:
                 loss = model.train_batch(data_iter=iter([current_batch]))
-            # combined_batch = {'text': batch}
-            # Add current batch to replay buffer
-            # if current_batch is not None:
-            #     for sample in current_batch['text']:
-            #         replay_buffer.add(sample)
-                
-            # loss = model.train_batch(data_iter=iter([combined_batch]))
         else:
             if inputs is not None:
                 replay_buffer.add(inputs['text'])
@@ -1392,7 +1377,6 @@ def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None,
     else:
             loss = model.train_batch(data_iter=data_iterator)
         
-
     loss_dict = {"lm_loss": loss}
     # Don't break Megatron's timers because we changed code paths.
     for t in [
@@ -1688,7 +1672,6 @@ def train(
                     reference_model=reference_model,
                 )
         except:
-                print("here!!!!!!!!!!!!!!!!")
                 for t in [
                     "batch generator",
                     "data loader",
