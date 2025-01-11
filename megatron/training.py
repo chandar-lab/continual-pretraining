@@ -204,6 +204,7 @@ def pretrain(neox_args):
     )
     timers("model and optimizer").stop()
 
+    task_id=0
     # Data stuff.
     timers("train/valid/test data iterators").start()
     (
@@ -212,7 +213,8 @@ def pretrain(neox_args):
         test_data_iterator,
     ) = build_train_valid_test_data_iterators(neox_args=neox_args)
     timers("train/valid/test data iterators").stop()
-
+    
+    neox_args.iters_task=[neox_args.train_iters+100]
     if neox_args.use_mup and neox_args.coord_check:
         mup_coord_check(neox_args, timers, lr_scheduler, train_data_iterator)
 
@@ -230,6 +232,8 @@ def pretrain(neox_args):
             model=model,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
+            
+            task_id=0
         )
 
     if neox_args.do_train and neox_args.train_iters > 0:
@@ -265,6 +269,7 @@ def pretrain(neox_args):
             model=model,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
+            task_id=0,
         )
 
     if neox_args.do_test:
@@ -1124,7 +1129,7 @@ def setup_model_and_optimizer(neox_args, use_cache=False, iteration=None):
         raise ValueError("Must be using deepspeed to run neox")
 
     if neox_args.load is not None:
-        neox_args.iteration = load_checkpoint(
+        neox_args.iteration,task_id = load_checkpoint(
             neox_args=neox_args,
             model=model,
             optimizer=optimizer,
@@ -1401,6 +1406,8 @@ def train(
                 model=model,
                 optimizer=optimizer,
                 lr_scheduler=lr_scheduler,
+                
+                task_id=0,
             )
         # Evaluation
         if (
