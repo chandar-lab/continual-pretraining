@@ -1544,7 +1544,7 @@ def train(
         #     )
         
         # Checkpointing
-        if neox_args.save and iteration in neox_args.save_iters or iteration in range(10, 45000, 500) or iteration in neox_args.iters_task:
+        if neox_args.save and iteration in neox_args.save_iters or iteration in range(500, 45000, 500) or iteration in neox_args.iters_task:
         # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
             forgetting = []
             for j in range(task_id + 1):

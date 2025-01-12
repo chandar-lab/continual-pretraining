@@ -637,7 +637,7 @@ def get_checkpoint_name(checkpoints_path, iteration, release=False, mp_rank=None
 def get_checkpoint_tag_after_task(iteration: int, task_id: int = None) -> str:
         return f"after_task{task_id}"
 
-def get_checkpoint_tag(iteration: int, task_id: int = None) -> str:
+def get_checkpoint_tag(iteration: int, task_id: int = 0) -> str:
         return f"global_step{iteration}_task{task_id}"
 
 

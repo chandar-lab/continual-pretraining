@@ -8,8 +8,11 @@ from threading import Lock, Thread
 import random
 import numpy as np
 
+from megatron import print_rank_0
+
 class ReplayBuffer:
-    def __init__(self, neox_args, device=torch.device('cuda'), prefetch_size=50, load_previous=False):
+    def __init__(self, neox_args, device=torch.device('cuda'), prefetch_size=20, load_previous=False):
+        #META META NO NEET TO GET FROM METADATA
         self.neox_args = neox_args
         self.buffer_size = neox_args.buffer_size  # Total buffer size in tokens
         self.file_size = neox_args.file_size      # Size of each file in tokens
@@ -19,22 +22,25 @@ class ReplayBuffer:
         self.num_files = self.buffer_size // self.file_size
         self.files = [f"{self.data_dir}/buffer_{i}.pt" for i in range(self.buffer_size // self.file_size)]
         self.file_sizes = [0] * len(self.files)  
+        self.file_lock = Lock()
+        self.prefetch_lock = Lock()
+        self.seq_length = neox_args.seq_length +1 
         if load_previous and os.path.exists(os.path.join(self.data_dir, 'metadata.json')):
-            time.sleep(1)
             self.load_metadata(self.data_dir)
         else:
             self.create_files()
+            self.tensor_shape = None
+            self.dtype = None
+            self.dtype_size = None
+            # self.seq_length = None 
+            self.current_file_idx = 0
+            self.total_samples_seen = 0
 
-        self.tensor_shape = None
-        self.dtype = None
-        self.dtype_size = None
-        self.seq_length = None 
-        dummy_tensor = torch.zeros(1,2049, dtype=torch.int)
-        self.prefetch_lock = Lock()
-        self.file_lock = Lock()
-        self.current_file_idx = 0
-        self.total_samples_seen = 0
-        self.add(dummy_tensor)
+            dummy_tensor = torch.zeros(1,2049, dtype=torch.int)
+            self.add(dummy_tensor)
+
+        
+        
 
         self.prefetch_queue = deque(maxlen=prefetch_size)
         self.prefetch_thread = Thread(target=self._prefetch_files, daemon=True)
@@ -48,15 +54,16 @@ class ReplayBuffer:
                 # Create an empty file without preallocating memory
                 with open(file, 'wb') as f:
                     pass  
-
+    
     def add(self, tensor_data):
-        num_samples = tensor_data.shape[0]
+        
         self.seq_length = tensor_data.shape[1]
         self.tensor_shape = tensor_data.shape
         self.dtype = tensor_data.dtype
         self.dtype_size = tensor_data.dtype.itemsize
         
         with self.file_lock:
+            num_samples = tensor_data.shape[0]
             available_files = [idx for idx in range(self.num_files) 
                             if self.file_sizes[idx] + num_samples <= self.file_size]
             
@@ -90,7 +97,7 @@ class ReplayBuffer:
                     f.write(tensor_data.cpu().numpy().tobytes())
             
             self.total_samples_seen += num_samples
-            self.save_metadata(self.data_dir)
+            # self.save_metadata(self.data_dir)
 
     def _prefetch_files(self):
         while True:
@@ -102,7 +109,6 @@ class ReplayBuffer:
                         with open(self.files[file_idx], 'rb') as f:
                             num_elements = self.file_sizes[file_idx] * self.seq_length
                             buffer = f.read(num_elements * self.dtype_size)
-                            
                             data = torch.frombuffer(buffer, dtype=self.dtype)
                             data = data.reshape(self.file_sizes[file_idx], self.seq_length)
                             
@@ -116,17 +122,16 @@ class ReplayBuffer:
         
         with self.prefetch_lock:
             if not self.prefetch_queue:
-                print("Prefetch queue is empty")
+                print_rank_0("Prefetch queue is empty")
                 return None
 
-            buffer_data, file_idx = self.prefetch_queue.popleft()
+            buffer_data, _ = self.prefetch_queue.popleft()
             available_samples = min(len(buffer_data), buffer_batch_size)
             if available_samples > 0:
                 indices = torch.randperm(len(buffer_data))[:available_samples]
-                selected_data = buffer_data[indices].to(self.device)  # Shape: (buffer_batch_size x seq_length)
-                return selected_data
+                return buffer_data[indices].to(self.device)
             else:
-                print("No available samples to fetch")
+                print_rank_0("No available samples to fetch")
                 return None
 
 
@@ -155,25 +160,20 @@ class ReplayBuffer:
         with open(os.path.join(path, 'metadata.json'), 'w') as f:
             json.dump(metadata, f)
 
-    def load_metadata(self, path):
-        with open(os.path.join(path, 'metadata.json'), 'r') as f:
-                data = f.read()
-                if not data.strip():
-                    raise ValueError("JSON file is empty.")
-                metadata = json.loads(data)
+    def load_metadata(self,path):
+        file_path = os.path.join(path, 'metadata.json')
+        with open(file_path, 'r') as f:
+            metadata = json.load(f)
         
         # Load buffer configuration
         self.buffer_size = metadata['buffer_size']
         self.file_size = metadata['file_size']
         self.file_sizes = metadata['file_sizes']
         self.num_files = metadata['num_files']
-        
-        # Load tensor properties if available
-        if metadata['tensor_shape'] is not None:
-            self.tensor_shape = metadata["tensor_shape"]
+        self.tensor_shape = metadata.get('tensor_shape')
         if metadata['dtype'] is not None:
             self.dtype = getattr(torch, metadata['dtype'].split('.')[-1])
-        self.dtype_size = metadata['dtype_size']
+        self.dtype_size = metadata.get('dtype_size')
         
         self.total_samples_seen = metadata['total_samples_seen']
         self.current_file_idx = metadata['current_file_idx']

@@ -188,13 +188,7 @@ def pretrain(neox_args):
         neox_args: an instance of NeoXArgs containing the configuration for pretrain
 
     """
-    if neox_args.use_replay:
-        if neox_args.load_buffer:
-            replay_buffer = ReplayBuffer(neox_args=neox_args, load_previous = neox_args.load_buffer)
-        else:
-            replay_buffer = ReplayBuffer(neox_args=neox_args)
-    else:
-        replay_buffer = None
+
         
     # setup logging and timers
     init_wandb(neox_args=neox_args)
@@ -224,8 +218,15 @@ def pretrain(neox_args):
             model=model,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
-            buffer=replay_buffer,
         )
+
+    if neox_args.use_replay:
+        if neox_args.load_buffer:
+            replay_buffer = ReplayBuffer(neox_args=neox_args, load_previous = neox_args.load_buffer)
+        else:
+            replay_buffer = ReplayBuffer(neox_args=neox_args)
+    else:
+        replay_buffer = None
     
     
     neox_args.iteration = iteration
@@ -1528,8 +1529,9 @@ def train(
         #     )
         
         # Checkpointing
-        if neox_args.save and iteration in neox_args.save_iters or iteration in range(10, 45000, 500) or iteration in neox_args.iters_task:
-        # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
+        if neox_args.save and iteration in neox_args.save_iters or iteration in range(500, 45000, 500) or iteration in neox_args.iters_task:
+
+            # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
             forgetting = []
             for j in range(task_id + 1):
                 _, _, test_data_iterator_j = build_train_valid_test_data_iterators(
@@ -1590,6 +1592,7 @@ def train(
             save_best_performances(best_performances,best_performances_checkpoint, neox_args.forget_path)
             
             if neox_args.use_replay:
+                buffer.save_metadata(neox_args.buffer_dir)
                 # buffer.save()
                 save_checkpoint(
                     neox_args=neox_args,

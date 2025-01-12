@@ -44,7 +44,10 @@
     "contiguous_gradients": true,
     "cpu_offload": false
   },
-   "train_micro_batch_size_per_gpu": 8,
+   "train_micro_batch_size_per_gpu": 4,
+   "eff_batch_size": 8,
+   "replay_buffer_proportion": 0.5,
+
    "gradient_accumulation_steps": 1,
    "data_impl": "mmap",
    "checkpoint_activations": true,
@@ -102,7 +105,7 @@
     11921,11921,11921,
   ],
     
-  "forget_path":"spectra_1B/forgetting.pth",
+  "forget_path":"spectra_1B_50_replay/forgetting.pth",
 
   "weight_by_num_documents": true,
    "split" : "70,15,15",
@@ -111,18 +114,17 @@
   #  "split" : "80,10,10",
    "tokenizer_type": "Llama3HFTokenizer",
   "deepspeed_mpi": true,
-  "save": "checkpoints/spectra_1B",
+  "save": "checkpoints/spectra_1B_50_replay",
   "log_dir": "logs",
-  "load": "checkpoints/spectra_1B",
+  # "load": "checkpoints/spectra_1B_50_replay",
   # "tensorboard_dir": "tensorboard_important/pythia_410M_kemel",
-  "wandb_project":"spectra_1B",
+  "wandb_project":"spectra_1B_50_replay",
   "wandb_team":"istabrak",
   # "use_wandb": false,
   "extra_save_iters": [2000],
-  # "load_buffer": false,
-  #  "use_replay": true,
-  #  "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/replay_multilang_10/",
-  #  "replay_buffer_proportion": 0.1,
+  # "load_buffer": true,
+   "use_replay": true,
+   "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/spectra_1B_50_replay/",
 }
 
 
