@@ -32,6 +32,7 @@ class Embedding(torch.nn.Module):
         init_method: weight initialization method
         num_tokentypes: size of the token-type embeddings. 0 value
                         will ignore this embedding
+        hidden_states: encoder last layer hidden states for cross attention
     """
 
     def __init__(
@@ -44,8 +45,11 @@ class Embedding(torch.nn.Module):
         init_method,
         num_tokentypes=0,
         use_pos_emb=True,
+        input_buffer=None
     ):
         super(Embedding, self).__init__()
+        self.input_buffer = input_buffer
+        (self.input_ids, self.position_ids, self.attention_mask) = self.input_buffer
 
         self.hidden_size = hidden_size
         self.init_method = init_method
@@ -136,8 +140,10 @@ class Embedding(torch.nn.Module):
         # Initialize the token-type embeddings.
         self.init_method(self.tokentype_embeddings.weight)
 
-    def forward(self, input_ids, position_ids, tokentype_ids=None):
+    def forward(self, tokentype_ids=None):
         # Embeddings.
+        input_ids, position_ids = self.input_ids, self.position_ids
+
         words_embeddings = self.word_embeddings(input_ids)
         if self.use_pos_emb and self.embedding_type in ["learned", "sinusoidal"]:
             if self.opt_pos_emb_offset:
@@ -182,15 +188,32 @@ class EmbeddingPipe(Embedding):
 
     def forward(self, args):
         assert (
-            len(args) == 3
+            len(args) == 1
         ), f"Expected 3 arguments (input_ids, position_ids, attention_mask), but got {len(args)}."
+
+        input_ids, position_ids, attention_mask = self.input_buffer
+        embeddings = super().forward(input_ids, position_ids)
+        return embeddings, encoder_hidden_states, attention_mask
+
+class EmbeddingWithContextPipe(Embedding):
+    """Extends Embedding to forward attention_mask through the pipeline."""
+
+    @property
+    def word_embeddings_weight(self):
+        """Easy accessory for the pipeline engine to tie embeddings across stages."""
+        return self.word_embeddings.weight
+
+    def forward(self, args):
+        assert (
+            len(args) == 4
+        ), f"Expected 4 arguments (input_ids, position_ids, attention_mask), but got {len(args)}."
 
         input_ids = args[0]
         position_ids = args[1]
-        attention_mask = args[2]
+        encoder_hidden_states = args[2]
+        attention_mask = args[3]
         embeddings = super().forward(input_ids, position_ids)
-        return embeddings, attention_mask
-
+        return embeddings, encoder_hidden_states, attention_mask
 
 class SoftEmbedding(torch.nn.Module):
     def __init__(

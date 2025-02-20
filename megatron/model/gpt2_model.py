@@ -80,18 +80,30 @@ def cross_entropy(output, labels, _fp16=False):
 
 def _pre_transformer_block(args):
     # data format change for hidden_states to avoid explicit tranposes : [b s h] --> [s b h]
+    assert len(args) == 3, "Incorrect number of arguments to _pre_transformer_block"
+    fn = lambda _args: (_args[0].transpose(0, 1).contiguous(), _args[1], *_args[2:])
+    return fn(args)
+
+def _pre_encoder_block(args):
+    # data format change for hidden_states to avoid explicit tranposes : [b s h] --> [s b h]
     assert len(args) == 2, "Incorrect number of arguments to _pre_transformer_block"
     fn = lambda _args: (_args[0].transpose(0, 1).contiguous(), *_args[1:])
-    return fn(args)
+    return fn(args)    
 
 
 def _post_transformer_block(args):
-    # from (hidden_states, attention_mask)
+    # from (hidden_states, encoder_hidden_states, attention_mask)
     # to (hidden_states.T)
-    assert len(args) == 2, "Incorrect number of arguments to _post_transformer_block"
+    assert len(args) == 3, "Incorrect number of arguments to _post_transformer_block"
     fn = lambda _args: (_args[0].transpose(0, 1).contiguous())
     return fn(args)
 
+def _post_encoder_block(args):
+    # from (hidden_states, encoder_hidden_states, attention_mask)
+    # to (hidden_states, encoder_hidden_states)
+    assert len(args) == 3, "Incorrect number of arguments to _post_transformer_block"
+    fn = lambda _args: (_args[0], _args[1])
+    return fn(args)
 
 class GPT2ModelPipe(PipelineModule, torch.nn.Module):
     """GPT2Model adapted for pipeline parallelism.
@@ -113,6 +125,7 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
         parallel_output=True,
         topology=None,
         use_cache=False,
+        context=None # TODO: this needs to be passed in forward, not init. need to connect the other components (encoder, latent proj) to an overall modelpipe
     ):
         self.neox_args = neox_args
 
@@ -120,6 +133,7 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
         self.parallel_output = parallel_output
         self.hidden_size = self.neox_args.hidden_size
         self.num_tokentypes = num_tokentypes
+        self.context = context # for cross attention (TODO)
         self.init_method, self.output_layer_init_method = get_init_methods(
             self.neox_args
         )
@@ -220,7 +234,7 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
         # NB: the attention mask always needs to be the *last* item in the args when being passed from
         # one stage to the next, because deepspeed is hacks on top of hacks.
         #
-        # outputs are now (hidden_states,  attention_mask)
+        # outputs are now (hidden_states, encoder_hidden_states, attention_mask)
 
         self.specs.append(_pre_transformer_block)
 
@@ -411,3 +425,306 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
             parent_class_name=self.__class__.__name__,
         )
         return model
+
+class EncoderPipe(torch.nn.Module):
+    def __init__(self, neox_args, encoder_model):
+        super().__init__()
+        self.neox_args = neox_args
+        self.encoder_model = encoder_model
+
+    def forward(self, inputs):
+        input_ids, position_ids, attention_mask = inputs
+        encoder_outputs = self.encoder_model(
+            input_ids=input_ids, 
+            attention_mask=attention_mask
+        )
+        return input_ids, position_ids, encoder_outputs.last_hidden_state, attention_mask
+
+    @property
+    def word_embeddings_weight(self):
+        # If needed for tying embeddings later
+        return self.encoder_model.get_input_embeddings().weight
+
+
+class EncodertoGPT2Pipe(PipelineModule, nn.Module):
+   def __init__(
+        self,
+        neox_args,
+        num_tokentypes=0,
+        parallel_output=True,
+        topology=None,
+        use_cache=False,
+    ):
+        self.neox_args = neox_args
+
+        self.use_cache = use_cache
+        self.parallel_output = parallel_output
+        self.hidden_size = self.neox_args.hidden_size
+        self.num_tokentypes = num_tokentypes
+        self.context = context # for cross attention (TODO)
+        self.init_method, self.output_layer_init_method = get_init_methods(
+            self.neox_args
+        )
+        self.__topology__ = topology
+
+        self.specs = []
+        self.init_specs()  # initializes the layer specs (basically a fancy nn.Sequential)
+
+
+        # GPT2 part
+        super().__init__(
+            layers=self.specs,
+            loss_fn=partial(cross_entropy, _fp16=self.neox_args.fp16_lm_cross_entropy),
+            topology=topology,
+            activation_checkpoint_interval=self.neox_args.checkpoint_num_layers
+            if self.neox_args.checkpoint_activations
+            else 0,
+            partition_method=neox_args.pipe_partition_method,
+            checkpointable_layers=[
+                "GMLPBlock",
+                "ParallelTransformerLayerPipe",
+                "ParallelMambaResidualLayerPipe",
+            ],
+        )
+
+    def set_input(self, inputs):
+        self.input_buffer = inputs
+
+    def init_specs(self):
+        
+        weight_tying = not self.neox_args.no_weight_tying
+        self.specs = []
+
+        ######## Encoder Pipe #############
+
+        # input will be (input_ids, position_ids, attention_mask)
+        self.specs.append(_pre_encoder_block)
+
+        if weight_tying:
+            self.specs.append(
+                TiedLayerSpec(
+                    "embed",
+                    EmbeddingPipe,
+                    self.neox_args,
+                    self.hidden_size,
+                    self.neox_args.padded_vocab_size,
+                    self.neox_args.max_position_embeddings,
+                    self.neox_args.hidden_dropout,
+                    self.init_method,
+                    self.num_tokentypes,
+                    tied_weight_attr="word_embeddings_weight",
+                )
+            )
+        else:
+            self.specs.append(
+                LayerSpec(
+                    EmbeddingPipe,
+                    self.neox_args,
+                    self.hidden_size,
+                    self.neox_args.padded_vocab_size,
+                    self.neox_args.max_position_embeddings,
+                    self.neox_args.hidden_dropout,
+                    self.init_method,
+                    self.num_tokentypes,
+                )
+            )     
+
+        # NB: the attention mask always needs to be the *last* item in the args when being passed from
+        # one stage to the next, because deepspeed is hacks on top of hacks.
+        #
+        # outputs are now (embeddings/hidden_states, attention_mask)
+
+        # T5 RPE positional embedding
+        if self.neox_args.pos_emb == "rpe":
+            hidden_size_per_attention_head = mpu.divide(
+                self.neox_args.hidden_size, self.neox_args.num_attention_heads
+            )
+            rpe_scale = math.sqrt(hidden_size_per_attention_head)
+            rpe_emb = ParallelRelativePositionBias(
+                neox_args=self.neox_args,
+                scale=rpe_scale,
+                causal=True,
+                num_buckets=self.neox_args.rpe_num_buckets,
+                max_distance=self.neox_args.rpe_max_distance,
+                heads=self.neox_args.num_attention_heads,
+            )
+
+        for i in range(self.neox_args.num_layers//2):
+            self.specs.append(
+                LayerSpec(
+                    ParallelTransformerLayerPipe,
+                    neox_args=self.neox_args,
+                    attention_mask_func=gpt2_attention_mask_func,
+                    init_method=self.init_method,
+                    output_layer_init_method=self.output_layer_init_method,
+                    layer_number=i,
+                    rpe=rpe_emb if self.neox_args.pos_emb == "rpe" else None,
+                    rotary=self.neox_args.pos_emb == "rotary",
+                    use_cache=self.use_cache,
+                )
+            )
+
+        # used to drop attention mask + reshape hidden states
+        self.specs.append(_post_transformer_block)
+        # just encoder_hidden_states now
+
+        ######### decoder ###########
+        # Embedding layer
+        # (input_ids, position_ids, attention_mask) = self.input_buffer
+        # input will be (input_ids, position_ids, encoder_hidden_states, attention_mask)
+
+        if weight_tying:
+            self.specs.append(
+                TiedLayerSpec(
+                    "embed",
+                    EmbeddingWithContextPipe,
+                    self.neox_args,
+                    self.hidden_size,
+                    self.neox_args.padded_vocab_size,
+                    self.neox_args.max_position_embeddings,
+                    self.neox_args.hidden_dropout,
+                    self.init_method,
+                    self.num_tokentypes,
+                    tied_weight_attr="word_embeddings_weight",
+                    input_buffer=self.input_buffer
+                )
+            )
+        else:
+            self.specs.append(
+                LayerSpec(
+                    EmbeddingWithContextPipe,
+                    self.neox_args,
+                    self.hidden_size,
+                    self.neox_args.padded_vocab_size,
+                    self.neox_args.max_position_embeddings,
+                    self.neox_args.hidden_dropout,
+                    self.init_method,
+                    self.num_tokentypes,
+                    input_buffer=self.input_buffer
+                )
+            )
+
+        # NB: the attention mask always needs to be the *last* item in the args when being passed from
+        # one stage to the next, because deepspeed is hacks on top of hacks.
+        #
+        # outputs are now (embeddings/hidden_states, encoder_hidden_states, attention_mask)
+
+        self.specs.append(_pre_transformer_block)
+
+        # T5 RPE positional embedding
+        if self.neox_args.pos_emb == "rpe":
+            hidden_size_per_attention_head = mpu.divide(
+                self.neox_args.hidden_size, self.neox_args.num_attention_heads
+            )
+            rpe_scale = math.sqrt(hidden_size_per_attention_head)
+            rpe_emb = ParallelRelativePositionBias(
+                neox_args=self.neox_args,
+                scale=rpe_scale,
+                causal=True,
+                num_buckets=self.neox_args.rpe_num_buckets,
+                max_distance=self.neox_args.rpe_max_distance,
+                heads=self.neox_args.num_attention_heads,
+            )
+
+        # Transformer layers
+        for i in range(self.neox_args.num_layers):
+            layer_type = self.neox_args.attention_config[i]
+            if layer_type in ["gmlp", "amlp"]:
+                self.specs.append(
+                    LayerSpec(
+                        GMLPBlock,
+                        init_method=self.init_method,
+                        layer_number=i,
+                        output_layer_init_method=self.output_layer_init_method,
+                        neox_args=self.neox_args,
+                        mask_fn=gpt2_attention_mask_func,
+                    )
+                )
+            elif layer_type == "rwkv":
+                self.specs.append(
+                    LayerSpec(
+                        RWKVResidualLayerPipe,
+                        neox_args=self.neox_args,
+                        layer_number=i,
+                    )
+                )
+            elif layer_type in ["mamba"]:
+                self.specs.append(
+                    LayerSpec(
+                        ParallelMambaResidualLayerPipe,
+                        neox_args=self.neox_args,
+                        init_method=self.init_method,
+                        output_layer_init_method=self.output_layer_init_method,
+                        layer_number=i,
+                    )
+                )
+            else:
+                self.specs.append(
+                    LayerSpec(
+                        ParallelTransformerLayerWithContextPipe,
+                        neox_args=self.neox_args,
+                        attention_mask_func=gpt2_attention_mask_func,
+                        init_method=self.init_method,
+                        output_layer_init_method=self.output_layer_init_method,
+                        layer_number=i,
+                        rpe=rpe_emb if self.neox_args.pos_emb == "rpe" else None,
+                        rotary=self.neox_args.pos_emb == "rotary",
+                        use_cache=self.use_cache,
+                    )
+                )
+
+        # used to drop attention mask + reshape hidden states
+        self.specs.append(_post_transformer_block)
+
+        # NormPipe is a (deprecated) helper class that used to be used to pass presents along the pipeline - since presents are now cached to the `TransformerLayer` class this is no longer needed
+        norm, eps = get_norm(self.neox_args)
+        self.specs.append(
+            LayerSpec(NormPipe, norm, self.neox_args.hidden_size, eps=eps)
+        )
+
+        # outputs are now a single tensor: hidden_states
+
+        def _logits_helper(embedding, lm_output):
+            """Just a wrapper to massage inputs/outputs from pipeline."""
+            if self.neox_args.use_mup:
+                # Since we're using pipeline parallelism, we can't directly use MuReadout. Instead, use this workaround that does the same thing as MuReadout.
+                # https://github.com/microsoft/mup/issues/6#issuecomment-1082156274
+                lm_output = (
+                    lm_output
+                    / self.tied_modules.embed.word_embeddings.weight.infshape.width_mult()
+                )
+
+            logits = parallel_lm_logits(
+                lm_output,
+                embedding.word_embeddings_weight,
+                self.parallel_output,
+                seq_parallel=self.neox_args.sequence_parallel,
+            )
+            return logits
+
+        if weight_tying:
+            self.specs.append(
+                TiedLayerSpec(
+                    "embed",
+                    EmbeddingPipe,
+                    self.neox_args,
+                    self.hidden_size,
+                    self.neox_args.padded_vocab_size,
+                    self.neox_args.max_position_embeddings,
+                    self.neox_args.hidden_dropout,
+                    self.init_method,
+                    self.num_tokentypes,
+                    forward_fn=_logits_helper,
+                    tied_weight_attr="word_embeddings_weight",
+                )
+            )
+        else:
+            self.specs.append(
+                LayerSpec(
+                    ParallelLinearPipe,
+                    neox_args=self.neox_args,
+                    init_method=self.init_method,
+                    parallel_output=self.parallel_output,
+                    is_last_layer=True,
+                )
+            )

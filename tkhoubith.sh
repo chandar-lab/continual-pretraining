@@ -2,7 +2,8 @@
 
 "Starting script with PID $$" >> nohup.out
 
-i=5
+
+i=0
 
 while [ $i -lt 10 ]; do
 	echo "Iteration $i:"

@@ -25,7 +25,6 @@ try:
 except ImportError:
     from typing_extensions import List, Literal, Union, Optional
 
-
 ATTENTION_TYPE_CHOICES = [
     "global",
     "local",
@@ -902,6 +901,26 @@ class NeoXArgsOther(NeoXArgsTemplate):
     """
     forgetting metric save directory
     """
+
+    #### TODO: add latent args here ####
+    enc_dec_model: str = None
+    """
+    the encoder decoder model
+    """
+
+    num_encoder_latents: int = 64
+    """
+    number of encoder lantets
+    """
+
+    num_decoder_latents: int = 64
+    dim_ae:
+    num_layers:
+    l2_normalize_latents:
+    lm_mode:
+
+
+    ####################################
 
 
 @dataclass

@@ -974,6 +974,144 @@ class ParallelSelfAttention(nn.Module):
 
         return output, bias
 
+class ParallelCrossAttention(ParallelSelfAttention):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Strided linear layer.
+        self.query = mpu.ColumnParallelLinear(
+            neox_args=neox_args,
+            input_size=neox_args.hidden_size,
+            output_size=neox_args.hidden_size,
+            gather_output=False,
+            init_method=init_method,
+            bias=neox_args.use_bias_in_attn_linear,
+        )
+        self.key_value = mpu.ColumnParallelLinear(
+            neox_args=neox_args,
+            input_size=2 * neox_args.hidden_size,
+            output_size=2 * neox_args.hidden_size,
+            gather_output=False,
+            init_method=init_method,
+            bias=neox_args.use_bias_in_attn_linear,
+        )
+
+   def forward(self, hidden_states, encoder_hidden_states, attention_mask, layer_past=None):
+
+        # hidden_states: [sq, b, h]
+
+        # =====================
+        # Query, Key, and Value
+        # =====================
+
+        # QKV projection for MHA.
+
+        # Attention heads [sq, b, h] --> [sq, b, (np * 1 * hn)]
+        mixed_x_layer, _ = self.query_key(hidden_states)
+        # Attention heads [sq, b, h] --> [sq, b, (np * 2 * hn)]
+        encoder_hidden_layer, _ = self.key_value(encoder_hidden_states)
+        mixed_x_layer = torch.cat((mixed_x_layer, encoder_hidden_layer), dim=-1)
+
+        # [sq, b, (np * 3 * hn)] --> [sq, b, np, 3 * hn]
+        new_tensor_shape = mixed_x_layer.size()[:-1] + (
+            self.num_attention_heads_per_partition,
+            3 * self.hidden_size_per_attention_head,
+        )
+        mixed_x_layer = mixed_x_layer.view(*new_tensor_shape)
+
+        # [sq, b, np, 3 * hn] --> 3 [sq, b, np, hn]
+        (query_layer, key_layer, value_layer) = mpu.split_tensor_along_last_dim(
+            mixed_x_layer, 3
+        )
+
+
+        # QK Normalization https://arxiv.org/abs/2302.05442
+        if self.use_qk_layernorm:
+            query_layer = self.qk_layernorm(query_layer)
+            key_layer = self.qk_layernorm(key_layer)
+
+        if exists(self.rotary_emb):
+            if exists(self.rotary_ndims):
+                # partial rotary
+                query_rot, query_pass = (
+                    query_layer[..., : self.rotary_ndims],
+                    query_layer[..., self.rotary_ndims :],
+                )
+                key_rot, key_pass = (
+                    key_layer[..., : self.rotary_ndims],
+                    key_layer[..., self.rotary_ndims :],
+                )
+            else:
+                # full rotary
+                query_rot, key_rot = query_layer, key_layer
+
+            seq_len = key_layer.shape[0]
+            offset = 0
+            if exists(layer_past) and layer_past.numel() > 0:
+                offset = layer_past[0].shape[0]
+                seq_len += offset
+            cos, sin = self.rotary_emb(value_layer, seq_len=seq_len)
+            if self.rope_fusion:
+                query_layer, key_layer = (
+                    fused_apply_rotary_pos_emb_cached(rot, cos, sin)
+                    for rot in [query_rot, key_rot]
+                )
+            else:
+                if self.bf16:
+                    apply_rotary_fn = apply_rotary_pos_emb_torch
+                else:
+                    apply_rotary_fn = apply_rotary_pos_emb
+                query_layer, key_layer = apply_rotary_fn(
+                    query_rot, key_rot, cos, sin, offset=offset
+                )
+
+            if exists(self.rotary_ndims):
+                query_layer = torch.cat((query_layer, query_pass), dim=-1)
+                key_layer = torch.cat((key_layer, key_pass), dim=-1)
+
+        # ==================================
+        # Cache key and value for inference
+        # ==================================
+
+        if exists(layer_past) and layer_past.numel() > 0:
+            past_key, past_value = layer_past
+            key_layer = torch.cat((past_key.type_as(key_layer), key_layer), dim=0)
+            value_layer = torch.cat(
+                (past_value.type_as(value_layer), value_layer), dim=0
+            )
+
+        if self.use_cache:
+            present = torch.stack((key_layer, value_layer))
+
+        if self.use_flash_attention:
+            context_layer = self.flash_attention(query_layer, key_layer, value_layer)
+        elif not self.sparse:
+            context_layer = self.attention(
+                query_layer, key_layer, value_layer, layer_past, attention_mask
+            )
+        else:
+            context_layer = self.sparse_attention(
+                query_layer, key_layer, value_layer, attention_mask
+            )
+
+        # [b, np, sq, hn] --> [sq, b, np, hn]
+        context_layer = context_layer.permute(2, 0, 1, 3).contiguous()
+
+        # [sq, b, np, hn] --> [sq, b, hp]
+        new_context_layer_shape = context_layer.size()[:-2] + (
+            self.hidden_size_per_partition,
+        )
+        context_layer = context_layer.view(*new_context_layer_shape)
+
+        # =================
+        # Output. [sq, b, h]
+        # =================
+
+        output, bias = self.dense(context_layer)
+
+        if self.use_cache:
+            output = [output, present]
+
+        return output, bias
 
 class ParallelTransformerLayer(nn.Module):
     """A single transformer layer.
@@ -1286,6 +1424,344 @@ class ParallelTransformerLayer(nn.Module):
 
         return output, moe_loss
 
+class ParallelTransformerLayerWithContext(nn.Module):
+    """A single transformer layer.
+
+    Transformer layer takes input with size [b, s, h] and returns an
+    output of the same size.
+    """
+
+    def __init__(
+        self,
+        neox_args,
+        attention_mask_func,
+        init_method,
+        output_layer_init_method,
+        layer_number,
+        rpe=None,
+        rotary=False,
+        use_cache=False,
+        use_cross_attn=False
+    ):
+
+        super().__init__()
+        self.layer_number = layer_number
+        self.neox_args = neox_args
+
+
+        norm, eps = get_norm(neox_args)
+
+        # Layernorm on the input data.
+        self.input_layernorm = norm(neox_args.hidden_size, eps=eps)
+        self.use_cache = use_cache
+
+        self.hidden_dropout = neox_args.hidden_dropout
+        self.bias_dropout_fusion = neox_args.bias_dropout_fusion
+        self.gpt_j_residual = neox_args.gpt_j_residual
+        self.gpt_j_tied = neox_args.gpt_j_tied
+        self.moe_type = neox_args.moe_type
+        self.activation = neox_args.activation
+
+        if self.gpt_j_residual:
+            # GPT-J style layers allow us to defer the reduction of results across TP ranks until the end of the two sublayers.
+            # the reduction we use is a simple allreduce for pure Tensor Parallel,
+            # but needs to be a reduce-scatter when using Megatron-style Sequence Parallel (LN sharding.)
+            self.reduce = (
+                mpu.mappings.reduce_from_model_parallel_region
+                if not neox_args.sequence_parallel
+                else mpu.mappings.reduce_scatter_to_sequence_parallel_region
+            )
+
+        # Self attention.
+        self.attention = ParallelSelfAttention(
+            neox_args=neox_args,
+            attention_mask_func=attention_mask_func,
+            init_method=init_method,
+            output_layer_init_method=output_layer_init_method,
+            layer_number=layer_number,
+            rpe=rpe,
+            use_cache=self.use_cache,
+            rotary=rotary,
+            parallel_output=self.gpt_j_residual,
+        )
+
+        # TODO: add cross attention here #
+        self.cross_attention = ParallelCrossAttention(
+            neox_args=neox_args,
+            attention_mask_func=attention_mask_func,
+            init_method=init_method,
+            output_layer_init_method=output_layer_init_method,
+            layer_number=layer_number,
+            rpe=rpe,
+            use_cache=self.use_cache,
+            rotary=rotary,
+            parallel_output=self.gpt_j_residual,
+        ) if use_cross_attn else None
+        # end cross attn #
+
+        # Layernorm on the output of the attention layer.
+        # If GPT-J residuals are used, this is surpurfulous but leaving it in
+        # leads to cleaner code
+        self.post_attention_layernorm = norm(neox_args.hidden_size, eps=eps)
+
+        # MLP
+        def get_mlp(**kw):
+            return ParallelMLP(
+                neox_args=neox_args,
+                init_method=init_method,
+                output_layer_init_method=output_layer_init_method,
+                parallel_output=self.gpt_j_residual,
+                multiple_of=neox_args.mlp_multiple_of,
+                **kw,
+            )
+
+        self.num_experts = (
+            neox_args.moe_num_experts
+            if layer_number % neox_args.expert_interval == 0
+            else 1
+        )
+        args = neox_args
+        if self.num_experts <= 1:
+            self.mlp = get_mlp()
+        else:
+            from torch import distributed as dist
+
+            if self.num_experts > dist.get_world_size():
+                moe_mp_size = 1
+            else:
+                moe_mp_size = dist.get_world_size() // self.num_experts
+
+            if neox_args.moe_type == "deepspeed":
+                self.mlp = MoE(
+                    args.hidden_size,
+                    get_mlp(
+                        "regular",
+                        MOE=True,
+                        MoE_mp_size=moe_mp_size,
+                    ),
+                    num_experts=self.num_experts,
+                    ep_size=args.moe_expert_parallel_size,
+                    k=args.moe_top_k,
+                    use_residual=args.moe_use_residual,
+                    capacity_factor=args.moe_train_capacity_factor,
+                    eval_capacity_factor=args.moe_eval_capacity_factor,
+                    min_capacity=args.moe_min_capacity,
+                    drop_tokens=args.moe_token_dropping,
+                    use_tutel=args.use_tutel,
+                    enable_expert_tensor_parallelism=args.enable_expert_tensor_parallelism,
+                )
+            elif neox_args.moe_type == "megablocks":
+
+                def integrate_megablocks_with_ds_expert_parallelism():
+                    # We make megablocks work with DS parallelism.
+                    #
+                    # We fool DS into accepting these MoE parameters as its own DS MoE params,
+                    # which makes things work with the underlying expert parallelism,
+                    # including TED parallelism.
+                    #
+                    # Effectively, we want to:
+                    #
+                    # - Make DS's data parallel gradient all-reduction skip these params.
+                    # - But make these params participate in the expert parallel all-reduction!
+                    #
+                    # Further background:
+                    #
+                    # Normally, with the original megablocks demo codebase, it
+                    # only supports 1 copy of any expert throughout
+                    # the network, since it uses EP group = DP group.
+                    #
+                    # First, we trigger DS initialization of the MoE expert parallel groups and internal state.
+                    throwaway = MoE(
+                        args.hidden_size,
+                        get_mlp(
+                            "regular",
+                            MOE=True,
+                            MoE_mp_size=moe_mp_size,
+                        ),
+                        num_experts=self.num_experts,
+                        ep_size=args.moe_expert_parallel_size,
+                        k=args.moe_top_k,
+                        use_residual=args.moe_use_residual,
+                        capacity_factor=args.moe_train_capacity_factor,
+                        eval_capacity_factor=args.moe_eval_capacity_factor,
+                        min_capacity=args.moe_min_capacity,
+                        drop_tokens=args.moe_token_dropping,
+                        use_tutel=args.use_tutel,
+                        enable_expert_tensor_parallelism=args.enable_expert_tensor_parallelism,
+                    )
+                    throwaway.set_deepspeed_parallelism()
+
+                    ep_group = throwaway.deepspeed_moe.ep_group
+                    if args.moe_token_dropping:
+                        self.mlp = MbMoE(
+                            neox_args, init_method, output_layer_init_method, ep_group
+                        )
+                    else:
+                        self.mlp = dMoE(
+                            neox_args, init_method, output_layer_init_method, ep_group
+                        )
+
+                    # Next, we trick DS into seeing these as its own MoE params.
+                    for param in self.mlp.parameters():
+                        if getattr(param, "expert_model_parallel", None) is not None:
+                            # is_moe_param looks for this attr.
+                            param.allreduce = False
+                            param.group_name = throwaway.expert_group_name
+
+                integrate_megablocks_with_ds_expert_parallelism()
+
+            else:
+                raise KeyError(neox_args.moe_type)
+
+        self.layer_past = None  # used to cache k/v pairs in inference
+
+    def _get_bias_dropout(self):
+        if self.bias_dropout_fusion:
+            fn = (
+                bias_dropout_add_fused_train
+                if self.training
+                else bias_dropout_add_fused_inference
+            )
+        else:
+            fn = get_bias_dropout_add(self.training)
+        return fn
+
+    def forward(self, x, encoder_hidden_states, attention_mask, layer_past=None):
+        layer_past = layer_past if layer_past is not None else self.layer_past
+        bias_dropout_fn = self._get_bias_dropout()
+        moe_loss = torch.tensor(0.0, device=x.device, dtype=x.dtype)
+        # x: [b, s, h]
+        if self.gpt_j_residual:
+            # pseudocode:
+            # x = x + attn(ln(x)) + mlp(ln(x))
+            # this means we can avoid doing the allreduce in the attn / mlp outputs
+            # to save communication time (we can do a single allreduce after we add mlp / attn outputs).
+            # due to a bug, the two layernorms are not tied in GPT-NeoX-20B. This is non-desirable, but
+            # we preserve the functionality for backwards compatibility
+
+            residual = x
+            # applies the correct normalization depending on if the norms are tied
+            if self.gpt_j_tied:
+                x = self.input_layernorm(x)
+                x1, x2 = x, x
+            else:
+                x1, x2 = self.input_layernorm(x), self.post_attention_layernorm(x)
+
+            # attention operator
+            attention_output, attention_bias = self.attention(
+                x1, attention_mask, layer_past=layer_past
+            )
+            if encoder_hidden_states is not None:
+                attention_output = attention_output + self.cross_attention(x1, encoder_hidden_states, layer_past=layer_past)
+            if self.use_cache:
+                attention_output, presents = attention_output
+                self.layer_past = presents
+
+            if attention_bias is not None:
+                with torch.enable_grad() if not self.eval else nullcontext():
+                    attention_output = bias_dropout_fn(
+                        attention_output,
+                        bias=attention_bias.expand_as(attention_output),
+                        residual=None,
+                        prob=self.hidden_dropout,
+                    )
+
+            # mlp operator
+            mlp_output, mlp_bias = self.mlp(x2)
+            if mlp_bias is not None:
+                with torch.enable_grad() if not self.eval else nullcontext():
+                    output = bias_dropout_fn(
+                        mlp_output,
+                        bias=mlp_bias.expand_as(mlp_output),
+                        residual=attention_output,
+                        prob=self.hidden_dropout,
+                    )
+            else:
+                output = mlp_output
+
+            # output = (x + attn(ln(x)) + mlp(ln(x))
+            output = residual + self.reduce(output)
+        else:
+            # pseudocode:
+            # x = x + attn(ln1(x))
+            # x = x + mlp(ln2(x))
+
+            residual = x
+
+            # x = x + attn(ln1(x))
+            attention_output, attention_bias = self.attention(
+                self.input_layernorm(x), attention_mask, layer_past=layer_past
+            )
+
+            # TODO: add cross attn here #
+            if encoder_hidden_states is not None:
+                cross_attention_output = self.cross_attention(
+                    self.input_layernorm(x), encoder_hidden_states, layer_past=layer_past
+                )
+                attention_output = attention_output + cross_attention_output
+
+            # end cross attn #
+            if self.use_cache:
+                attention_output, presents = attention_output
+                self.layer_past = presents
+            with torch.enable_grad() if not self.eval else nullcontext():
+                if attention_bias is not None:
+                    # Use special bias_dropout_fn if we have a bias term from the above attention layer
+                    attention_output = bias_dropout_fn(
+                        attention_output,
+                        bias=attention_bias.expand_as(residual),
+                        residual=residual,
+                        prob=self.hidden_dropout,
+                    )
+                else:
+                    # Otherwise just apply dropout + residual
+                    attention_output = (
+                        torch.nn.functional.dropout(
+                            attention_output,
+                            p=self.hidden_dropout,
+                            training=self.training,
+                        )
+                        + residual
+                    )
+
+            # output = x + mlp(ln2(x))
+            layernorm_output = self.post_attention_layernorm(attention_output)
+            mlp_bias = torch.tensor(
+                0.0, device=layernorm_output.device, dtype=layernorm_output.dtype
+            )
+
+            if self.num_experts == 1:
+                mlp_output, mlp_bias = self.mlp(layernorm_output)
+            else:
+                if self.moe_type == "deepspeed":
+                    mlp_output, moe_loss, _ = self.mlp(layernorm_output)
+                    mlp_bias = (
+                        None  # deepspeed.moe.layer.MoE.forward ignores the bias term
+                    )
+                elif self.moe_type == "megablocks":
+                    mlp_output, mlp_bias = self.mlp(layernorm_output)
+                else:
+                    raise KeyError(self.moe_type)
+
+            with torch.enable_grad() if not self.eval else nullcontext():
+                if (
+                    self.activation == "swiglu"
+                    or self.num_experts > 1
+                    and self.moe_type == "deepspeed"
+                ):
+                    # No dropout either
+                    assert mlp_bias is None
+                    output = mlp_output + attention_output
+                else:
+                    output = bias_dropout_fn(
+                        mlp_output,
+                        bias=mlp_bias.expand_as(attention_output),
+                        residual=attention_output,
+                        prob=self.hidden_dropout,
+                    )
+
+        return output, encoder_hidden_states, moe_loss
+
 
 class ParallelTransformerLayerPipe(ParallelTransformerLayer):
     """Extends ParallelTransformerLayer to forward attention_mask through the pipeline."""
@@ -1296,11 +1772,24 @@ class ParallelTransformerLayerPipe(ParallelTransformerLayer):
         ), "ParallelTransformerLayerPipe expects 2 arguments - hidden_states and attention_mask"
         hidden_states, attention_mask = args
         # we are returning just [hidden_states, mask]
-        output, moe_loss = super().forward(hidden_states, attention_mask)
+        output, moe_loss = super().forward(hidden_states, encoder_hidden_states, attention_mask)
         # auxiliary output
         self.last_moe_loss = moe_loss
         return output, attention_mask
 
+class ParallelTransformerLayerWithContextPipe(ParallelTransformerLayerWithContext):
+    """Extends ParallelTransformerLayerWithContext to forward attention_mask through the pipeline."""
+
+    def forward(self, args):
+        assert (
+            len(args) == 3
+        ), "ParallelTransformerLayerWithContextPipe expects 32 arguments - hidden_states, encoder_hidden_states and attention_mask"
+        hidden_states, encoder_hidden_states, attention_mask = args
+        # we are returning just [hidden_states, mask]
+        output, encoder_hidden_states, moe_loss = super().forward(hidden_states, encoder_hidden_states, attention_mask)
+        # auxiliary output
+        self.last_moe_loss = moe_loss
+        return output, encoder_hidden_states, attention_mask
 
 class ParallelLinearPipe(ParallelLinear):
     """Another helper class to pass presents through to the output when doing inference with a Pipe Parallel model"""
