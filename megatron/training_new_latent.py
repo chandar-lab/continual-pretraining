@@ -43,6 +43,7 @@ from megatron.utils import (
 from megatron import print_rank_0, mpu
 from megatron.model import (
     GPT2ModelPipe,
+    TransformerEncoderDecoderPipe,
     SoftEmbedding,
     get_params_for_weight_decay_optimization,
     mark_norms_for_sequence_parallel_grad_sync,
@@ -186,7 +187,7 @@ from dataclasses import dataclass
 from transformers.models.bart.modeling_bart import (
     BartForConditionalGeneration,
 )
-from latent_models.perceiver_ae import PerceiverAutoEncoder
+# from latent_models.perceiver_ae import PerceiverAutoEncoder
 from einops import rearrange
 
 
@@ -224,8 +225,8 @@ def pretrain(neox_args):
     initialize_megatron(neox_args=neox_args)
 
 
-    #### TODO: combined encoder decoder model created here #####
-    model = get_encoder_gpt2_model(neox_args)
+    #### TODO: test combined encoder decoder model created here #####
+    model = get_encoder_gpt2_model(neox_args, use_cache=False)
     # model = get_model(neox_args=neox_args, use_cache=use_cache)
 
     # perceiver_ae = PerceiverAE(input_dim=1024, latent_dim=512)
@@ -945,33 +946,13 @@ def get_encoder_gpt2_model(neox_args, use_cache=False):
     with deepspeed.zero.Init(
         config_dict_or_path=neox_args.deepspeed_config
     ) if neox_args.zero_stage == 3 else nullcontext() as gs:
-        model = EncodertoGPT2Pipe(
+        model = TransformerEncoderDecoderPipe(
             neox_args=neox_args,
             num_tokentypes=0,
             parallel_output=True,
             topology=mpu.get_topology(),
             use_cache=use_cache,
         )
-
-    ### soft prompt tuning stuff ###
-    if neox_args.soft_prompt_tuning is not None and neox_args.soft_prompt_tuning.get(
-        "enabled", False
-    ):
-        soft_prompt = SoftEmbedding(
-            neox_args,
-            wte=getattr(model, "0").word_embeddings,
-            n_tokens=neox_args.soft_prompt_tuning.get("n_tokens", 10),
-            init_string=neox_args.soft_prompt_tuning.get("init_string", ""),
-            init_range=neox_args.soft_prompt_tuning.get("init_range", 0.5),
-        )
-        model.insert_layers(
-            layers=soft_prompt, idx=1
-        )  # insert the soft prompt layer directly after the word embeddings
-
-        # freeze everything but the soft prompt
-        for name, param in model.named_parameters():
-            if not "soft_embedding" in name:
-                param.requires_grad = False
 
     if not neox_args.is_pipe_parallel:
         # Export PipeParallel model to nn.Sequential model to avoid the overhead of deepspeed's pipe parallel training
@@ -1264,6 +1245,7 @@ def setup_model_and_optimizer(model, neox_args, use_cache=False, iteration=None)
         model.total_params = get_total_params(model.module)
         print_rank_0(f' > total params: {"{:,}".format(model.total_params)}')
 
+        # neox_args.is_pipe_parallel = False # TODO revert it back
         if neox_args.is_pipe_parallel:
             model.set_has_attention_mask(True)
             if neox_args.curriculum_learning:
@@ -1387,6 +1369,8 @@ def train_step(
                 pass            
             
             losses.append(loss)
+
+            print("Loss shape", loss.shape)
             # for key in metric_dict.keys():
             #     metric_dicts[key].append(metric_dict[key])
             # Calculate gradients, reduce across processes, and clip.
@@ -1786,15 +1770,15 @@ def train(
                     )
         except StopIteration:
             print_rank_0(f"StopIteration encountered during evaluation on current task at iteration {iteration}")
-                for t in [
-                    "forward",
-                    "backward",
-                    "allreduce",
-                    "optimizer",
-                    "batch generator",
-                    "data loader",
-                ]:
-                    timers(t).reset()
+            for t in [
+                "forward",
+                "backward",
+                "allreduce",
+                "optimizer",
+                "batch generator",
+                "data loader",
+            ]:
+                timers(t).reset()
             _,valid_on_task,_ = build_train_valid_test_data_iterators(
             neox_args=neox_args, data_path=neox_args.train_data_paths[task_id], iteration = iteration, task_iters=iteration_task)
             pass

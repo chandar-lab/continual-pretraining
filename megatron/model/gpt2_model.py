@@ -31,6 +31,7 @@ from megatron import mpu
 from megatron.mpu import ParallelRelativePositionBias
 from megatron.model.transformer import (
     ParallelTransformerLayerPipe,
+    ParallelTransformerLayerWithContextPipe,
     NormPipe,
     ParallelLinearPipe,
     parallel_lm_logits,
@@ -39,7 +40,7 @@ from megatron.model.transformer import (
 from megatron.model.gmlp import GMLPBlock
 from megatron.model.rwkv.v6 import RWKVResidualLayerPipe
 from megatron.model.mamba import ParallelMambaResidualLayerPipe
-from megatron.model.word_embeddings import EmbeddingPipe, SoftEmbedding
+from megatron.model.word_embeddings import EmbeddingPipe, SoftEmbedding, EmbeddingWithContextPipe
 
 # Pipeline parallelism
 from deepspeed.pipe import PipelineModule, LayerSpec, TiedLayerSpec
@@ -78,32 +79,33 @@ def cross_entropy(output, labels, _fp16=False):
     return loss
 
 
-def _pre_transformer_block(args):
+def _pre_decoder_block(args):
     # data format change for hidden_states to avoid explicit tranposes : [b s h] --> [s b h]
     assert len(args) == 3, "Incorrect number of arguments to _pre_transformer_block"
     fn = lambda _args: (_args[0].transpose(0, 1).contiguous(), _args[1], *_args[2:])
     return fn(args)
 
-def _pre_encoder_block(args):
+def _post_decoder_block(args):
+    # from (hidden_states, encoder_hidden_states, attention_mask)
+    # to (hidden_states, encoder_hidden_states)
+    assert len(args) == 3, "Incorrect number of arguments to _post_transformer_block"
+    fn = lambda _args: (_args[0].transpose(0,1).contiguous())
+    return fn(args)
+
+def _pre_transformer_block(args):
     # data format change for hidden_states to avoid explicit tranposes : [b s h] --> [s b h]
     assert len(args) == 2, "Incorrect number of arguments to _pre_transformer_block"
     fn = lambda _args: (_args[0].transpose(0, 1).contiguous(), *_args[1:])
     return fn(args)    
 
-
 def _post_transformer_block(args):
-    # from (hidden_states, encoder_hidden_states, attention_mask)
+    # from (hidden_states, attention_mask)
     # to (hidden_states.T)
-    assert len(args) == 3, "Incorrect number of arguments to _post_transformer_block"
+    assert len(args) == 2, "Incorrect number of arguments to _post_transformer_block"
     fn = lambda _args: (_args[0].transpose(0, 1).contiguous())
     return fn(args)
 
-def _post_encoder_block(args):
-    # from (hidden_states, encoder_hidden_states, attention_mask)
-    # to (hidden_states, encoder_hidden_states)
-    assert len(args) == 3, "Incorrect number of arguments to _post_transformer_block"
-    fn = lambda _args: (_args[0], _args[1])
-    return fn(args)
+
 
 class GPT2ModelPipe(PipelineModule, torch.nn.Module):
     """GPT2Model adapted for pipeline parallelism.
@@ -125,7 +127,6 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
         parallel_output=True,
         topology=None,
         use_cache=False,
-        context=None # TODO: this needs to be passed in forward, not init. need to connect the other components (encoder, latent proj) to an overall modelpipe
     ):
         self.neox_args = neox_args
 
@@ -133,7 +134,7 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
         self.parallel_output = parallel_output
         self.hidden_size = self.neox_args.hidden_size
         self.num_tokentypes = num_tokentypes
-        self.context = context # for cross attention (TODO)
+
         self.init_method, self.output_layer_init_method = get_init_methods(
             self.neox_args
         )
@@ -195,7 +196,6 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
         )
 
     def init_specs(self):
-
         weight_tying = not self.neox_args.no_weight_tying
         self.specs = []
 
@@ -234,7 +234,7 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
         # NB: the attention mask always needs to be the *last* item in the args when being passed from
         # one stage to the next, because deepspeed is hacks on top of hacks.
         #
-        # outputs are now (hidden_states, encoder_hidden_states, attention_mask)
+        # outputs are now (hidden_states, attention_mask)
 
         self.specs.append(_pre_transformer_block)
 
@@ -426,28 +426,204 @@ class GPT2ModelPipe(PipelineModule, torch.nn.Module):
         )
         return model
 
-class EncoderPipe(torch.nn.Module):
-    def __init__(self, neox_args, encoder_model):
-        super().__init__()
+###### TODO: test new stuff ############
+import torch
+import torch.nn as nn
+import math
+import torch
+import torch.nn as nn
+import math
+from deepspeed.pipe import PipelineModule, TiedLayerSpec, LayerSpec
+
+class TransformerEncoderPipe(PipelineModule):
+    def __init__(self, neox_args, num_tokentypes=0, parallel_output=True, topology=None, use_cache=False):
         self.neox_args = neox_args
-        self.encoder_model = encoder_model
+        self.use_cache = use_cache
+        self.parallel_output = parallel_output
+        self.hidden_size = self.neox_args.hidden_size
+        self.num_tokentypes = num_tokentypes
+        self.init_method, self.output_layer_init_method = get_init_methods(self.neox_args)
+        self.weight_tying = not self.neox_args.no_weight_tying
+        
+        # Define layer specs for DeepSpeed PipelineModule
+        self.specs = []
 
-    def forward(self, inputs):
-        input_ids, position_ids, attention_mask = inputs
-        encoder_outputs = self.encoder_model(
-            input_ids=input_ids, 
-            attention_mask=attention_mask
+        # Embedding Layer
+        if self.weight_tying:
+            self.specs.append(
+                TiedLayerSpec(
+                    "embed",
+                    EmbeddingPipe,
+                    self.neox_args,
+                    self.hidden_size,
+                    self.neox_args.padded_vocab_size,
+                    self.neox_args.max_position_embeddings,
+                    self.neox_args.hidden_dropout,
+                    self.init_method,
+                    self.num_tokentypes,
+                    tied_weight_attr="word_embeddings_weight",
+                )
+            )
+        else:
+            self.specs.append(
+                LayerSpec(
+                    EmbeddingPipe,
+                    self.neox_args,
+                    self.hidden_size,
+                    self.neox_args.padded_vocab_size,
+                    self.neox_args.max_position_embeddings,
+                    self.neox_args.hidden_dropout,
+                    self.init_method,
+                    self.num_tokentypes,
+                )
+            )
+
+        # Pre-Transformer Block
+        self.specs.append(_pre_transformer_block)
+
+        # Relative Position Embedding (RPE)
+        if self.neox_args.pos_emb == "rpe":
+            hidden_size_per_attention_head = self.neox_args.hidden_size // self.neox_args.num_attention_heads
+            rpe_scale = math.sqrt(hidden_size_per_attention_head)
+            rpe_emb = ParallelRelativePositionBias(
+                neox_args=self.neox_args,
+                scale=rpe_scale,
+                causal=True,
+                num_buckets=self.neox_args.rpe_num_buckets,
+                max_distance=self.neox_args.rpe_max_distance,
+                heads=self.neox_args.num_attention_heads,
+            )
+        else:
+            rpe_emb = None
+
+        # Transformer Layers
+        for i in range(self.neox_args.num_layers):
+            self.specs.append(
+                LayerSpec(
+                    ParallelTransformerLayerPipe,
+                    neox_args=self.neox_args,
+                    attention_mask_func=gpt2_attention_mask_func,
+                    init_method=self.init_method,
+                    output_layer_init_method=self.output_layer_init_method,
+                    layer_number=i,
+                    rpe=rpe_emb if self.neox_args.pos_emb == "rpe" else None,
+                    rotary=self.neox_args.pos_emb == "rotary",
+                    use_cache=self.use_cache,
+                )
+            )
+
+        # Post-Transformer Block
+        self.specs.append(_post_transformer_block)
+
+        # Initialize PipelineModule
+        super().__init__(
+            layers=self.specs,
+            num_stages=topology.get_dim("pipe") if topology else 1,
+            topology=topology,
+            loss_fn=None,  # Define loss externally
         )
-        return input_ids, position_ids, encoder_outputs.last_hidden_state, attention_mask
 
-    @property
-    def word_embeddings_weight(self):
-        # If needed for tying embeddings later
-        return self.encoder_model.get_input_embeddings().weight
+# class TransformerEncoder(nn.Module):
+#     def __init__(self, 
+#             neox_args,
+#             num_tokentypes=0,
+#             parallel_output=True,
+#             topology=None,
+#             use_cache=False,
+#         ):
+#         super(TransformerEncoder, self).__init__()
 
 
-class EncodertoGPT2Pipe(PipelineModule, nn.Module):
-   def __init__(
+#         self.neox_args = neox_args
+
+#         self.use_cache = use_cache
+#         self.parallel_output = parallel_output
+#         self.hidden_size = self.neox_args.hidden_size
+#         self.num_tokentypes = num_tokentypes
+#         self.init_method, self.output_layer_init_method = get_init_methods(
+#             self.neox_args
+#         )
+#         self.weight_tying = not self.neox_args.no_weight_tying
+
+#         # Embedding Layer
+#         self.embedding = self._build_embedding_layer()
+
+#         # Positional Embedding (RPE if specified)
+#         if self.neox_args.pos_emb == "rpe":
+#             hidden_size_per_attention_head = self.neox_args.hidden_size // self.neox_args.num_attention_heads
+#             rpe_scale = math.sqrt(hidden_size_per_attention_head)
+#             self.rpe_emb = ParallelRelativePositionBias(
+#                 neox_args=self.neox_args,
+#                 scale=rpe_scale,
+#                 causal=True,
+#                 num_buckets=self.neox_args.rpe_num_buckets,
+#                 max_distance=self.neox_args.rpe_max_distance,
+#                 heads=self.neox_args.num_attention_heads,
+#             )
+#         else:
+#             self.rpe_emb = None
+        
+#         self.pre_transformer_block = _pre_transformer_block
+
+#         # Transformer Layers - Instantiating the layers directly
+#         self.transformer_layers = nn.ModuleList([
+#             ParallelTransformerLayerPipe(
+#                 neox_args=self.neox_args,
+#                 attention_mask_func=gpt2_attention_mask_func,
+#                 init_method=self.init_method,
+#                 output_layer_init_method=self.output_layer_init_method,
+#                 layer_number=i,
+#                 rpe=self.rpe_emb if self.neox_args.pos_emb == "rpe" else None,
+#                 rotary=self.neox_args.pos_emb == "rotary",
+#                 use_cache=self.use_cache
+#             )
+#             for i in range(self.neox_args.num_layers)
+#         ])
+
+#         # Post Transformer Block
+#         self.post_transformer_block = _post_transformer_block
+    
+#     def _build_embedding_layer(self):
+#         if self.weight_tying:
+#             return EmbeddingPipe(
+#                 self.neox_args,
+#                 self.hidden_size,
+#                 self.neox_args.padded_vocab_size,
+#                 self.neox_args.max_position_embeddings,
+#                 self.neox_args.hidden_dropout,
+#                 self.init_method,
+#                 self.num_tokentypes,
+#                 tied_weight_attr="word_embeddings_weight",
+#             )
+#         else:
+#             return EmbeddingPipe(
+#                 self.neox_args,
+#                 self.hidden_size,
+#                 self.neox_args.padded_vocab_size,
+#                 self.neox_args.max_position_embeddings,
+#                 self.neox_args.hidden_dropout,
+#                 self.init_method,
+#                 self.num_tokentypes,
+#             )
+
+#     def forward(self, input_ids, position_ids, attention_mask):
+#         # Step 1: Embedding Layer
+#         embeddings, attention_mask = self.embedding(input_ids, position_ids, attention_mask)
+#         hidden_states, attention_mask = self.pre_transformer_block(embeddings, attention_mask)
+#         # outputs are now (hidden_states, attention_mask)
+#         # Step 2: Apply Transformer Layers
+#         for transformer_layer in self.transformer_layers:
+#             hidden_states = transformer_layer(hidden_states, attention_mask)
+        
+#         # Step 3: Post Transformer Block
+#         hidden_states = self.post_transformer_block(hidden_states, attention_mask)
+        
+#         # Return final hidden states
+#         return hidden_states
+
+
+class ConditionalGPT2Pipe(PipelineModule, nn.Module):
+    def __init__(
         self,
         neox_args,
         num_tokentypes=0,
@@ -461,7 +637,6 @@ class EncodertoGPT2Pipe(PipelineModule, nn.Module):
         self.parallel_output = parallel_output
         self.hidden_size = self.neox_args.hidden_size
         self.num_tokentypes = num_tokentypes
-        self.context = context # for cross attention (TODO)
         self.init_method, self.output_layer_init_method = get_init_methods(
             self.neox_args
         )
@@ -482,95 +657,21 @@ class EncodertoGPT2Pipe(PipelineModule, nn.Module):
             partition_method=neox_args.pipe_partition_method,
             checkpointable_layers=[
                 "GMLPBlock",
-                "ParallelTransformerLayerPipe",
+                "ParallelTransformerLayerWithContextPipe",
                 "ParallelMambaResidualLayerPipe",
             ],
         )
 
     def set_input(self, inputs):
-        self.input_buffer = inputs
+    	self.input_buffer = inputs
 
     def init_specs(self):
         
         weight_tying = not self.neox_args.no_weight_tying
         self.specs = []
 
-        ######## Encoder Pipe #############
-
-        # input will be (input_ids, position_ids, attention_mask)
-        self.specs.append(_pre_encoder_block)
-
-        if weight_tying:
-            self.specs.append(
-                TiedLayerSpec(
-                    "embed",
-                    EmbeddingPipe,
-                    self.neox_args,
-                    self.hidden_size,
-                    self.neox_args.padded_vocab_size,
-                    self.neox_args.max_position_embeddings,
-                    self.neox_args.hidden_dropout,
-                    self.init_method,
-                    self.num_tokentypes,
-                    tied_weight_attr="word_embeddings_weight",
-                )
-            )
-        else:
-            self.specs.append(
-                LayerSpec(
-                    EmbeddingPipe,
-                    self.neox_args,
-                    self.hidden_size,
-                    self.neox_args.padded_vocab_size,
-                    self.neox_args.max_position_embeddings,
-                    self.neox_args.hidden_dropout,
-                    self.init_method,
-                    self.num_tokentypes,
-                )
-            )     
-
-        # NB: the attention mask always needs to be the *last* item in the args when being passed from
-        # one stage to the next, because deepspeed is hacks on top of hacks.
-        #
-        # outputs are now (embeddings/hidden_states, attention_mask)
-
-        # T5 RPE positional embedding
-        if self.neox_args.pos_emb == "rpe":
-            hidden_size_per_attention_head = mpu.divide(
-                self.neox_args.hidden_size, self.neox_args.num_attention_heads
-            )
-            rpe_scale = math.sqrt(hidden_size_per_attention_head)
-            rpe_emb = ParallelRelativePositionBias(
-                neox_args=self.neox_args,
-                scale=rpe_scale,
-                causal=True,
-                num_buckets=self.neox_args.rpe_num_buckets,
-                max_distance=self.neox_args.rpe_max_distance,
-                heads=self.neox_args.num_attention_heads,
-            )
-
-        for i in range(self.neox_args.num_layers//2):
-            self.specs.append(
-                LayerSpec(
-                    ParallelTransformerLayerPipe,
-                    neox_args=self.neox_args,
-                    attention_mask_func=gpt2_attention_mask_func,
-                    init_method=self.init_method,
-                    output_layer_init_method=self.output_layer_init_method,
-                    layer_number=i,
-                    rpe=rpe_emb if self.neox_args.pos_emb == "rpe" else None,
-                    rotary=self.neox_args.pos_emb == "rotary",
-                    use_cache=self.use_cache,
-                )
-            )
-
-        # used to drop attention mask + reshape hidden states
-        self.specs.append(_post_transformer_block)
-        # just encoder_hidden_states now
-
         ######### decoder ###########
         # Embedding layer
-        # (input_ids, position_ids, attention_mask) = self.input_buffer
         # input will be (input_ids, position_ids, encoder_hidden_states, attention_mask)
 
         if weight_tying:
@@ -586,7 +687,6 @@ class EncodertoGPT2Pipe(PipelineModule, nn.Module):
                     self.init_method,
                     self.num_tokentypes,
                     tied_weight_attr="word_embeddings_weight",
-                    input_buffer=self.input_buffer
                 )
             )
         else:
@@ -600,7 +700,6 @@ class EncodertoGPT2Pipe(PipelineModule, nn.Module):
                     self.neox_args.hidden_dropout,
                     self.init_method,
                     self.num_tokentypes,
-                    input_buffer=self.input_buffer
                 )
             )
 
@@ -609,7 +708,7 @@ class EncodertoGPT2Pipe(PipelineModule, nn.Module):
         #
         # outputs are now (embeddings/hidden_states, encoder_hidden_states, attention_mask)
 
-        self.specs.append(_pre_transformer_block)
+        self.specs.append(_pre_decoder_block)
 
         # T5 RPE positional embedding
         if self.neox_args.pos_emb == "rpe":
@@ -670,11 +769,12 @@ class EncodertoGPT2Pipe(PipelineModule, nn.Module):
                         rpe=rpe_emb if self.neox_args.pos_emb == "rpe" else None,
                         rotary=self.neox_args.pos_emb == "rotary",
                         use_cache=self.use_cache,
+                        use_cross_attn=True,
                     )
                 )
 
         # used to drop attention mask + reshape hidden states
-        self.specs.append(_post_transformer_block)
+        self.specs.append(_post_decoder_block)
 
         # NormPipe is a (deprecated) helper class that used to be used to pass presents along the pipeline - since presents are now cached to the `TransformerLayer` class this is no longer needed
         norm, eps = get_norm(self.neox_args)
@@ -728,3 +828,91 @@ class EncodertoGPT2Pipe(PipelineModule, nn.Module):
                     is_last_layer=True,
                 )
             )
+
+class TransformerEncoderDecoderPipe(PipelineModule, nn.Module):
+    def __init__(self,
+        neox_args,
+        num_tokentypes=0,
+        parallel_output=True,
+        topology=None,
+        use_cache=False,
+    ):
+        self.neox_args = neox_args
+        self.topology = topology
+
+        # Define layer specs
+        self.specs = []
+
+        # Add Encoder
+        self.specs.append(LayerSpec(TransformerEncoderPipe,
+            neox_args,
+            num_tokentypes=num_tokentypes,
+            parallel_output=parallel_output,
+            topology=topology,
+            use_cache=use_cache,)
+        )
+
+        # Add Decoder
+        self.specs.append(LayerSpec(ConditionalGPT2Pipe, 
+            neox_args,
+            num_tokentypes=num_tokentypes,
+            parallel_output=parallel_output,
+            topology=topology,
+            use_cache=use_cache,)
+        )
+
+        # Initialize PipelineModule
+        super().__init__(
+            layers=self.specs,
+            num_stages=topology.get_dim("pipe") if topology else 1,
+            topology=topology,
+            loss_fn=None,
+        )
+
+    def forward(self, inputs):
+        (input_ids, position_ids, attention_mask) = inputs
+        
+        # Step 1: Run Encoder (separate forward pass)
+        encoder_hidden_states = self.forward_funcs[0]((input_ids, position_ids, attention_mask))
+        # print(encoder_hidden_states.shape, "outside")
+        # print(f"Before permute: {encoder_hidden_states.shape}")
+        encoder_hidden_states = encoder_hidden_states.permute(1, 0, 2).contiguous()
+        # print(f"After permute: {encoder_hidden_states.shape}")        
+        # Step 2: Run Decoder (separate forward pass)
+        decoder_output = self.forward_funcs[1]((input_ids, position_ids, encoder_hidden_states, attention_mask))
+
+        return decoder_output
+
+
+# class TransformerEncoderDecoderModel(nn.Module):
+#     def __init__(self,
+        # neox_args,
+        # num_tokentypes=0,
+        # parallel_output=True,
+        # topology=None,
+        # use_cache=False
+#     ):
+#         super(TransformerEncoderDecoderModel, self).__init__()
+#         self.encoder = TransformerEncoder(
+#             neox_args,
+#             num_tokentypes=0,
+#             parallel_output=True,
+#             topology=None,
+#             use_cache=False,
+#         )
+#         self.decoder = ConditionalGPT2Pipe(
+            # neox_args,
+            # num_tokentypes=num_tokentypes,
+            # parallel_output=parallel_output,
+            # topology=topology,
+            # use_cache=use_cache,
+#         )
+    
+#     def forward(self, inputs):
+#         (input_ids, position_ids, attention_mask) = inputs # use non causal attn mask for encoder TODO
+#         # Get encoder output (using the same input_ids for the encoder)
+#         encoder_hidden_states = self.encoder(input_ids, position_ids, attention_mask)
+#         inputs_decoder = (input_ids, position_ids, encoder_hidden_states, attention_mask)
+#         # Use the same input_ids for the decoder
+#         decoder_output = self.decoder(inputs_decoder)
+#         return decoder_output

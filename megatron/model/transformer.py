@@ -975,8 +975,29 @@ class ParallelSelfAttention(nn.Module):
         return output, bias
 
 class ParallelCrossAttention(ParallelSelfAttention):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self,         
+        neox_args,
+        attention_mask_func,
+        init_method,
+        output_layer_init_method,
+        layer_number,
+        rpe=None,
+        rotary=False,
+        use_cache=False,
+        parallel_output=False,
+    ):
+        super().__init__(        
+            neox_args,
+            attention_mask_func,
+            init_method,
+            output_layer_init_method,
+            layer_number,
+            rpe=None,
+            rotary=False,
+            use_cache=False,
+            parallel_output=False,
+        )
+
         # Strided linear layer.
         self.query = mpu.ColumnParallelLinear(
             neox_args=neox_args,
@@ -988,14 +1009,14 @@ class ParallelCrossAttention(ParallelSelfAttention):
         )
         self.key_value = mpu.ColumnParallelLinear(
             neox_args=neox_args,
-            input_size=2 * neox_args.hidden_size,
+            input_size=neox_args.hidden_size,
             output_size=2 * neox_args.hidden_size,
             gather_output=False,
             init_method=init_method,
             bias=neox_args.use_bias_in_attn_linear,
         )
 
-   def forward(self, hidden_states, encoder_hidden_states, attention_mask, layer_past=None):
+    def forward(self, hidden_states, encoder_hidden_states, attention_mask, layer_past=None):
 
         # hidden_states: [sq, b, h]
 
@@ -1006,9 +1027,12 @@ class ParallelCrossAttention(ParallelSelfAttention):
         # QKV projection for MHA.
 
         # Attention heads [sq, b, h] --> [sq, b, (np * 1 * hn)]
-        mixed_x_layer, _ = self.query_key(hidden_states)
+        mixed_x_layer, _ = self.query(hidden_states)
         # Attention heads [sq, b, h] --> [sq, b, (np * 2 * hn)]
+        # print(encoder_hidden_states.shape, "inside")
+
         encoder_hidden_layer, _ = self.key_value(encoder_hidden_states)
+        # sq b h, b sq h
         mixed_x_layer = torch.cat((mixed_x_layer, encoder_hidden_layer), dim=-1)
 
         # [sq, b, (np * 3 * hn)] --> [sq, b, np, 3 * hn]
@@ -1441,7 +1465,7 @@ class ParallelTransformerLayerWithContext(nn.Module):
         rpe=None,
         rotary=False,
         use_cache=False,
-        use_cross_attn=False
+        use_cross_attn=True
     ):
 
         super().__init__()
@@ -1651,8 +1675,10 @@ class ParallelTransformerLayerWithContext(nn.Module):
             attention_output, attention_bias = self.attention(
                 x1, attention_mask, layer_past=layer_past
             )
+            # print("Encoder shape inside fwd", encoder_hidden_states.shape)
             if encoder_hidden_states is not None:
-                attention_output = attention_output + self.cross_attention(x1, encoder_hidden_states, layer_past=layer_past)
+                cross_attn_output, _ = self.cross_attention(x1, encoder_hidden_states, attention_mask, layer_past=layer_past) # TODO: should we include bias?
+                attention_output = attention_output + cross_attn_output
             if self.use_cache:
                 attention_output, presents = attention_output
                 self.layer_past = presents
@@ -1772,7 +1798,7 @@ class ParallelTransformerLayerPipe(ParallelTransformerLayer):
         ), "ParallelTransformerLayerPipe expects 2 arguments - hidden_states and attention_mask"
         hidden_states, attention_mask = args
         # we are returning just [hidden_states, mask]
-        output, moe_loss = super().forward(hidden_states, encoder_hidden_states, attention_mask)
+        output, moe_loss = super().forward(hidden_states, attention_mask)
         # auxiliary output
         self.last_moe_loss = moe_loss
         return output, attention_mask
@@ -1783,12 +1809,15 @@ class ParallelTransformerLayerWithContextPipe(ParallelTransformerLayerWithContex
     def forward(self, args):
         assert (
             len(args) == 3
-        ), "ParallelTransformerLayerWithContextPipe expects 32 arguments - hidden_states, encoder_hidden_states and attention_mask"
+        ), "ParallelTransformerLayerWithContextPipe expects 3 arguments - hidden_states, encoder_hidden_states and attention_mask"
         hidden_states, encoder_hidden_states, attention_mask = args
+        enc_shape = encoder_hidden_states.shape
+        # print("enc shape before forward in paralleltransformerlayerwithcontext", enc_shape)
         # we are returning just [hidden_states, mask]
-        output, encoder_hidden_states, moe_loss = super().forward(hidden_states, encoder_hidden_states, attention_mask)
+        output, _, moe_loss = super().forward(hidden_states, encoder_hidden_states, attention_mask) # TODO: see if this works not rewriting encoder output
         # auxiliary output
         self.last_moe_loss = moe_loss
+        encoder_hidden_states = encoder_hidden_states.view(*enc_shape)
         return output, encoder_hidden_states, attention_mask
 
 class ParallelLinearPipe(ParallelLinear):
