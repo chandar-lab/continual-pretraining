@@ -32,6 +32,7 @@ import torch.nn.functional as F
 import deepspeed
 from deepspeed.runtime.data_pipeline.curriculum_scheduler import CurriculumScheduler
 import numpy as np
+from copy import deepcopy
 
 from megatron.utils import (
     Timers,
@@ -227,7 +228,6 @@ def pretrain(neox_args):
             replay_buffer = ReplayBuffer(neox_args=neox_args)
     else:
         replay_buffer = None
-    
     
     neox_args.iteration = iteration
 
@@ -1210,16 +1210,46 @@ def train_step(
     replay_buffer,
     lr_scheduler,
     reference_model=None,
-    fill_buffer_iter =0,
+    fill_buffer_iter=0,
 ):
     """Single training step."""
 
     # Pipeline parallelism schedules forward/backward/step
     if neox_args.is_pipe_parallel:
-        reduced_loss, fill_buffer_iter = train_step_pipe(
-            neox_args=neox_args, timers=timers, model=model, data_iterator=data_iterator, replay_buffer=replay_buffer, fill_buffer_iter = fill_buffer_iter
-        )
+        initial_weights = deepcopy(model.state_dict())
+        
+        accumulated_loss = 0
+        for step in range(neox_args.reptile_inner_steps):
+            weights_before = deepcopy(model.state_dict())
+            
+            reduced_loss, fill_buffer_iter = train_step_pipe(
+                neox_args=neox_args, 
+                timers=timers, 
+                model=model, 
+                data_iterator=data_iterator, 
+                replay_buffer=replay_buffer, 
+                fill_buffer_iter=fill_buffer_iter
+            )
+            
+            weights_after = model.state_dict()
+            # print("weights after:", weights_after)
+            
+            model.load_state_dict({
+                name: weights_before[name] + ((weights_after[name] - weights_before[name]) * neox_args.reptile_beta)
+                for name in weights_before
+            })
+
+            accumulated_loss += reduced_loss['lm_loss']
+        
+        final_weights = model.state_dict()
+        
+        model.load_state_dict({
+            name: initial_weights[name] + ((final_weights[name] - initial_weights[name]) * neox_args.reptile_gamma)
+            for name in initial_weights
+        })
+        reduced_loss['lm_loss'] = accumulated_loss / neox_args.reptile_inner_steps
         reduce_metrics = reduced_loss
+
         if (
             neox_args.memory_profiling
             and neox_args.iteration >= neox_args.profile_step_start
@@ -1529,7 +1559,7 @@ def train(
         #     )
         
         # Checkpointing
-        if neox_args.save and iteration in neox_args.save_iters or iteration in range(500, 45000, 500) or iteration in neox_args.iters_task:
+        if neox_args.save and iteration in range(29000, 45000, 1000) or iteration in neox_args.iters_task:
 
             # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
             forgetting = []
@@ -1541,7 +1571,7 @@ def train(
                     task_iters=iteration_task,
                     task_id=j
                 )
-        
+                
                 # Evaluate the model on the test data of dataset j
                 eval_results = evaluate(
                     neox_args=neox_args,
@@ -1594,6 +1624,7 @@ def train(
             if neox_args.use_replay:
                 buffer.save_metadata(neox_args.buffer_dir)
                 # buffer.save()
+                
                 save_checkpoint(
                     neox_args=neox_args,
                     iteration=iteration,
@@ -1603,7 +1634,7 @@ def train(
                     task_id=task_id,
 
                 )
-                torch.distributed.barrier()                
+                torch.distributed.barrier()  
                  
             else:
                 save_checkpoint(
@@ -1626,6 +1657,7 @@ def train(
                     ):
                         chart_name = f"on task {task_id} only"
                         prefix="iteration {}".format(iteration)
+
                         evaluate_and_print_results(
                             neox_args=neox_args,
                             prefix=prefix,

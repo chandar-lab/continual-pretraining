@@ -883,7 +883,7 @@ class NeoXArgsOther(NeoXArgsTemplate):
     Replay buffer size
     """
     
-    file_size: int = 1000000
+    file_size: int = 2000
     """
     replay buffer file size
     """

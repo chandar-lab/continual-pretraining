@@ -1,0 +1,121 @@
+{
+  "pipe_parallel_size": 1,
+  "model_parallel_size": 1,
+  "num_layers": 24,
+  "hidden_size": 1024,
+  "num_attention_heads": 16,
+  "intermediate_size": 2560,
+  "seq_length": 2048,
+  "max_position_embeddings": 2048,
+  "pos_emb": "rotary",
+  "rotary_pct": 0.25,
+  "activation": "silu",
+  "no_weight_tying": true,
+  "norm": "rmsnorm",
+  "rms_norm_epsilon": 1.0e-5,
+  "gpt_j_residual": true,
+  "output_layer_parallelism": "column",
+  "scaled_upper_triang_masked_softmax_fusion": true,
+  "bias_gelu_fusion": false,
+  "rope_fusion": false,
+  "layernorm_fusion": true,
+  "optimizer": {
+    "type": "Adam",
+    "params": {
+      "lr": 2.8e-4,
+      "betas": [0.9, 0.95],
+      "eps": 1.0e-8,
+    }
+  },
+  "min_lr": 5.0e-5,
+  "lr_decay_style": "cosine",
+  "warmup": 0.01,
+   "zero_optimization": {
+    "stage": 1,
+    "allgather_partitions": true,
+    "allgather_bucket_size": 200000000,
+    "overlap_comm": true,
+    "reduce_scatter": true,
+    "reduce_bucket_size": 200000000,
+    "contiguous_gradients": true,
+    "cpu_offload": false
+  },
+   "train_micro_batch_size_per_gpu": 16,
+   "eff_batch_size": 16,
+   "replay_buffer_proportion": 0,
+   "gradient_accumulation_steps": 1,
+   "data_impl": "mmap",
+   "checkpoint_activations": true,
+   "checkpoint_num_layers": 1,
+   "partition_activations": true,
+   "synchronize_each_layer": true,
+   "gradient_clipping": 1.0,
+   "weight_decay": 0.1,
+   "hidden_dropout": 0.0,
+   "attention_dropout": 0.0,
+  "precision": "bfloat16",
+  "fp32_allreduce": true,
+  "bf16": {
+    "enabled": true
+  },
+  "data_types": {
+    "grad_accum_dtype": "fp32"
+  },
+   "train_iters": 35763,
+   "lr_decay_iters": 35763,
+   "distributed_backend": "nccl",
+   "checkpoint_factor": 1000,
+   "eval_interval": 100,
+   "eval_iters": 100,
+   "log_interval": 10,
+   "steps_per_print": 10,
+   "keep_last_n_checkpoints": 4,
+   "wall_clock_breakdown": true,
+   "launcher": "slurm",
+   "deepspeed_slurm": true,
+   "num_workers": 8,
+
+
+  #  ########OSCAR Deutsch ######################
+    "train_data_paths": [
+    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/train_400B/dclm-baseline/merged_train",
+    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/train/de/merged_train",
+    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/train/fr/merged_train",
+
+
+    ],
+    
+   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/test/dclm-baseline/merged_test",
+    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/test/de/merged_test",
+   "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/test/fr/merged_test",
+   ],
+   "valid_data_paths": [
+    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/val/dclm-baseline/merged_val",
+    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/val/de/merged_val",
+    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/val/fr/merged_val",
+   ],
+
+
+  "train_proportion": [
+    11921,11921,11921,
+  ],
+    
+  "weight_by_num_documents": true,
+  "vocab-file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
+  "split" : "80,10,10",
+  "tokenizer_type": "Llama3HFTokenizer",
+  "deepspeed_mpi": true,
+  "save": "checkpoints/spectra_560M_reptile",
+  "log_dir": "logs",
+  # "load": "checkpoints/spectra_560M_reptile",
+  "wandb_project":"spectra_560M_reptile",
+  "wandb_team":"istabrak",
+  "use_wandb": true,
+  "forget_path":"spectra_560M_reptile/forgetting.pth",
+  # "tensorboard_dir": "spectra_560M/",
+  # "extra_save_iters": [20,100,120,200],
+  "load_buffer": false,
+   "use_replay": false,
+  #  "bufFer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/buffer_560_50/",
+  #  "replay_buffer_proportion": 0.1,
+}
