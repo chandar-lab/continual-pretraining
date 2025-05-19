@@ -119,6 +119,7 @@ class NeoXArgsModel(NeoXArgsTemplate):
     Transformer hidden size.
     """
 
+
     intermediate_size: int = None
     """
     Transformer intermediate size. Default = 4h
@@ -1244,6 +1245,25 @@ class NeoXArgsTraining(NeoXArgsTemplate):
     """
     Number of iterations to run for each task.
     """
+
+    """REPTILEEEEE"""
+
+    reptile_inner_steps: int = 500
+    """
+    reptile num steps for inner loop
+    """
+    
+    reptile_beta: float = 0.01
+    """
+    repptile beta coef
+    """
+    
+    reptile_gamma: float = 0.02
+    """
+    reptile gamma coef
+    """
+    reptile: bool = False
+
     train_proportion: list = None
     """
     proportion of train iters for each task

@@ -408,7 +408,6 @@ class EvalHarnessAdapter(HFLM):
                 "winogrande",
                 "mathqa",
                 "pubmedqa",
-                "triviaqa",
             ]
 
         # register all the default tasks bundled with lm-evaluation-harness repository

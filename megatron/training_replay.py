@@ -22,7 +22,7 @@
 from datetime import datetime
 from functools import partial
 from collections import defaultdict
-
+from copy import deepcopy
 import math
 import sys
 from contextlib import nullcontext
@@ -32,7 +32,6 @@ import torch.nn.functional as F
 import deepspeed
 from deepspeed.runtime.data_pipeline.curriculum_scheduler import CurriculumScheduler
 import numpy as np
-from copy import deepcopy
 
 from megatron.utils import (
     Timers,
@@ -189,8 +188,14 @@ def pretrain(neox_args):
         neox_args: an instance of NeoXArgs containing the configuration for pretrain
 
     """
-
-        
+    if neox_args.use_replay:
+        if neox_args.load_buffer:
+            replay_buffer = ReplayBuffer(neox_args=neox_args, load_previous = neox_args.load_buffer)
+        else:
+            replay_buffer = ReplayBuffer(neox_args=neox_args)
+    else:
+        replay_buffer = None
+    print_rank_0("NEW 500B CORRECT VERSION")
     # setup logging and timers
     init_wandb(neox_args=neox_args)
     timers = Timers(
@@ -219,15 +224,9 @@ def pretrain(neox_args):
             model=model,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
+            buffer=replay_buffer,
         )
-
-    if neox_args.use_replay:
-        if neox_args.load_buffer:
-            replay_buffer = ReplayBuffer(neox_args=neox_args, load_previous = neox_args.load_buffer)
-        else:
-            replay_buffer = ReplayBuffer(neox_args=neox_args)
-    else:
-        replay_buffer = None
+    
     
     neox_args.iteration = iteration
 
@@ -1216,40 +1215,10 @@ def train_step(
 
     # Pipeline parallelism schedules forward/backward/step
     if neox_args.is_pipe_parallel:
-        initial_weights = deepcopy(model.state_dict())
-        
-        accumulated_loss = 0
-        for step in range(neox_args.reptile_inner_steps):
-            weights_before = deepcopy(model.state_dict())
-            
-            reduced_loss, fill_buffer_iter = train_step_pipe(
-                neox_args=neox_args, 
-                timers=timers, 
-                model=model, 
-                data_iterator=data_iterator, 
-                replay_buffer=replay_buffer, 
-                fill_buffer_iter=fill_buffer_iter
-            )
-            
-            weights_after = model.state_dict()
-            # print("weights after:", weights_after)
-            
-            model.load_state_dict({
-                name: weights_before[name] + ((weights_after[name] - weights_before[name]) * neox_args.reptile_beta)
-                for name in weights_before
-            })
-
-            accumulated_loss += reduced_loss['lm_loss']
-        
-        final_weights = model.state_dict()
-        
-        model.load_state_dict({
-            name: initial_weights[name] + ((final_weights[name] - initial_weights[name]) * neox_args.reptile_gamma)
-            for name in initial_weights
-        })
-        reduced_loss['lm_loss'] = accumulated_loss / neox_args.reptile_inner_steps
+        reduced_loss, fill_buffer_iter = train_step_pipe(
+            neox_args=neox_args, timers=timers, model=model, data_iterator=data_iterator, replay_buffer=replay_buffer, fill_buffer_iter = fill_buffer_iter
+        )
         reduce_metrics = reduced_loss
-
         if (
             neox_args.memory_profiling
             and neox_args.iteration >= neox_args.profile_step_start
@@ -1386,7 +1355,7 @@ def train_step_pipe(neox_args, timers, model, data_iterator, replay_buffer=None,
           
     if neox_args.use_replay:
 
-        if fill_buffer_iter > 20 and inputs is not None:
+        if fill_buffer_iter > 50 and inputs is not None:
             replay_buffer.add(inputs['text'])
             current_batch = inputs
 
@@ -1500,6 +1469,7 @@ def train(
             with_stack=True,
         )
         prof.start()
+    weights_before = deepcopy(model.state_dict())
     while iteration < iteration_task[task_id]:
         if neox_args.profile:
                 prof.step()
@@ -1516,6 +1486,14 @@ def train(
                 reference_model=reference_model,
                 fill_buffer_iter =fill_buffer_iter,
         )
+        if iteration % neox_args.reptile_inner_steps == 0:
+            weights_after = deepcopy(model.state_dict())
+            model.load_state_dict({
+                name: weights_before[name] + ((weights_after[name] - weights_before[name]) * neox_args.reptile_beta)
+                for name in weights_before
+            })
+            weights_before = deepcopy(model.state_dict())
+            
         if neox_args.profile and iteration == neox_args.profile_step_stop:
                 torch.cuda.cudart().cudaProfilerStop()
                 prof.stop()
@@ -1559,9 +1537,8 @@ def train(
         #     )
         
         # Checkpointing
-        if neox_args.save and iteration in range(0, 45000, 1000) or iteration in neox_args.iters_task:
-
-            # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
+        if neox_args.save and iteration in neox_args.save_iters or iteration in range(10, 45000, 500) or iteration in neox_args.iters_task:
+        # buffer.save('/lustre/orion/bif151/scratch/istabrak/ben/continual_neox/gpt-neox/data/saved_buffer_continual')
             forgetting = []
             for j in range(task_id + 1):
                 _, _, test_data_iterator_j = build_train_valid_test_data_iterators(
@@ -1571,7 +1548,7 @@ def train(
                     task_iters=iteration_task,
                     task_id=j
                 )
-                
+        
                 # Evaluate the model on the test data of dataset j
                 eval_results = evaluate(
                     neox_args=neox_args,
@@ -1624,7 +1601,6 @@ def train(
             if neox_args.use_replay:
                 buffer.save_metadata(neox_args.buffer_dir)
                 # buffer.save()
-                
                 save_checkpoint(
                     neox_args=neox_args,
                     iteration=iteration,
@@ -1632,9 +1608,8 @@ def train(
                     optimizer=optimizer,
                     lr_scheduler=lr_scheduler,
                     task_id=task_id,
-
                 )
-                torch.distributed.barrier()  
+                torch.distributed.barrier()                
                  
             else:
                 save_checkpoint(
@@ -1657,7 +1632,6 @@ def train(
                     ):
                         chart_name = f"on task {task_id} only"
                         prefix="iteration {}".format(iteration)
-
                         evaluate_and_print_results(
                             neox_args=neox_args,
                             prefix=prefix,

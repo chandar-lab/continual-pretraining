@@ -1,0 +1,214 @@
+./tkhoubith.sh: line 2: Starting script with PID 455586: command not found
+Iteration 1:
+./tkhoubith.sh: line 2: Starting script with PID 472730: command not found
+Iteration 1:
+./tkhoubith2.sh: line 2: Starting script with PID 485955: command not found
+Iteration 1:
+./tkhoubith2.sh: line 2: Starting script with PID 493208: command not found
+Iteration 1:
+./tkhoubith.sh: line 11: 2241016 Killed                  sleep 16000
+Iteration 2:
+./tkhoubith.sh: line 2: Starting script with PID 2342639: command not found
+Iteration 1:
+./tkhoubith.sh: line 2: Starting script with PID 2465202: command not found
+Iteration 1:
+./tkhoubith.sh: line 11: 2803047 Killed                  sleep 16000
+Iteration 2:
+./tkhoubith.sh: line 11: 2954604 Killed                  sleep 16000
+Iteration 3:
+Iteration 4:
+Iteration 2:
+Iteration 5:
+Iteration 3:
+./tkhoubith.sh: line 2: Starting script with PID 2847659: command not found
+Iteration 1:
+./tkhoubith.sh: line 11: 3340200 Killed                  sleep 16000
+Iteration 2:
+./tkhoubith.sh: line 11: 3416118 Killed                  sleep 16000
+Iteration 3:
+Iteration 6:
+./tkhoubith.sh: line 11: 3497756 Killed                  sleep 16000
+Iteration 4:
+./tkhoubith.sh: line 2: Starting script with PID 4019194: command not found
+Iteration 1:
+./tkhoubith.sh: line 2: Starting script with PID 4041019: command not found
+Iteration 1:
+Iteration 7:
+./tkhoubith.sh: line 11: 4115668 Killed                  sleep 16000
+Iteration 2:
+Iteration 5:
+Iteration 2:
+Iteration 8:
+Iteration 3:
+Iteration 3:
+Iteration 4:
+Iteration 9:
+Iteration 6:
+Iteration 4:
+Iteration 4:
+./tkhoubith2.sh: line 2: Starting script with PID 3734254: command not found
+Iteration 1:
+Iteration 7:
+./tkhoubith2.sh: line 11: 3783634 Killed                  sleep 16000
+Iteration 2:
+Iteration 5:
+Iteration 5:
+Iteration 8:
+Iteration 6:
+Iteration 6:
+Iteration 3:
+Iteration 5:
+Iteration 9:
+Iteration 7:
+Iteration 4:
+Iteration 7:
+Iteration 8:
+Iteration 5:
+Iteration 8:
+Iteration 6:
+Iteration 9:
+./tkhoubith.sh: line 2: Starting script with PID 4119361: command not found
+Iteration 1:
+Iteration 9:
+./tkhoubith.sh: line 11: 10043 Killed                  sleep 16000
+Iteration 2:
+Iteration 3:
+Iteration 4:
+Iteration 6:
+./tkhoubith.sh: line 2: Starting script with PID 3239: command not found
+Iteration 1:
+Iteration 5:
+Iteration 2:
+Iteration 6:
+Iteration 3:
+Iteration 7:
+Iteration 8:
+Iteration 4:
+./tkhoubith.sh: line 2: Starting script with PID 194797: command not found
+Iteration 1:
+Iteration 5:
+Iteration 9:
+Iteration 2:
+Iteration 6:
+Iteration 7:
+Iteration 3:
+Iteration 7:
+Iteration 4:
+Iteration 8:
+Iteration 8:
+Iteration 5:
+Iteration 9:
+Iteration 6:
+Iteration 9:
+Iteration 7:
+Iteration 8:
+./tkhoubith2.sh: line 2: Starting script with PID 438627: command not found
+Iteration 1:
+Iteration 9:
+./tkhoubith2.sh: line 2: Starting script with PID 969983: command not found
+Iteration 1:
+Iteration 2:
+./tkhoubith2.sh: line 11: 969986 Killed                  salloc -A bif151 -N 32 -t 2:00:00 -q debug  >> 99M_50_replay_${i}.log 2>&1 <<EOF
+	source /lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/jobs/rep50.sh
+EOF
+
+./tkhoubith2.sh: line 11: 1052698 Killed                  sleep 16000
+Iteration 2:
+./tkhoubith2.sh: line 11: 1131212 Killed                  sleep 16000
+Iteration 3:
+Iteration 3:
+Iteration 4:
+Iteration 4:
+Iteration 5:
+./tkhoubith.sh: line 2: Starting script with PID 710034: command not found
+Iteration 1:
+Iteration 5:
+./tkhoubith.sh: line 2: Starting script with PID 1650313: command not found
+Iteration 1:
+./tkhoubith.sh: line 11: 1650322 Killed                  sleep 16000
+Iteration 2:
+./tkhoubith.sh: line 11: 1650429 Killed                  sleep 16000
+Iteration 3:
+Iteration 6:
+Iteration 2:
+Iteration 6:
+Iteration 4:
+Iteration 7:
+Iteration 3:
+Iteration 5:
+Iteration 7:
+Iteration 8:
+Iteration 4:
+Iteration 8:
+Iteration 9:
+Iteration 6:
+Iteration 5:
+Iteration 7:
+Iteration 9:
+Iteration 8:
+Iteration 6:
+Iteration 9:
+Iteration 7:
+./tkhoubith.sh: line 2: Starting script with PID 2111759: command not found
+Iteration 1:
+Iteration 8:
+Iteration 9:
+Iteration 2:
+Iteration 3:
+Iteration 4:
+Iteration 5:
+Iteration 6:
+Iteration 7:
+./tkhoubith.sh: line 2: Starting script with PID 1779436: command not found
+Iteration 1:
+Iteration 8:
+Iteration 2:
+Iteration 9:
+Iteration 3:
+Iteration 4:
+Iteration 5:
+Iteration 6:
+Iteration 7:
+Iteration 8:
+Iteration 9:
+./tkhoubith.sh: line 2: Starting script with PID 776410: command not found
+Iteration 8:
+./tkhoubith2.sh: line 2: Starting script with PID 778886: command not found
+Iteration 1:
+./tkhoubith2.sh: line 2: Starting script with PID 779488: command not found
+Iteration 1:
+Iteration 9:
+./tkhoubith.sh: line 2: Starting script with PID 2745730: command not found
+Iteration 8:
+./tkhoubith2.sh: line 2: Starting script with PID 3128589: command not found
+Iteration 1:
+./tkhoubith2.sh: line 2: Starting script with PID 3129129: command not found
+Iteration 1:
+./tkhoubith2.sh: line 11: 3137617 Killed                  sleep 16000
+Iteration 2:
+./tkhoubith.sh: line 2: Starting script with PID 3030257: command not found
+Iteration 8:
+Iteration 3:
+Iteration 9:
+Iteration 4:
+Iteration 5:
+Iteration 6:
+Iteration 7:
+Iteration 8:
+Iteration 9:
+./tkhoubith.sh: line 2: Starting script with PID 2709397: command not found
+Iteration 8:
+./tkhoubith.sh: line 11: 2709402 Killed                  sleep 16000
+Iteration 9:
+./tkhoubith2.sh: line 2: Starting script with PID 2768002: command not found
+Iteration 1:
+./tkhoubith2.sh: line 11: 2769084 Killed                  sleep 16000
+Iteration 2:
+./tkhoubith2.sh: line 2: Starting script with PID 2770620: command not found
+Iteration 1:
+Iteration 2:
+./tkhoubith2.sh: line 2: Starting script with PID 800309: command not found
+Iteration 1:
+./tkhoubith2.sh: line 11: 816115 Killed                  sleep 16000
+./tkhoubith2.sh: line 2: Starting script with PID 816378: command not found
+Iteration 1:

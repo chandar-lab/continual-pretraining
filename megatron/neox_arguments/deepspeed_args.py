@@ -368,19 +368,4 @@ class NeoXArgsDeepspeedRunner(NeoXArgsTemplate):
     Adds a `--account` to the DeepSpeed launch command. In DeeperSpeed this is passed on to the SlurmLauncher as well. Sometimes necessary for cluster rules, or so I've heard.
     """
 
-    """REPTILEEEEE"""
-    reptile_inner_steps: int = 500
-    """
-    reptile num steps for inner loop
-    """
-    
-    reptile_beta: float = 0.01
-    """
-    repptile beta coef
-    """
-    
-    reptile_gamma: float = 0.02
-    """
-    reptile gamma coef
-    """
-    reptile: bool = False
+

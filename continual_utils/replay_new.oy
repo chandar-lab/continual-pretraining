@@ -1,0 +1,191 @@
+import os
+import json
+import time
+import torch
+import random
+import numpy as np
+from collections import deque
+from threading import Lock, Thread
+from megatron import print_rank_0
+
+class ReplayBuffer:
+    def __init__(self, neox_args, device=torch.device('cuda'), prefetch_size=6, load_previous=False):
+        #META META NO NEED TO GET FROM METADATA
+        self.neox_args = neox_args
+        self.buffer_size = neox_args.buffer_size  # Total buffer size in tokens
+        self.file_size = neox_args.file_size      # Size of each file in tokens
+        self.data_dir = neox_args.buffer_dir      # Directory to store buffer files
+        self.device = device
+        self.prefetch_size = prefetch_size
+        self.num_files = self.buffer_size // self.file_size
+        self.files = [f"{self.data_dir}/buffer_{i}.pt" for i in range(self.buffer_size // self.file_size)]
+        self.file_sizes = [0] * len(self.files)  
+        self.file_lock = Lock()
+        self.prefetch_lock = Lock()
+        self.seq_length = neox_args.seq_length + 1 
+
+        # Preload all data into memory if not loading from previous data
+        self.data = []
+
+        if load_previous and os.path.exists(os.path.join(self.data_dir, 'metadata.json')):
+            print_rank_0("Loading metadata")
+            self.load_metadata(self.data_dir)
+            self.load_data_into_memory()
+        else:
+            self.create_files()
+            self.tensor_shape = None
+            self.dtype = None
+            self.dtype_size = None
+            self.current_file_idx = 0
+            self.total_samples_seen = 0
+            dummy_tensor = torch.zeros(1, 2049, dtype=torch.int)
+            self.add(dummy_tensor)
+
+        self.prefetch_queue = deque(maxlen=prefetch_size)
+        self.prefetch_thread = Thread(target=self._prefetch_data, daemon=True)
+        self.prefetch_thread.start()
+
+    def create_files(self):
+        os.makedirs(self.data_dir, exist_ok=True)
+        for file in self.files:
+            if not os.path.exists(file):
+                # Create an empty file without preallocating memory
+                with open(file, 'wb') as f:
+                    pass
+
+    def add(self, tensor_data):
+        self.seq_length = tensor_data.shape[1]
+        self.tensor_shape = tensor_data.shape
+        self.dtype = tensor_data.dtype
+        self.dtype_size = tensor_data.dtype.itemsize
+
+        with self.file_lock:
+            num_samples = tensor_data.shape[0]
+            available_files = [idx for idx in range(self.num_files)
+                               if self.file_sizes[idx] + num_samples <= self.file_size]
+
+            if available_files:
+                if self.current_file_idx in available_files:
+                    file_idx = self.current_file_idx
+                else:
+                    file_idx = available_files[0]
+                    self.current_file_idx = file_idx
+
+                current_size = self.file_sizes[file_idx]
+                current_file = self.files[self.current_file_idx]
+
+                with open(current_file, 'r+b') as f:
+                    bytes_per_sample = self.seq_length * self.dtype_size
+                    f.seek(current_size * bytes_per_sample)
+                    f.write(tensor_data.cpu().numpy().tobytes())
+
+                current_size += num_samples
+                self.file_sizes[self.current_file_idx] = current_size
+            else:
+                j = random.randint(0, self.buffer_size)
+                file_idx = j // self.file_size
+                position = j % self.file_size
+
+                with open(self.files[file_idx], 'r+b') as f:
+                    bytes_per_sample = self.seq_length * self.dtype_size
+                    offset = position * bytes_per_sample
+                    f.seek(offset)
+                    f.write(tensor_data.cpu().numpy().tobytes())
+
+            self.total_samples_seen += num_samples
+            # self.save_metadata(self.data_dir)
+
+        # Load data into memory after adding
+        self.load_data_into_memory()
+
+    def load_data_into_memory(self):
+        """Load all buffer data into memory (on CPU)."""
+        print_rank_0("Loading data into memory")
+        self.data = []
+        for file_idx in range(self.num_files):
+            with open(self.files[file_idx], 'rb') as f:
+                num_elements = self.file_sizes[file_idx] * self.seq_length
+                buffer = f.read(num_elements * self.dtype_size)
+                data = torch.frombuffer(buffer, dtype=self.dtype)
+                data = data.reshape(self.file_sizes[file_idx], self.seq_length)
+                self.data.append(data)
+
+    def _prefetch_data(self):
+        while True:
+            if len(self.prefetch_queue) < self.prefetch_size:
+                with self.prefetch_lock:
+                    # Randomly select a file from the preloaded data
+                    file_idx = random.randint(0, len(self.data) - 1)
+                    buffer_data = self.data[file_idx]
+
+                    # Select a random sample from the buffer_data
+                    indices = torch.randperm(len(buffer_data))[:self.prefetch_size - len(self.prefetch_queue)]
+                    selected_data = buffer_data[indices]
+
+                    # Add to prefetch queue
+                    self.prefetch_queue.extend(selected_data)
+            else:
+                time.sleep(0.1)
+
+    def get_batch(self, buffer_proportion=0.5):
+        buffer_batch_size = int(self.neox_args.eff_batch_size * buffer_proportion)
+
+        with self.prefetch_lock:
+            if not self.prefetch_queue:
+                print_rank_0("Prefetch queue is empty")
+                return None
+
+            buffer_data = list(self.prefetch_queue)
+            available_samples = min(len(buffer_data), buffer_batch_size)
+            if available_samples > 0:
+                indices = torch.randperm(len(buffer_data))[:available_samples]
+                return buffer_data[indices].to(self.device)
+            else:
+                print_rank_0("No available samples to fetch")
+                return None
+
+    def save_metadata(self, path):
+        metadata = {
+            # Buffer configuration
+            'buffer_size': self.buffer_size,
+            'file_size': self.file_size,
+            'file_sizes': self.file_sizes,
+            'num_files': self.num_files,
+
+            # Tensor properties
+            'tensor_shape': self.tensor_shape if self.tensor_shape is not None else None,  # Skip batch dimension
+            'dtype': str(self.dtype) if self.dtype is not None else None,
+            'dtype_size': self.dtype_size,
+
+            # Statistics
+            'total_samples_seen': self.total_samples_seen,
+            'current_file_idx': self.current_file_idx,
+        }
+
+        os.makedirs(path, exist_ok=True)
+        with open(os.path.join(path, 'metadata.json'), 'w') as f:
+            json.dump(metadata, f)
+
+    def load_metadata(self, path):
+        file_path = os.path.join(path, 'metadata.json')
+        with open(file_path, 'r') as f:
+            metadata = json.load(f)
+
+        # Load buffer configuration
+        self.buffer_size = metadata['buffer_size']
+        self.file_size = metadata['file_size']
+        self.file_sizes = metadata['file_sizes']
+        self.num_files = metadata['num_files']
+        self.tensor_shape = metadata.get('tensor_shape')
+        if metadata['dtype'] is not None:
+            self.dtype = getattr(torch, metadata['dtype'].split('.')[-1])
+        self.dtype_size = metadata.get('dtype_size')
+
+        self.total_samples_seen = metadata['total_samples_seen']
+        self.current_file_idx = metadata['current_file_idx']
+
+        # Load data into memory after loading metadata
+        self.load_data_into_memory()
+
+    def __len__(self):
+        return sum(self.file_sizes)

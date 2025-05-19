@@ -43,9 +43,9 @@
     "contiguous_gradients": true,
     "cpu_offload": false
   },
-   "train_micro_batch_size_per_gpu": 12,
+   "train_micro_batch_size_per_gpu": 16,
    "eff_batch_size": 16,
-   "replay_buffer_proportion": 0.25,
+   "replay_buffer_proportion": 0.5,
    "gradient_accumulation_steps": 1,
    "data_impl": "mmap",
    "checkpoint_activations": true,
@@ -76,7 +76,7 @@
    "wall_clock_breakdown": true,
    "launcher": "slurm",
    "deepspeed_slurm": true,
-   "num_workers": 8,
+   "num_workers": 4,
 
 
   #  ########OSCAR Deutsch ######################
@@ -106,7 +106,7 @@
   "forget_path":"spectra_25_replay_99M/forgetting.pth",
 
   "weight_by_num_documents": true,
-   "split" : "75,15,15",
+   "split" : "60,15,25",
 
    "vocab-file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
   #  "split" : "80,10,10",
@@ -114,15 +114,15 @@
   "deepspeed_mpi": true,
   "save": "checkpoints/spectra_25_replay_99M",
   "log_dir": "logs",
-  "load": "checkpoints/spectra_25_replay_99M",
+  # "load": "checkpoints/spectra_25_replay_99M",
   # "tensorboard_dir": "tensorboard_important/pythia_410M_kemel",
-  "wandb_project":"spectra_25_replay_99M",
-  "wandb_team":"istabrak",
+  # "wandb_project":"spectra_25_replay_99M",
+  # "wandb_team":"istabrak",
   "use_wandb": false,
-  "extra_save_iters": [2040],
-  "load_buffer": true,
-  "use_replay": true,
-  "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/replay_25_99M/",
+  "extra_save_iters": [8100],
+  # "load_buffer": true,
+  "use_replay": false,
+  "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/replay_old",
 }
 
 

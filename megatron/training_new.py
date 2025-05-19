@@ -1632,7 +1632,7 @@ def train(
                     )
         except StopIteration:
             print_rank_0(f"StopIteration encountered during evaluation on current task at iteration {iteration}")
-                for t in [
+            for t in [
                     "forward",
                     "backward",
                     "allreduce",

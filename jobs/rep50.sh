@@ -1,13 +1,14 @@
 #!/bin/bash
 #!/bin/bash
 #SBATCH -A bif151
-#SBATCH -t 2:00:00
+#SBATCH -t 24:00:00
 #SBATCH --nodes=32
-#SBATCH -p batch
+#SBATCH -p extended
 #SBATCH --gpus-per-node=8
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=istabrak.abbes@mila.quebec
 #SBATCH --mail-type=all
+#SBATCH --mem=0
 #SBATCH --output=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/multilang/train_%A.out
 #SBATCH --error=/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/logs/multilang/train_%A.err
 
@@ -35,4 +36,4 @@ rm -rf ./megatron/fused_kernels/build/lock
 rm -rf /autofs/nccs-svm1_home2/istabrak/.cache/torch_extensions/py312_cpu/fused_adam/lock
 
 # Start the training script
-python ./deepy.py train_replay.py ./configs/replay_50_99M.yml
+python ./deepy.py train_new_replay.py ./configs/replay_50_99M.yml

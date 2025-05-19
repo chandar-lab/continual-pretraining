@@ -38,30 +38,40 @@ import ftfy
 from megatron.tokenizer import build_tokenizer
 from megatron.data import indexed_dataset
 from threading import Semaphore
-
-
 class Encoder(object):
     def __init__(self, args):
         self.args = args
 
     def initializer(self):
-        # Use Encoder class as a container for global data
+        # build the tokenizer once in each worker
         Encoder.tokenizer = build_tokenizer(self.args)
 
-    def encode(self, text):
+    def encode(self, record):
+        """
+        record: either a str (raw text) or a dict (parsed JSONL object).
+        Returns: (ids_dict, length_of_text)
+        """
+        # 1) Extract text
+        if isinstance(record, dict):
+            # use the first key from --jsonl-keys
+            json_key = self.args.jsonl_keys[0]
+            text = record.get(json_key, "")
+        else:
+            text = record
+
+        # 2) Optional cleaning
         if self.args.ftfy:
             text = ftfy.fix_text(text)
-        ids = {}
-        for key in self.args.jsonl_keys:
-            doc_ids = []
-            text_ids = Encoder.tokenizer.tokenize(text)
-            if len(text_ids) > 0:
-                doc_ids.append(text_ids)
-            if self.args.append_eod:
-                doc_ids[-1].append(Encoder.tokenizer.eod)
-            ids[key] = doc_ids
-        return ids, len(text)
 
+        # 3) Tokenize
+        token_ids = Encoder.tokenizer.tokenize(text)
+        if self.args.append_eod and token_ids:
+            token_ids.append(Encoder.tokenizer.eod)
+
+        # 4) Build output dict: one list of token lists per key
+        ids = { key: [list(token_ids)] for key in self.args.jsonl_keys }
+
+        return ids, len(text)
 
 def get_args(input_args=None):
     parser = argparse.ArgumentParser()
@@ -151,25 +161,16 @@ def get_args(input_args=None):
 
     return args
 
-
+import json
 def yield_from_files(fnames: list, semaphore):
-    """
-    Iterator over input documents using lm_dataformat. Should be able to handle jsons / texts /
-    other compressed formats. Also filters out empty documents.
-
-    :param fnames: list of filenames
-    """
-
-    def yielder(fname, semaphore):
-        for f in filter(lambda x: x, lmd.Reader(fname).stream_data()):
-            semaphore.acquire()
-            yield f
-
     for fname in fnames:
-        semaphore.acquire()
-
-        yield from yielder(fname, semaphore)
-
+        with open(fname, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                semaphore.acquire()
+                yield json.loads(line)
 
 def main(input_args=None):
     args = get_args(input_args)
@@ -184,6 +185,7 @@ def main(input_args=None):
 
     # use multiprocessing to iterate over input documents
     fin = yield_from_files(args.input.split(","), semaphore)
+    print(f"Input files: {fin}")
 
     if args.workers > 1:
         pool = multiprocessing.Pool(args.workers, initializer=encoder.initializer)

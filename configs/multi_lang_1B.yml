@@ -77,7 +77,7 @@
    "keep_last_n_checkpoints": 4,
    "wall_clock_breakdown": true,
    "launcher": "slurm",
-   "deepspeed_slurm": true,
+  #  "deepspeed_slurm": true,
    "num_workers": 8,
 
 
@@ -105,26 +105,26 @@
     11921,11921,11921,
   ],
     
-  "forget_path":"spectra_1B_50_replay/forgetting.pth",
+  "forget_path":"spectra_1B_50_replay_reptile_new/forgetting.pth",
 
   "weight_by_num_documents": true,
-   "split" : "70,15,15",
+  "split" : "70,15,15",
 
-   "vocab-file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
+  "vocab-file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
   #  "split" : "80,10,10",
-   "tokenizer_type": "Llama3HFTokenizer",
-  "deepspeed_mpi": true,
-  "save": "checkpoints/spectra_1B_50_replay",
+  "tokenizer_type": "Llama3HFTokenizer",
+  # "deepspeed_mpi": true,
+  "save": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/test",
   "log_dir": "logs",
-  # "load": "checkpoints/spectra_1B_50_replay",
+  # "load": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/checkpoints/spectra_1B_50_replay_reptile_new",
   # "tensorboard_dir": "tensorboard_important/pythia_410M_kemel",
-  "wandb_project":"spectra_1B_50_replay",
+  "wandb_project":"spectra_1B_50_replay_reptile_new",
   "wandb_team":"istabrak",
-  # "use_wandb": false,
-  "extra_save_iters": [2000],
-  # "load_buffer": true,
-   "use_replay": true,
-   "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/spectra_1B_50_replay/",
+  "use_wandb": false,
+  "extra_save_iters": [500,1500,2500,3500,4500,5500,6500,7500,8500,9500,10500,11500,12500,13500,14500,15500,16500,17500,18500,19500,20500,21500,22500,23500,24500,25500,26500,27500,28500,29500,30500,31500,32500,33500,34500,35500],
+  "load_buffer": false,
+  "use_replay": false,
+  "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/spectra_1B_50_replay_reptile_new/",
 }
 
 
