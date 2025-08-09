@@ -79,27 +79,7 @@
   #  "launcher": "slurm",
   #  "deepspeed_slurm": true,
    "num_workers": 8,
-
-
-  #  ########OSCAR Deutsch ######################
-    "train_data_paths": [
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/train_400B/dclm-baseline/merged_train",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/train/de/merged_train",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/train/fr/merged_train",
-
-
-    ],
-    
-   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/test/dclm-baseline/merged_test",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/test/de/merged_test",
-   "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/test/fr/merged_test",
-   ],
-   "valid_data_paths": [
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/val/dclm-baseline/merged_val",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/val/de/merged_val",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/val/fr/merged_val",
-   ],
-
+  # Add your dataset paths here
 
   "train_proportion": [
     11921,11921,11921,
@@ -110,14 +90,13 @@
   "weight_by_num_documents": true,
    "split" : "70,15,15",
   
-   "vocab-file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
+   "vocab-file": "Meta-Llama-3-8B/tokenizer.json",
   #  "split" : "80,10,10",
    "tokenizer_type": "Llama3HFTokenizer",
   # "deepspeed_mpi": true,
   "save": "checkpoints/spectra_1B_reptile_no_replay",
   "log_dir": "logs",
-  "load": "/lustre/orion/bif151/proj-shared/joint_baseliens",
-  # "tensorboard_dir": "tensorboard_important/pythia_410M_kemel",
+  "load": "joint_baseliens",
   "wandb_project":"spectra_1B_reptile_no_replay",
   "wandb_team":"istabrak",
   "use_wandb": false,
@@ -125,7 +104,6 @@
   "load_buffer": false,
    "use_replay": false,
   #  "reptile": true,
-  #  "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/spectra_1B_25_replay_reptile/",
 }
 
 

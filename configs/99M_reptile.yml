@@ -81,21 +81,21 @@
 
   #  ########OSCAR Deutsch ######################
     "train_data_paths": [
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/train_400B/dclm-baseline/merged_train",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/train/de/merged_train",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/train/fr/merged_train",
+    "data_shared/llama3_tokenized_datasets/dclm-baseline/train_400B/dclm-baseline/merged_train",
+    "data_shared/llama3_tokenized_datasets/oscar-de/train/de/merged_train",
+    "data_shared/llama3_tokenized_datasets/oscar-fr/train/fr/merged_train",
 
 
     ],
     
-   "test_data_paths": ["/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/test/dclm-baseline/merged_test",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/test/de/merged_test",
-   "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/test/fr/merged_test",
+   "test_data_paths": ["data_shared/llama3_tokenized_datasets/dclm-baseline/test/dclm-baseline/merged_test",
+    "data_shared/llama3_tokenized_datasets/oscar-de/test/de/merged_test",
+   "data_shared/llama3_tokenized_datasets/oscar-fr/test/fr/merged_test",
    ],
    "valid_data_paths": [
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/dclm-baseline/val/dclm-baseline/merged_val",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-de/val/de/merged_val",
-    "/lustre/orion/bif151/proj-shared/data_shared/llama3_tokenized_datasets/oscar-fr/val/fr/merged_val",
+    "data_shared/llama3_tokenized_datasets/dclm-baseline/val/dclm-baseline/merged_val",
+    "data_shared/llama3_tokenized_datasets/oscar-de/val/de/merged_val",
+    "data_shared/llama3_tokenized_datasets/oscar-fr/val/fr/merged_val",
    ],
 
 
@@ -108,13 +108,13 @@
   "weight_by_num_documents": true,
   "split" : "70,15,15",
 
-  "vocab-file": "/lustre/orion/bif151/proj-shared/Meta-Llama-3-8B/tokenizer.json",
+  "vocab-file": "Meta-Llama-3-8B/tokenizer.json",
   #  "split" : "80,10,10",
    "tokenizer_type": "Llama3HFTokenizer",
   # "deepspeed_mpi": true,
   "save": "checkpoints/spectra_99M_reptile",
   "log_dir": "logs",
-  "load":"/lustre/orion/bif151/proj-shared/joint_baselines/spectra_99M_joint",
+  "load":"joint_baselines/spectra_99M_joint",
   # "tensorboard_dir": "tensorboard_important/pythia_410M_kemel",
   "wandb_project":"spectra_99M_reptile",
   "wandb_team":"istabrak",
@@ -122,7 +122,6 @@
   "extra_save_iters": [8100],
   # "load_buffer": true,
   # "use_replay": true,
-  # "buffer_dir": "/lustre/orion/bif151/scratch/istabrak/new/continual_neox/gpt-neox/replay_old",
 }
 
 
