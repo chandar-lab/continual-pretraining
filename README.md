@@ -6,7 +6,7 @@ This repository provides a **GPT-NeoX/Megatron-DeepSpeed** pipeline to perform *
 
 > If you use this repository, please cite the accompanying paper:
 > **“Revisiting Replay and Gradient Alignment for Continual Pre-Training of Large Language Models” (2025).**
-> See the **📚 Citation** section below.
+> See the ** Citation** section below.
 
 ---
 
