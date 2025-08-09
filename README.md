@@ -17,6 +17,12 @@ This repository provides a **GPT-NeoX/Megatron-DeepSpeed** pipeline to perform *
 - **MER/Reptile** hook that interpolates weights every *k* steps with negligible compute/memory overhead.
 - Metrics scripts for **Forgetting Score**, **Retained Loss**, and **Learned Loss**, plus **lm-eval** integration.
 
+# How It Works (brief)
+Mixed-batch replay: each step draws (1−α) samples from the current task stream and α from the disk buffer M.
+
+Disk-backed buffer: examples are appended as they arrive + async prefetch keeps GPUs fed.
+
+MER/Reptile: every k steps, interpolate current weights toward the weights from the last k steps (θ ← (1−ε)·θ + ε·θ_k).
 
 
 @inproceedings{abbes2025revisiting,
