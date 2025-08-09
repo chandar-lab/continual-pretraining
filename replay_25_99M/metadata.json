@@ -1,1 +1,0 @@
-{"buffer_size": 1463414, "file_size": 1000000, "file_sizes": [481], "num_files": 1, "tensor_shape": [12, 2049], "dtype": "torch.int64", "dtype_size": 8, "total_samples_seen": 481, "current_file_idx": 0}
